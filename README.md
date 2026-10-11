@@ -1,18 +1,11 @@
-# DashPRO Config (prototype)
+# DashPRO Config
 
-Browser app to connect to the DashPRO over USB.
+Browser app to connect to the DashPRO over USB (Web Serial + SD drive access).
 
-- Connects to the dash's serial port with Web Serial and shows product, firmware version and serial number (`ID?`).
-- Shows memory diagnostics (`MEM?`).
-- Console to send text commands.
-- Lists and copies files to the dash's SD card (the SD appears as a USB drive; the app uses the browser's folder access).
-
-## Run
-
-Web Serial needs Chrome or Edge and a secure context, so serve the folder from localhost:
+## Run locally
 
 ```
-python -m http.server 8000 -d WebApp
+python -m http.server 8000
 ```
 
 Then open `http://localhost:8000` in Chrome or Edge, plug in the dash and click **Conectar**.
