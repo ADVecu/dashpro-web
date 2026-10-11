@@ -19,22 +19,11 @@
     --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font: 14px/1.45 system-ui, "Segoe UI", Roboto, sans-serif;
-  }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; }
   header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--line);
-    background: var(--panel);
-    position: sticky;
-    top: 0;
-    z-index: 1;
+    display: flex; align-items: center; gap: 16px; padding: 12px 20px;
+    border-bottom: 1px solid var(--line); background: var(--panel);
+    position: sticky; top: 0; z-index: 2; flex-wrap: wrap;
   }
   header h1 { font-size: 17px; margin: 0; letter-spacing: .3px; }
   header h1 span { color: var(--accent); }
@@ -43,44 +32,25 @@
   .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
   .spacer { flex: 1; }
   button {
-    background: var(--panel-2);
-    color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 8px 14px;
-    font: inherit;
-    cursor: pointer;
+    background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 14px; font: inherit; cursor: pointer;
   }
   button:hover:not(:disabled) { border-color: var(--accent); }
   button:disabled { opacity: .45; cursor: default; }
   button.primary { background: var(--accent); border-color: var(--accent); color: #111; font-weight: 600; }
-  main {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-    gap: 16px;
-    padding: 16px 20px 32px;
-    max-width: 1300px;
-    margin: 0 auto;
-  }
-  section {
-    background: var(--panel);
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 16px;
-    min-width: 0;
-  }
+  button.danger:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
+  nav { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--panel); overflow-x: auto; }
+  nav button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 12px 14px; color: var(--muted); }
+  nav button.active { color: var(--text); border-bottom-color: var(--accent); }
+  .page { display: none; padding: 16px 20px 40px; max-width: 1300px; margin: 0 auto; }
+  .page.active { display: block; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
   section h2 {
-    margin: 0 0 12px;
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: .8px;
-    color: var(--muted);
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: .8px;
+    color: var(--muted); display: flex; align-items: center; gap: 8px;
   }
-  section h2 .spacer { flex: 1; }
-  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; }
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; margin: 0; }
   .kv dt { color: var(--muted); }
   .kv dd { margin: 0; font-family: var(--mono); word-break: break-all; }
   .bar { height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; margin: 3px 0 10px; }
@@ -89,46 +59,51 @@
   .bar > div.bad { background: var(--bad); }
   .row { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 12.5px; }
   .row span:first-child { color: var(--muted); font-family: inherit; }
+  .warn { color: var(--warn); }
+  .bad { color: var(--bad); }
+  .muted { color: var(--muted); }
+  .note { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
+  .toolbar .dirty { color: var(--warn); font-size: 13px; }
+  .field { display: grid; grid-template-columns: 1fr 150px 48px; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .field:last-child { border-bottom: 0; }
+  .field small { display: block; color: var(--muted); font-size: 11.5px; }
+  .field .unit { color: var(--muted); font-size: 12px; }
+  .field.changed label::after { content: " •"; color: var(--warn); }
+  .field.error input, .field.error select { border-color: var(--bad); }
+  input[type=text], input[type=number], select {
+    width: 100%; min-width: 0; background: #0b0d10; color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: 13px var(--mono);
+  }
+  input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .tile .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .6px; }
+  .tile .value { font: 600 28px/1.2 var(--mono); margin-top: 6px; }
+  .tile .value small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
   #console-log {
-    height: 260px;
-    overflow: auto;
-    background: #0b0d10;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 8px 10px;
-    font: 12.5px/1.5 var(--mono);
-    white-space: pre-wrap;
+    height: 360px; overflow: auto; background: #0b0d10; border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 10px; font: 12.5px/1.5 var(--mono); white-space: pre-wrap;
   }
   #console-log .tx { color: var(--accent); }
-  #console-log .rx { color: var(--text); }
   #console-log .sys { color: var(--muted); font-style: italic; }
   .console-in { display: flex; gap: 8px; margin-top: 8px; }
-  input[type=text] {
-    flex: 1;
-    min-width: 0;
-    background: #0b0d10;
-    color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 8px 10px;
-    font: 13px var(--mono);
-  }
-  .files { max-height: 260px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; margin-top: 10px; }
+  .files { max-height: 300px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; margin-top: 10px; }
   .files table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .files td { padding: 6px 10px; border-bottom: 1px solid var(--line); }
   .files td:last-child { text-align: right; font-family: var(--mono); color: var(--muted); }
-  .muted { color: var(--muted); }
-  .note { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
-  .banner {
-    margin: 16px 20px 0;
-    padding: 12px 14px;
-    border-radius: 10px;
-    background: #3a1d1d;
-    border: 1px solid var(--bad);
-    display: none;
-  }
+  .banner { margin: 16px 20px 0; padding: 12px 14px; border-radius: 10px; background: #3a1d1d; border: 1px solid var(--bad); display: none; }
+  .empty { padding: 40px 20px; text-align: center; color: var(--muted); }
   progress { width: 100%; height: 8px; margin-top: 10px; accent-color: var(--accent); display: none; }
-  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  #toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--panel-2);
+    border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; display: none; z-index: 5; max-width: 90vw;
+  }
+  @media (max-width: 600px) {
+    .field { grid-template-columns: 1fr 110px 40px; }
+    .kv { grid-template-columns: 110px 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -140,26 +115,95 @@
   <button id="btn-disconnect" disabled>Desconectar</button>
 </header>
 
+<nav id="tabs">
+  <button data-page="summary" class="active">Resumen</button>
+  <button data-page="settings">Ajustes</button>
+  <button data-page="live">En vivo</button>
+  <button data-page="sd">Tarjeta SD</button>
+  <button data-page="console">Consola</button>
+</nav>
+
 <div class="banner" id="unsupported">
-  Este navegador no soporta Web Serial. Abre la app en <b>Chrome</b> o <b>Edge</b> desde <code>http://localhost</code>.
+  Este navegador no soporta Web Serial. Abre la app en <b>Chrome</b> o <b>Edge</b>.
 </div>
 
-<main>
-  <section>
-    <h2>Dispositivo</h2>
-    <dl class="kv">
-      <dt>Producto</dt><dd id="dev-product">—</dd>
-      <dt>Firmware</dt><dd id="dev-fw">—</dd>
-      <dt>Número de serie</dt><dd id="dev-serial">—</dd>
-      <dt>USB</dt><dd id="dev-usb">—</dd>
-    </dl>
-  </section>
+<!-- Summary -->
+<div class="page active" id="page-summary">
+  <div class="grid">
+    <section>
+      <h2>Dispositivo</h2>
+      <dl class="kv">
+        <dt>Producto</dt><dd id="dev-product">—</dd>
+        <dt>Firmware</dt><dd id="dev-fw">—</dd>
+        <dt>Protocolo</dt><dd id="dev-proto">—</dd>
+        <dt>Número de serie</dt><dd id="dev-serial">—</dd>
+        <dt>USB</dt><dd id="dev-usb">—</dd>
+      </dl>
+    </section>
 
-  <section>
-    <h2>Memoria <span class="spacer"></span><button id="btn-mem" disabled>Actualizar</button></h2>
-    <div id="mem-body" class="muted">Conecta el dash para ver la memoria.</div>
-  </section>
+    <section>
+      <h2>Reloj <span class="spacer"></span><button id="btn-time-sync" disabled>Sincronizar con el PC</button></h2>
+      <dl class="kv">
+        <dt>Hora del dash</dt><dd id="time-dash">—</dd>
+        <dt>Hora del PC</dt><dd id="time-pc">—</dd>
+      </dl>
+    </section>
 
+    <section>
+      <h2>Trips</h2>
+      <div id="trip-body" class="muted">—</div>
+      <div class="actions" style="margin-top:10px">
+        <button class="danger" id="btn-trip1" disabled>Reiniciar trip 1</button>
+        <button class="danger" id="btn-trip2" disabled>Reiniciar trip 2</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Memoria <span class="spacer"></span><button id="btn-mem" disabled>Actualizar</button></h2>
+      <div id="mem-body" class="muted">Conecta el dash para ver la memoria.</div>
+    </section>
+
+    <section>
+      <h2>Firmware</h2>
+      <p class="note" style="margin-top:0">Reinicia el dash en modo DFU (bootloader de ST) para cargar firmware con STM32CubeProgrammer.</p>
+      <div class="actions" style="margin-top:10px"><button class="danger" id="btn-dfu" disabled>Entrar en modo DFU</button></div>
+    </section>
+  </div>
+</div>
+
+<!-- Settings -->
+<div class="page" id="page-settings">
+  <div class="toolbar">
+    <button class="primary" id="btn-save" disabled>Guardar en el dash</button>
+    <button id="btn-revert" disabled>Descartar cambios</button>
+    <button id="btn-reload" disabled>Releer</button>
+    <span class="dirty" id="dirty-text"></span>
+    <span class="spacer"></span>
+    <button id="btn-export" disabled>Exportar…</button>
+    <button id="btn-import" disabled>Importar…</button>
+    <button class="danger" id="btn-defaults" disabled>Valores de fábrica</button>
+    <input type="file" id="import-file" accept=".json,application/json" hidden>
+  </div>
+  <div class="grid" id="settings-body"><div class="empty">Conecta el dash para ver sus ajustes.</div></div>
+</div>
+
+<!-- Live -->
+<div class="page" id="page-live">
+  <div class="toolbar">
+    <span class="muted">Período</span>
+    <select id="live-period" style="width:auto">
+      <option value="100">100 ms</option>
+      <option value="200" selected>200 ms</option>
+      <option value="500">500 ms</option>
+      <option value="1000">1 s</option>
+    </select>
+    <span class="muted" id="live-state">Detenido</span>
+  </div>
+  <div class="tiles" id="live-tiles"><div class="empty">Conecta el dash para ver los datos en vivo.</div></div>
+</div>
+
+<!-- SD -->
+<div class="page" id="page-sd">
   <section>
     <h2>Tarjeta SD</h2>
     <div class="actions">
@@ -171,22 +215,73 @@
     <progress id="sd-progress" max="1" value="0"></progress>
     <div class="files" id="sd-files" hidden><table><tbody id="sd-list"></tbody></table></div>
   </section>
+</div>
 
+<!-- Console -->
+<div class="page" id="page-console">
   <section>
     <h2>Consola <span class="spacer"></span><button id="btn-clear">Limpiar</button></h2>
     <div id="console-log"></div>
     <form class="console-in" id="console-form">
-      <input type="text" id="console-input" placeholder="Comando, p. ej. ID? o MEM?" autocomplete="off" disabled>
+      <input type="text" id="console-input" placeholder="Comando, p. ej. HELP?" autocomplete="off" disabled>
       <button type="submit" id="btn-send" disabled>Enviar</button>
     </form>
   </section>
-</main>
+</div>
+
+<div id="toast"></div>
 
 <script>
 'use strict';
 
 /* USB IDs of the dash (development VID; PID 0x4001 = CDC only, 0x4002 = CDC + SD) */
 const DASH_FILTERS = [{ usbVendorId: 0xCAFE }];
+
+/* Friendly labels and groups for the setting names the dash publishes.
+ * Unknown names still show up (raw name, "Otros" group). */
+const SETTING_INFO = {
+  rpm_redline: ['RPM', 'Línea roja'],
+  rpm_shift: ['RPM', 'Luz de cambio'],
+  rpm_warning: ['RPM', 'Zona de advertencia'],
+  temp_unit: ['Temperatura de motor', 'Unidad de temperatura'],
+  clt_cold: ['Temperatura de motor', 'Motor frío'],
+  clt_warning: ['Temperatura de motor', 'Advertencia'],
+  clt_danger: ['Temperatura de motor', 'Peligro'],
+  fuel_warning: ['Combustible', 'Nivel de advertencia'],
+  fuel_danger: ['Combustible', 'Nivel de peligro'],
+  map_unit: ['MAP', 'Unidad'],
+  map_max: ['MAP', 'Escala máxima (kPa)'],
+  map_warning: ['MAP', 'Advertencia'],
+  map_danger: ['MAP', 'Peligro'],
+  lambda_unit: ['Lambda', 'Unidad'],
+  oilp_unit: ['Presión de aceite', 'Unidad'],
+  oilp_warning: ['Presión de aceite', 'Advertencia'],
+  oilp_danger: ['Presión de aceite', 'Peligro'],
+  fuelp_unit: ['Presión de combustible', 'Unidad'],
+  fuelp_warning: ['Presión de combustible', 'Advertencia'],
+  fuelp_danger: ['Presión de combustible', 'Peligro'],
+  batt_warning: ['Batería', 'Baja · advertencia'],
+  batt_danger: ['Batería', 'Baja · peligro'],
+  batt_warning_high: ['Batería', 'Alta · advertencia'],
+  batt_danger_high: ['Batería', 'Alta · peligro'],
+  oilt_cold: ['Temperatura de aceite', 'Aceite frío'],
+  oilt_warning: ['Temperatura de aceite', 'Advertencia'],
+  oilt_danger: ['Temperatura de aceite', 'Peligro'],
+  bright_day: ['Pantalla y unidades', 'Brillo de día'],
+  bright_night: ['Pantalla y unidades', 'Brillo de noche'],
+  speed_unit: ['Pantalla y unidades', 'Unidad de velocidad'],
+  engine_map: ['ECU', 'Mapa de motor'],
+  launch_armed: ['ECU', 'Launch armado al arrancar'],
+};
+
+/* Live values: key in the "L" line -> [label, unit, scale]; scale 0 = hex */
+const LIVE_INFO = {
+  rpm: ['RPM', '', 1], spd: ['Velocidad', 'km/h', 1], gear: ['Marcha', '', 1],
+  clt: ['Temp. motor', '°C', 1], iat: ['Temp. admisión', '°C', 1], oilt: ['Temp. aceite', '°C', 1],
+  oilp: ['Presión aceite', 'kPa', 1], fuelp: ['Presión comb.', 'kPa', 1], map: ['MAP', 'kPa', 1],
+  tps: ['TPS', '%', 1], lambda: ['Lambda', 'mV', 1], batt: ['Batería', 'V', 0.001],
+  fuel: ['Combustible', '%', 1], can_id: ['Último CAN ID', '', 0],
+};
 
 const $ = (id) => document.getElementById(id);
 
@@ -195,21 +290,43 @@ const state = {
   reader: null,
   writer: null,
   lineBuf: '',
-  waiter: null,      // pending command: { lines, isDone, resolve, reject, timer }
+  waiter: null,
   queue: Promise.resolve(),
+  proto: 0,
+  info: {},
+  schema: [],         // [{name,type,min,max,unit,options,value}]
+  dirty: new Set(),
+  liveOn: false,
   sdDir: null,
+  page: 'summary',
 };
 
-/* ---------------- Console log ---------------- */
+/* ---------------- UI helpers ---------------- */
 
-function log(text, cls = 'sys') {
+function log(text, cls = 'rx') {
   const el = $('console-log');
   const line = document.createElement('div');
   line.className = cls;
   line.textContent = (cls === 'tx' ? '> ' : '') + text;
   el.appendChild(line);
+  if (el.childNodes.length > 2000) el.removeChild(el.firstChild);
   el.scrollTop = el.scrollHeight;
 }
+
+let toastTimer;
+function toast(text) {
+  const t = $('toast');
+  t.textContent = text;
+  t.style.display = 'block';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.style.display = 'none'; }, 3500);
+}
+
+const kb = (n) => n == null ? '—' : (n >= 1024 ? (n / 1024).toFixed(1) + ' KB' : n + ' B');
+const hex4 = (n) => n == null ? '—' : '0x' + n.toString(16).toUpperCase().padStart(4, '0');
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const pad = (n) => String(n).padStart(2, '0');
+const fmtDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
 
 /* ---------------- Connection ---------------- */
 
@@ -218,34 +335,52 @@ function setConnected(on) {
   $('status-text').textContent = on ? 'Conectado' : 'Desconectado';
   $('btn-connect').disabled = on;
   $('btn-disconnect').disabled = !on;
-  $('btn-mem').disabled = !on;
-  $('console-input').disabled = !on;
-  $('btn-send').disabled = !on;
+  for (const id of ['btn-mem', 'console-input', 'btn-send', 'btn-time-sync', 'btn-trip1', 'btn-trip2',
+                    'btn-dfu', 'btn-reload', 'btn-export', 'btn-import', 'btn-defaults']) {
+    $(id).disabled = !on;
+  }
   if (!on) {
-    for (const id of ['dev-product', 'dev-fw', 'dev-serial', 'dev-usb']) $(id).textContent = '—';
+    for (const id of ['dev-product', 'dev-fw', 'dev-proto', 'dev-serial', 'dev-usb', 'time-dash']) $(id).textContent = '—';
     $('mem-body').innerHTML = '<span class="muted">Conecta el dash para ver la memoria.</span>';
+    $('trip-body').textContent = '—';
+    $('settings-body').innerHTML = '<div class="empty">Conecta el dash para ver sus ajustes.</div>';
+    $('live-tiles').innerHTML = '<div class="empty">Conecta el dash para ver los datos en vivo.</div>';
+    delete $('live-tiles').dataset.ready;
+    $('live-state').textContent = 'Detenido';
+    state.schema = [];
+    state.dirty.clear();
+    state.liveOn = false;
+    updateDirty();
   }
 }
 
 async function connect() {
   try {
     const port = await navigator.serial.requestPort({ filters: DASH_FILTERS });
-    await port.open({ baudRate: 115200 });  // CDC ignores the baud rate
+    await port.open({ baudRate: 115200 }); // CDC ignores the baud rate
     state.port = port;
     state.writer = port.writable.getWriter();
     state.lineBuf = '';
     setConnected(true);
 
     const info = port.getInfo();
-    $('dev-usb').textContent =
-      `VID ${hex4(info.usbVendorId)} · PID ${hex4(info.usbProductId)}`;
-    log('Puerto abierto');
+    $('dev-usb').textContent = `VID ${hex4(info.usbVendorId)} · PID ${hex4(info.usbProductId)}`;
+    log('Puerto abierto', 'sys');
 
     readLoop(port);
-    await refreshIdentity();
-    await refreshMemory();
+    await loadInfo();
+    if (state.proto >= 1) {
+      await refreshTime();
+      await refreshTrips();
+      await refreshMemory();
+      await loadSettings();
+      if (state.page === 'live') startLive();
+    } else {
+      await refreshMemory();
+      toast('Firmware sin protocolo de configuración: actualízalo para usar Ajustes');
+    }
   } catch (err) {
-    if (err.name !== 'NotFoundError') log('Error al conectar: ' + err.message);
+    if (err.name !== 'NotFoundError') toast('Error al conectar: ' + err.message);
     await disconnect();
   }
 }
@@ -255,11 +390,11 @@ async function disconnect() {
   state.port = null;
   failWaiter(new Error('desconectado'));
   try { if (state.reader) await state.reader.cancel(); } catch (_) {}
-  try { if (state.writer) { state.writer.releaseLock(); } } catch (_) {}
+  try { if (state.writer) state.writer.releaseLock(); } catch (_) {}
   state.reader = null;
   state.writer = null;
   try { if (port) await port.close(); } catch (_) {}
-  if (port) log('Puerto cerrado');
+  if (port) log('Puerto cerrado', 'sys');
   setConnected(false);
 }
 
@@ -274,7 +409,7 @@ async function readLoop(port) {
         onText(decoder.decode(value, { stream: true }));
       }
     } catch (err) {
-      if (state.port === port) log('Conexión perdida: ' + err.message);
+      if (state.port === port) log('Conexión perdida: ' + err.message, 'sys');
       break;
     } finally {
       try { state.reader.releaseLock(); } catch (_) {}
@@ -294,7 +429,8 @@ function onText(text) {
 }
 
 function onLine(line) {
-  log(line, 'rx');
+  if (line.startsWith('L ')) { onLive(line.slice(2)); return; }
+  log(line);
   const w = state.waiter;
   if (!w) return;
   w.lines.push(line);
@@ -310,49 +446,116 @@ function failWaiter(err) {
   if (w) { clearTimeout(w.timer); state.waiter = null; w.reject(err); }
 }
 
-/* Send one command line and collect reply lines until isDone() says so.
- * Commands are queued so replies never interleave. */
-function command(cmd, isDone, timeoutMs = 1500) {
+const untilEnd = (line) => line === 'OK' || line.startsWith('ERR');
+const oneLine = () => true;
+
+/* Send one command and collect its reply lines. Commands are queued so replies
+ * never interleave. Rejects on timeout or on an "ERR" reply. */
+function command(cmd, { isDone = untilEnd, timeout = 2500, quiet = false } = {}) {
   const run = async () => {
     if (!state.writer) throw new Error('no conectado');
     const reply = new Promise((resolve, reject) => {
       state.waiter = {
         lines: [], isDone, resolve, reject,
-        timer: setTimeout(() => failWaiter(new Error(`sin respuesta a "${cmd}"`)), timeoutMs),
+        timer: setTimeout(() => failWaiter(new Error(`sin respuesta a "${cmd}"`)), timeout),
       };
     });
-    log(cmd, 'tx');
+    if (!quiet) log(cmd, 'tx');
     await state.writer.write(new TextEncoder().encode(cmd + '\r\n'));
-    return reply;
+    const lines = await reply;
+    const last = lines[lines.length - 1] || '';
+    if (last.startsWith('ERR')) {
+      const err = new Error(last.replace(/^ERR \d+ /, ''));
+      err.code = Number((last.match(/^ERR (\d+)/) || [])[1]);
+      throw err;
+    }
+    return lines.filter((l) => l !== 'OK');
   };
   const p = state.queue.then(run, run);
   state.queue = p.catch(() => {});
   return p;
 }
 
-const oneLine = () => true;
-const untilOk = (line) => line === 'OK' || line === 'ERR';
+/* ---------------- Summary ---------------- */
 
-/* ---------------- Device panels ---------------- */
-
-async function refreshIdentity() {
+async function loadInfo() {
+  state.proto = 0;
   try {
-    const [line] = await command('ID?', oneLine);
-    const [product, fw, serial] = line.split(',');
-    $('dev-product').textContent = product || '—';
-    $('dev-fw').textContent = fw || '—';
-    $('dev-serial').textContent = serial || '—';
+    const lines = await command('INFO?');
+    state.info = Object.fromEntries(lines.map((l) => l.split('=')).filter((kv) => kv.length === 2));
+    state.proto = Number(state.info.proto) || 0;
+    $('dev-product').textContent = state.info.product || '—';
+    $('dev-fw').textContent = state.info.fw || '—';
+    $('dev-proto').textContent = `v${state.proto} · ajustes v${state.info.settings || '?'}`;
+    $('dev-serial').textContent = state.info.serial || '—';
+  } catch (_) {
+    // Older firmware: only ID?
+    try {
+      const [line] = await command('ID?', { isDone: oneLine });
+      const [product, fw, serial] = line.split(',');
+      state.info = { product, fw, serial };
+      $('dev-product').textContent = product || '—';
+      $('dev-fw').textContent = fw || '—';
+      $('dev-proto').textContent = 'sin protocolo';
+      $('dev-serial').textContent = serial || '—';
+    } catch (err) {
+      toast('El dash no responde: ' + err.message);
+    }
+  }
+}
+
+async function refreshTime() {
+  try {
+    const [t] = await command('TIME?', { quiet: true });
+    $('time-dash').textContent = t;
   } catch (err) {
-    log('ID?: ' + err.message);
+    $('time-dash').textContent = 'error: ' + err.message;
+  }
+}
+
+async function syncTime() {
+  try {
+    await command('TIME SET ' + fmtDate(new Date()));
+    await refreshTime();
+    toast('Hora sincronizada');
+  } catch (err) {
+    toast('No se pudo ajustar la hora: ' + err.message);
+  }
+}
+
+async function refreshTrips() {
+  try {
+    const lines = await command('TRIP?', { quiet: true });
+    $('trip-body').innerHTML = lines.map((l) => {
+      const parts = l.split(' ');
+      const v = Object.fromEntries(parts.slice(1).map((kv) => kv.split('=')));
+      const km = (Number(v.dist_m) / 1000).toFixed(1);
+      const h = Math.floor(Number(v.time_s) / 3600), m = Math.floor((Number(v.time_s) % 3600) / 60);
+      return `<div class="row"><span>${parts[0] === 'trip1' ? 'Trip 1' : 'Trip 2'}</span>` +
+             `<span>${km} km · ${h}h ${pad(m)}m · prom ${v.avg_kmh} · máx ${v.max_kmh} km/h</span></div>`;
+    }).join('');
+  } catch (err) {
+    $('trip-body').textContent = 'error: ' + err.message;
+  }
+}
+
+async function resetTrip(n) {
+  if (!confirm(`¿Reiniciar el trip ${n}?`)) return;
+  try {
+    await command('TRIP RESET ' + n);
+    await refreshTrips();
+    toast(`Trip ${n} reiniciado`);
+  } catch (err) {
+    toast('Error: ' + err.message);
   }
 }
 
 async function refreshMemory() {
   try {
-    const lines = await command('MEM?', untilOk);
+    const lines = await command('MEM?', { quiet: true });
     renderMemory(lines);
   } catch (err) {
-    log('MEM?: ' + err.message);
+    $('mem-body').textContent = 'error: ' + err.message;
   }
 }
 
@@ -361,10 +564,10 @@ function renderMemory(lines) {
   const out = [];
   for (const l of lines) {
     if (l.startsWith('RTOS heap')) {
-      const total = num(/total (\d+)/, l), free = num(/free (\d+)/, l), minfree = num(/minfree (\d+)/, l);
+      const total = num(/total (\d+)/, l), free = num(/ free (\d+)/, l), minfree = num(/minfree (\d+)/, l);
       out.push(meter('Heap FreeRTOS', total - minfree, total, `${kb(free)} libres · mín ${kb(minfree)}`));
     } else if (l.startsWith('newlib heap')) {
-      out.push(row('Heap malloc (newlib)', kb(num(/used (\d+)/, l)) + ' usados'));
+      out.push(`<div class="row"><span>Heap malloc</span><span>${kb(num(/used (\d+)/, l))} usados</span></div>`);
     } else if (l.startsWith('MSP')) {
       const res = num(/reserved (\d+)/, l), used = num(/maxused (\d+)/, l);
       out.push(meter('Stack de interrupciones', used, res, `${kb(used)} de ${kb(res)}`));
@@ -386,10 +589,260 @@ function meter(label, used, total, text) {
   return `<div class="row"><span>${label}</span><span>${text}</span></div>
           <div class="bar"><div class="${cls}" style="width:${pct}%"></div></div>`;
 }
-const row = (label, text) => `<div class="row"><span>${label}</span><span>${text}</span></div>`;
-const kb = (n) => n == null ? '—' : (n >= 1024 ? (n / 1024).toFixed(1) + ' KB' : n + ' B');
-const hex4 = (n) => n == null ? '—' : '0x' + n.toString(16).toUpperCase().padStart(4, '0');
-const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+async function enterDfu() {
+  if (!confirm('El dash se reiniciará en modo DFU y dejará de funcionar hasta que cargues firmware o lo reinicies. ¿Continuar?')) return;
+  try {
+    await command('DFU');
+    toast('Reiniciando en modo DFU…');
+  } catch (err) {
+    toast('Error: ' + err.message);
+  }
+}
+
+/* ---------------- Settings ---------------- */
+
+function parseSchemaLine(line) {
+  // name,type,min,max,unit_or_options,value
+  const p = line.split(',');
+  if (p.length < 6) return null;
+  const [name, type, min, max, unit] = p;
+  return {
+    name, type,
+    min: Number(min), max: Number(max),
+    unit: type === 'enum' ? '' : unit,
+    options: type === 'enum' ? unit.split('|') : null,
+    value: p.slice(5).join(','),
+  };
+}
+
+async function loadSettings() {
+  try {
+    const lines = await command('CFG LIST?', { quiet: true });
+    state.schema = lines.map(parseSchemaLine).filter(Boolean);
+    log(`(${state.schema.length} ajustes leídos)`, 'sys');
+    renderSettings();
+  } catch (err) {
+    $('settings-body').innerHTML = `<div class="empty">No se pudieron leer los ajustes: ${esc(err.message)}</div>`;
+  }
+}
+
+function renderSettings() {
+  const groups = new Map();
+  for (const f of state.schema) {
+    const [group] = SETTING_INFO[f.name] || ['Otros'];
+    if (!groups.has(group)) groups.set(group, []);
+    groups.get(group).push(f);
+  }
+
+  const body = $('settings-body');
+  body.innerHTML = '';
+  for (const [group, fields] of groups) {
+    const sec = document.createElement('section');
+    sec.innerHTML = `<h2>${esc(group)}</h2>`;
+    for (const f of fields) sec.appendChild(renderField(f));
+    body.appendChild(sec);
+  }
+  updateDirty();
+}
+
+function renderField(f) {
+  const [, label] = SETTING_INFO[f.name] || [null, f.name];
+  const row = document.createElement('div');
+  row.className = 'field' + (state.dirty.has(f.name) ? ' changed' : '');
+
+  const lab = document.createElement('label');
+  lab.innerHTML = `${esc(label)}${f.type === 'int' ? `<small>${f.min} a ${f.max}</small>` : ''}`;
+  row.appendChild(lab);
+
+  let input;
+  if (f.type === 'enum') {
+    input = document.createElement('select');
+    for (const o of f.options) {
+      const opt = document.createElement('option');
+      opt.value = o;
+      opt.textContent = o;
+      input.appendChild(opt);
+    }
+    input.value = f.value;
+  } else if (f.type === 'bool') {
+    input = document.createElement('input');
+    input.type = 'checkbox';
+    input.checked = f.value === '1';
+  } else {
+    input = document.createElement('input');
+    input.type = 'number';
+    input.min = f.min;
+    input.max = f.max;
+    input.step = 1;
+    input.value = f.value;
+  }
+  const holder = document.createElement('div');
+  holder.appendChild(input);
+  row.appendChild(holder);
+
+  const unit = document.createElement('span');
+  unit.className = 'unit';
+  unit.textContent = f.unit || '';
+  row.appendChild(unit);
+
+  input.addEventListener('change', () => {
+    const value = f.type === 'bool' ? (input.checked ? '1' : '0') : input.value.trim();
+    setSetting(f, value, row);
+  });
+  return row;
+}
+
+async function setSetting(f, value, row) {
+  try {
+    await command(`CFG SET ${f.name}=${value}`);
+    f.value = value;
+    state.dirty.add(f.name);
+    row.classList.remove('error');
+    row.classList.add('changed');
+    row.title = '';
+    updateDirty();
+    // Units of other fields depend on enum settings: refresh the list
+    if (f.type === 'enum') await loadSettings();
+  } catch (err) {
+    row.classList.add('error');
+    row.title = err.message;
+    toast(`${f.name}: ${err.message === 'out of range' ? 'valor fuera de rango' : err.message}`);
+  }
+}
+
+function updateDirty() {
+  const n = state.dirty.size;
+  $('dirty-text').textContent = n ? `${n} cambio(s) sin guardar en el dash` : '';
+  $('btn-save').disabled = !n || !state.port;
+  $('btn-revert').disabled = !n || !state.port;
+}
+
+async function saveSettings() {
+  try {
+    await command('CFG SAVE');
+    state.dirty.clear();
+    await loadSettings();
+    toast('Ajustes guardados en el dash');
+  } catch (err) {
+    toast('No se pudo guardar: ' + err.message);
+  }
+}
+
+async function revertSettings() {
+  try {
+    await command('CFG REVERT');
+    state.dirty.clear();
+    await loadSettings();
+    toast('Cambios descartados');
+  } catch (err) {
+    toast('Error: ' + err.message);
+  }
+}
+
+async function factoryDefaults() {
+  if (!confirm('¿Restaurar todos los ajustes a valores de fábrica? El odómetro no se toca.')) return;
+  try {
+    await command('CFG DEFAULTS');
+    state.dirty.clear();
+    await loadSettings();
+    toast('Valores de fábrica restaurados');
+  } catch (err) {
+    toast('Error: ' + err.message);
+  }
+}
+
+function exportSettings() {
+  const data = {
+    format: 'dashpro-settings',
+    version: 1,
+    product: state.info.product,
+    fw: state.info.fw,
+    serial: state.info.serial,
+    exported: new Date().toISOString(),
+    settings: Object.fromEntries(state.schema.map((f) => [f.name, f.value])),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `dashpro-ajustes-${(state.info.serial || 'dash').slice(-6)}-${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+async function importSettings(file) {
+  let data;
+  try {
+    data = JSON.parse(await file.text());
+  } catch (_) {
+    toast('El archivo no es un JSON válido');
+    return;
+  }
+  if (data.format !== 'dashpro-settings' || typeof data.settings !== 'object') {
+    toast('El archivo no es un respaldo de ajustes del DashPRO');
+    return;
+  }
+  const byName = new Map(state.schema.map((f) => [f.name, f]));
+  const isEnum = (n) => byName.has(n) && byName.get(n).type === 'enum';
+  // Units first, so dependent values are checked against the right range
+  const entries = Object.entries(data.settings).sort(([a], [b]) => isEnum(b) - isEnum(a));
+  let ok = 0;
+  const failed = [];
+  for (const [name, value] of entries) {
+    if (!byName.has(name)) { failed.push(name); continue; }
+    try {
+      await command(`CFG SET ${name}=${value}`, { quiet: true });
+      state.dirty.add(name);
+      ok++;
+    } catch (_) {
+      failed.push(name);
+    }
+  }
+  await loadSettings();
+  toast(`Importados ${ok} ajustes` + (failed.length ? `, con error: ${failed.join(', ')}` : '') +
+        '. Pulsa "Guardar en el dash" para dejarlos guardados.');
+}
+
+/* ---------------- Live ---------------- */
+
+async function startLive() {
+  if (!state.port || state.proto < 1 || state.liveOn) return;
+  try {
+    await command('LIVE ON ' + $('live-period').value, { quiet: true });
+    state.liveOn = true;
+    $('live-state').textContent = 'Recibiendo';
+  } catch (err) {
+    $('live-state').textContent = 'Error: ' + err.message;
+  }
+}
+
+async function stopLive() {
+  if (!state.port || !state.liveOn) return;
+  state.liveOn = false;
+  $('live-state').textContent = 'Detenido';
+  try { await command('LIVE OFF', { quiet: true }); } catch (_) {}
+}
+
+function onLive(text) {
+  const values = Object.fromEntries(text.split(',').map((kv) => kv.split('=')));
+  const tiles = $('live-tiles');
+  if (!tiles.dataset.ready) {
+    tiles.innerHTML = Object.keys(values).map((k) => {
+      const [label] = LIVE_INFO[k] || [k];
+      return `<div class="tile"><div class="label">${esc(label)}</div><div class="value" id="live-${esc(k)}">—</div></div>`;
+    }).join('');
+    tiles.dataset.ready = '1';
+  }
+  for (const [k, raw] of Object.entries(values)) {
+    const el = $('live-' + k);
+    if (!el) continue;
+    const [, unit = '', scale = 1] = LIVE_INFO[k] || [];
+    let shown = raw;
+    if (scale === 0) shown = '0x' + raw;
+    else if (scale !== 1) shown = (Number(raw) * scale).toFixed(2);
+    el.innerHTML = `${esc(shown)}${unit ? `<small>${esc(unit)}</small>` : ''}`;
+  }
+}
 
 /* ---------------- SD card (File System Access on the mounted drive) ---------------- */
 
@@ -429,8 +882,8 @@ async function copyToSd() {
   let files;
   try {
     files = await window.showOpenFilePicker({ multiple: true });
-  } catch (err) {
-    return;  // cancelled
+  } catch (_) {
+    return; // cancelled
   }
   const prog = $('sd-progress');
   prog.style.display = 'block';
@@ -463,45 +916,72 @@ async function copyToSd() {
   }
 }
 
-/* ---------------- Wiring ---------------- */
+/* ---------------- Tabs and wiring ---------------- */
+
+function showPage(page) {
+  state.page = page;
+  for (const b of $('tabs').children) b.classList.toggle('active', b.dataset.page === page);
+  for (const p of document.querySelectorAll('.page')) p.classList.toggle('active', p.id === 'page-' + page);
+  if (page === 'live') startLive(); else stopLive();
+  if (page === 'summary' && state.port && state.proto >= 1) refreshTime();
+}
 
 function init() {
   const hasSerial = 'serial' in navigator;
-  const hasFs = 'showDirectoryPicker' in window;
   if (!hasSerial) {
     $('unsupported').style.display = 'block';
     $('btn-connect').disabled = true;
   }
-  if (!hasFs) {
+  if (!('showDirectoryPicker' in window)) {
     $('btn-sd-pick').disabled = true;
     $('sd-info').textContent = 'Este navegador no permite acceder a carpetas; usa Chrome o Edge.';
   }
 
+  for (const b of $('tabs').children) b.onclick = () => showPage(b.dataset.page);
   $('btn-connect').onclick = connect;
   $('btn-disconnect').onclick = disconnect;
   $('btn-mem').onclick = refreshMemory;
-  $('btn-clear').onclick = () => { $('console-log').innerHTML = ''; };
+  $('btn-time-sync').onclick = syncTime;
+  $('btn-trip1').onclick = () => resetTrip(1);
+  $('btn-trip2').onclick = () => resetTrip(2);
+  $('btn-dfu').onclick = enterDfu;
+  $('btn-save').onclick = saveSettings;
+  $('btn-revert').onclick = revertSettings;
+  $('btn-reload').onclick = loadSettings;
+  $('btn-defaults').onclick = factoryDefaults;
+  $('btn-export').onclick = exportSettings;
+  $('btn-import').onclick = () => $('import-file').click();
+  $('import-file').onchange = (e) => { if (e.target.files[0]) importSettings(e.target.files[0]); e.target.value = ''; };
+  $('live-period').onchange = async () => { if (state.liveOn) { await stopLive(); await startLive(); } };
   $('btn-sd-pick').onclick = pickSd;
   $('btn-sd-copy').onclick = copyToSd;
   $('btn-sd-refresh').onclick = listSd;
+  $('btn-clear').onclick = () => { $('console-log').innerHTML = ''; };
   $('console-form').onsubmit = async (e) => {
     e.preventDefault();
     const cmd = $('console-input').value.trim();
     if (!cmd) return;
     $('console-input').value = '';
+    const isId = cmd.toUpperCase() === 'ID?';
     try {
-      await command(cmd, (line, lines) => untilOk(line) || (cmd.toUpperCase() !== 'MEM?' && lines.length >= 1));
+      await command(cmd, { isDone: isId ? oneLine : untilEnd });
     } catch (err) {
-      log(err.message);
+      log(err.message, 'sys');
     }
   };
 
+  setInterval(() => { $('time-pc').textContent = fmtDate(new Date()); }, 1000);
+  $('time-pc').textContent = fmtDate(new Date());
+
   if (hasSerial) {
     navigator.serial.addEventListener('disconnect', (e) => {
-      if (e.target === state.port) { log('Dash desconectado'); disconnect(); }
+      if (e.target === state.port) { log('Dash desconectado', 'sys'); disconnect(); }
     });
   }
-  log('Listo. Conecta el dash por USB y pulsa Conectar.');
+  window.addEventListener('beforeunload', (e) => {
+    if (state.dirty.size) { e.preventDefault(); e.returnValue = ''; }
+  });
+  log('Listo. Conecta el dash por USB y pulsa Conectar.', 'sys');
 }
 
 init();
