@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DashPRO Config</title>
+<style>
+  :root {
+    --bg: #0f1216;
+    --panel: #171b21;
+    --panel-2: #1e232b;
+    --line: #2a313b;
+    --text: #e6e9ee;
+    --muted: #8b94a3;
+    --accent: #ff7a1a;
+    --ok: #3ecf8e;
+    --warn: #f5b942;
+    --bad: #ff5d5d;
+    --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 14px/1.45 system-ui, "Segoe UI", Roboto, sans-serif;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+  header h1 { font-size: 17px; margin: 0; letter-spacing: .3px; }
+  header h1 span { color: var(--accent); }
+  .status { display: flex; align-items: center; gap: 8px; color: var(--muted); }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); }
+  .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+  .spacer { flex: 1; }
+  button {
+    background: var(--panel-2);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font: inherit;
+    cursor: pointer;
+  }
+  button:hover:not(:disabled) { border-color: var(--accent); }
+  button:disabled { opacity: .45; cursor: default; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #111; font-weight: 600; }
+  main {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 16px;
+    padding: 16px 20px 32px;
+    max-width: 1300px;
+    margin: 0 auto;
+  }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    min-width: 0;
+  }
+  section h2 {
+    margin: 0 0 12px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: .8px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  section h2 .spacer { flex: 1; }
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; font-family: var(--mono); word-break: break-all; }
+  .bar { height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; margin: 3px 0 10px; }
+  .bar > div { height: 100%; background: var(--ok); }
+  .bar > div.warn { background: var(--warn); }
+  .bar > div.bad { background: var(--bad); }
+  .row { display: flex; justify-content: space-between; gap: 12px; font-family: var(--mono); font-size: 12.5px; }
+  .row span:first-child { color: var(--muted); font-family: inherit; }
+  #console-log {
+    height: 260px;
+    overflow: auto;
+    background: #0b0d10;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: 12.5px/1.5 var(--mono);
+    white-space: pre-wrap;
+  }
+  #console-log .tx { color: var(--accent); }
+  #console-log .rx { color: var(--text); }
+  #console-log .sys { color: var(--muted); font-style: italic; }
+  .console-in { display: flex; gap: 8px; margin-top: 8px; }
+  input[type=text] {
+    flex: 1;
+    min-width: 0;
+    background: #0b0d10;
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font: 13px var(--mono);
+  }
+  .files { max-height: 260px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; margin-top: 10px; }
+  .files table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .files td { padding: 6px 10px; border-bottom: 1px solid var(--line); }
+  .files td:last-child { text-align: right; font-family: var(--mono); color: var(--muted); }
+  .muted { color: var(--muted); }
+  .note { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
+  .banner {
+    margin: 16px 20px 0;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #3a1d1d;
+    border: 1px solid var(--bad);
+    display: none;
+  }
+  progress { width: 100%; height: 8px; margin-top: 10px; accent-color: var(--accent); display: none; }
+  .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<header>
+  <h1>ADV <span>DashPRO</span> · Config</h1>
+  <div class="status"><div class="dot" id="dot"></div><span id="status-text">Desconectado</span></div>
+  <div class="spacer"></div>
+  <button class="primary" id="btn-connect">Conectar</button>
+  <button id="btn-disconnect" disabled>Desconectar</button>
+</header>
+
+<div class="banner" id="unsupported">
+  Este navegador no soporta Web Serial. Abre la app en <b>Chrome</b> o <b>Edge</b> desde <code>http://localhost</code>.
+</div>
+
+<main>
+  <section>
+    <h2>Dispositivo</h2>
+    <dl class="kv">
+      <dt>Producto</dt><dd id="dev-product">—</dd>
+      <dt>Firmware</dt><dd id="dev-fw">—</dd>
+      <dt>Número de serie</dt><dd id="dev-serial">—</dd>
+      <dt>USB</dt><dd id="dev-usb">—</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2>Memoria <span class="spacer"></span><button id="btn-mem" disabled>Actualizar</button></h2>
+    <div id="mem-body" class="muted">Conecta el dash para ver la memoria.</div>
+  </section>
+
+  <section>
+    <h2>Tarjeta SD</h2>
+    <div class="actions">
+      <button id="btn-sd-pick">Elegir unidad SD…</button>
+      <button id="btn-sd-copy" disabled>Copiar archivos…</button>
+      <button id="btn-sd-refresh" disabled>Refrescar</button>
+    </div>
+    <p class="note" id="sd-info">La SD del dash aparece como una unidad USB (p. ej. G:). Elígela para ver y copiar archivos.</p>
+    <progress id="sd-progress" max="1" value="0"></progress>
+    <div class="files" id="sd-files" hidden><table><tbody id="sd-list"></tbody></table></div>
+  </section>
+
+  <section>
+    <h2>Consola <span class="spacer"></span><button id="btn-clear">Limpiar</button></h2>
+    <div id="console-log"></div>
+    <form class="console-in" id="console-form">
+      <input type="text" id="console-input" placeholder="Comando, p. ej. ID? o MEM?" autocomplete="off" disabled>
+      <button type="submit" id="btn-send" disabled>Enviar</button>
+    </form>
+  </section>
+</main>
+
+<script>
+'use strict';
+
+/* USB IDs of the dash (development VID; PID 0x4001 = CDC only, 0x4002 = CDC + SD) */
+const DASH_FILTERS = [{ usbVendorId: 0xCAFE }];
+
+const $ = (id) => document.getElementById(id);
+
+const state = {
+  port: null,
+  reader: null,
+  writer: null,
+  lineBuf: '',
+  waiter: null,      // pending command: { lines, isDone, resolve, reject, timer }
+  queue: Promise.resolve(),
+  sdDir: null,
+};
+
+/* ---------------- Console log ---------------- */
+
+function log(text, cls = 'sys') {
+  const el = $('console-log');
+  const line = document.createElement('div');
+  line.className = cls;
+  line.textContent = (cls === 'tx' ? '> ' : '') + text;
+  el.appendChild(line);
+  el.scrollTop = el.scrollHeight;
+}
+
+/* ---------------- Connection ---------------- */
+
+function setConnected(on) {
+  $('dot').classList.toggle('on', on);
+  $('status-text').textContent = on ? 'Conectado' : 'Desconectado';
+  $('btn-connect').disabled = on;
+  $('btn-disconnect').disabled = !on;
+  $('btn-mem').disabled = !on;
+  $('console-input').disabled = !on;
+  $('btn-send').disabled = !on;
+  if (!on) {
+    for (const id of ['dev-product', 'dev-fw', 'dev-serial', 'dev-usb']) $(id).textContent = '—';
+    $('mem-body').innerHTML = '<span class="muted">Conecta el dash para ver la memoria.</span>';
+  }
+}
+
+async function connect() {
+  try {
+    const port = await navigator.serial.requestPort({ filters: DASH_FILTERS });
+    await port.open({ baudRate: 115200 });  // CDC ignores the baud rate
+    state.port = port;
+    state.writer = port.writable.getWriter();
+    state.lineBuf = '';
+    setConnected(true);
+
+    const info = port.getInfo();
+    $('dev-usb').textContent =
+      `VID ${hex4(info.usbVendorId)} · PID ${hex4(info.usbProductId)}`;
+    log('Puerto abierto');
+
+    readLoop(port);
+    await refreshIdentity();
+    await refreshMemory();
+  } catch (err) {
+    if (err.name !== 'NotFoundError') log('Error al conectar: ' + err.message);
+    await disconnect();
+  }
+}
+
+async function disconnect() {
+  const port = state.port;
+  state.port = null;
+  failWaiter(new Error('desconectado'));
+  try { if (state.reader) await state.reader.cancel(); } catch (_) {}
+  try { if (state.writer) { state.writer.releaseLock(); } } catch (_) {}
+  state.reader = null;
+  state.writer = null;
+  try { if (port) await port.close(); } catch (_) {}
+  if (port) log('Puerto cerrado');
+  setConnected(false);
+}
+
+async function readLoop(port) {
+  const decoder = new TextDecoder();
+  while (port.readable && state.port === port) {
+    state.reader = port.readable.getReader();
+    try {
+      for (;;) {
+        const { value, done } = await state.reader.read();
+        if (done) break;
+        onText(decoder.decode(value, { stream: true }));
+      }
+    } catch (err) {
+      if (state.port === port) log('Conexión perdida: ' + err.message);
+      break;
+    } finally {
+      try { state.reader.releaseLock(); } catch (_) {}
+    }
+  }
+  if (state.port === port) await disconnect();
+}
+
+function onText(text) {
+  state.lineBuf += text;
+  let idx;
+  while ((idx = state.lineBuf.search(/\r?\n/)) >= 0) {
+    const line = state.lineBuf.slice(0, idx);
+    state.lineBuf = state.lineBuf.slice(state.lineBuf[idx] === '\r' ? idx + 2 : idx + 1);
+    if (line.length) onLine(line);
+  }
+}
+
+function onLine(line) {
+  log(line, 'rx');
+  const w = state.waiter;
+  if (!w) return;
+  w.lines.push(line);
+  if (w.isDone(line, w.lines)) {
+    clearTimeout(w.timer);
+    state.waiter = null;
+    w.resolve(w.lines);
+  }
+}
+
+function failWaiter(err) {
+  const w = state.waiter;
+  if (w) { clearTimeout(w.timer); state.waiter = null; w.reject(err); }
+}
+
+/* Send one command line and collect reply lines until isDone() says so.
+ * Commands are queued so replies never interleave. */
+function command(cmd, isDone, timeoutMs = 1500) {
+  const run = async () => {
+    if (!state.writer) throw new Error('no conectado');
+    const reply = new Promise((resolve, reject) => {
+      state.waiter = {
+        lines: [], isDone, resolve, reject,
+        timer: setTimeout(() => failWaiter(new Error(`sin respuesta a "${cmd}"`)), timeoutMs),
+      };
+    });
+    log(cmd, 'tx');
+    await state.writer.write(new TextEncoder().encode(cmd + '\r\n'));
+    return reply;
+  };
+  const p = state.queue.then(run, run);
+  state.queue = p.catch(() => {});
+  return p;
+}
+
+const oneLine = () => true;
+const untilOk = (line) => line === 'OK' || line === 'ERR';
+
+/* ---------------- Device panels ---------------- */
+
+async function refreshIdentity() {
+  try {
+    const [line] = await command('ID?', oneLine);
+    const [product, fw, serial] = line.split(',');
+    $('dev-product').textContent = product || '—';
+    $('dev-fw').textContent = fw || '—';
+    $('dev-serial').textContent = serial || '—';
+  } catch (err) {
+    log('ID?: ' + err.message);
+  }
+}
+
+async function refreshMemory() {
+  try {
+    const lines = await command('MEM?', untilOk);
+    renderMemory(lines);
+  } catch (err) {
+    log('MEM?: ' + err.message);
+  }
+}
+
+function renderMemory(lines) {
+  const num = (re, s) => { const m = s.match(re); return m ? Number(m[1]) : null; };
+  const out = [];
+  for (const l of lines) {
+    if (l.startsWith('RTOS heap')) {
+      const total = num(/total (\d+)/, l), free = num(/free (\d+)/, l), minfree = num(/minfree (\d+)/, l);
+      out.push(meter('Heap FreeRTOS', total - minfree, total, `${kb(free)} libres · mín ${kb(minfree)}`));
+    } else if (l.startsWith('newlib heap')) {
+      out.push(row('Heap malloc (newlib)', kb(num(/used (\d+)/, l)) + ' usados'));
+    } else if (l.startsWith('MSP')) {
+      const res = num(/reserved (\d+)/, l), used = num(/maxused (\d+)/, l);
+      out.push(meter('Stack de interrupciones', used, res, `${kb(used)} de ${kb(res)}`));
+    } else if (l.startsWith('task ')) {
+      const m = l.match(/^task (.+): minfree (\d+)/);
+      if (m) {
+        const free = Number(m[2]);
+        const cls = free < 256 ? 'bad' : free < 512 ? 'warn' : '';
+        out.push(`<div class="row"><span>Tarea ${esc(m[1])}</span><span class="${cls}">${free} B libres</span></div>`);
+      }
+    }
+  }
+  $('mem-body').innerHTML = out.join('') || '<span class="muted">Sin datos</span>';
+}
+
+function meter(label, used, total, text) {
+  const pct = total ? Math.min(100, Math.round(used / total * 100)) : 0;
+  const cls = pct > 90 ? 'bad' : pct > 75 ? 'warn' : '';
+  return `<div class="row"><span>${label}</span><span>${text}</span></div>
+          <div class="bar"><div class="${cls}" style="width:${pct}%"></div></div>`;
+}
+const row = (label, text) => `<div class="row"><span>${label}</span><span>${text}</span></div>`;
+const kb = (n) => n == null ? '—' : (n >= 1024 ? (n / 1024).toFixed(1) + ' KB' : n + ' B');
+const hex4 = (n) => n == null ? '—' : '0x' + n.toString(16).toUpperCase().padStart(4, '0');
+const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------------- SD card (File System Access on the mounted drive) ---------------- */
+
+async function pickSd() {
+  try {
+    state.sdDir = await window.showDirectoryPicker({ mode: 'readwrite' });
+    $('btn-sd-copy').disabled = false;
+    $('btn-sd-refresh').disabled = false;
+    await listSd();
+  } catch (err) {
+    if (err.name !== 'AbortError') $('sd-info').textContent = 'No se pudo abrir la unidad: ' + err.message;
+  }
+}
+
+async function listSd() {
+  const rows = [];
+  let count = 0, bytes = 0;
+  for await (const [name, handle] of state.sdDir.entries()) {
+    if (name === 'System Volume Information') continue;
+    if (handle.kind === 'file') {
+      const f = await handle.getFile();
+      count++; bytes += f.size;
+      rows.push([name, f.size, false]);
+    } else {
+      rows.push([name, null, true]);
+    }
+  }
+  rows.sort((a, b) => (b[2] - a[2]) || a[0].localeCompare(b[0]));
+  $('sd-list').innerHTML = rows.length
+    ? rows.map(([n, s, d]) => `<tr><td>${d ? '📁 ' : ''}${esc(n)}</td><td>${d ? '' : kb(s)}</td></tr>`).join('')
+    : '<tr><td class="muted">(vacía)</td><td></td></tr>';
+  $('sd-files').hidden = false;
+  $('sd-info').textContent = `${state.sdDir.name} · ${count} archivo(s), ${kb(bytes)}`;
+}
+
+async function copyToSd() {
+  let files;
+  try {
+    files = await window.showOpenFilePicker({ multiple: true });
+  } catch (err) {
+    return;  // cancelled
+  }
+  const prog = $('sd-progress');
+  prog.style.display = 'block';
+  const total = (await Promise.all(files.map((h) => h.getFile()))).reduce((a, f) => a + f.size, 0);
+  let done = 0;
+  const t0 = performance.now();
+  try {
+    for (const h of files) {
+      const file = await h.getFile();
+      $('sd-info').textContent = `Copiando ${file.name}…`;
+      const dest = await state.sdDir.getFileHandle(file.name, { create: true });
+      const w = await dest.createWritable();
+      const reader = file.stream().getReader();
+      for (;;) {
+        const { value, done: end } = await reader.read();
+        if (end) break;
+        await w.write(value);
+        done += value.length;
+        prog.value = total ? done / total : 1;
+      }
+      await w.close();
+    }
+    const secs = (performance.now() - t0) / 1000;
+    await listSd();
+    $('sd-info').textContent += ` · copiados ${kb(total)} en ${secs.toFixed(1)} s`;
+  } catch (err) {
+    $('sd-info').textContent = 'Error copiando: ' + err.message;
+  } finally {
+    prog.style.display = 'none';
+  }
+}
+
+/* ---------------- Wiring ---------------- */
+
+function init() {
+  const hasSerial = 'serial' in navigator;
+  const hasFs = 'showDirectoryPicker' in window;
+  if (!hasSerial) {
+    $('unsupported').style.display = 'block';
+    $('btn-connect').disabled = true;
+  }
+  if (!hasFs) {
+    $('btn-sd-pick').disabled = true;
+    $('sd-info').textContent = 'Este navegador no permite acceder a carpetas; usa Chrome o Edge.';
+  }
+
+  $('btn-connect').onclick = connect;
+  $('btn-disconnect').onclick = disconnect;
+  $('btn-mem').onclick = refreshMemory;
+  $('btn-clear').onclick = () => { $('console-log').innerHTML = ''; };
+  $('btn-sd-pick').onclick = pickSd;
+  $('btn-sd-copy').onclick = copyToSd;
+  $('btn-sd-refresh').onclick = listSd;
+  $('console-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const cmd = $('console-input').value.trim();
+    if (!cmd) return;
+    $('console-input').value = '';
+    try {
+      await command(cmd, (line, lines) => untilOk(line) || (cmd.toUpperCase() !== 'MEM?' && lines.length >= 1));
+    } catch (err) {
+      log(err.message);
+    }
+  };
+
+  if (hasSerial) {
+    navigator.serial.addEventListener('disconnect', (e) => {
+      if (e.target === state.port) { log('Dash desconectado'); disconnect(); }
+    });
+  }
+  log('Listo. Conecta el dash por USB y pulsa Conectar.');
+}
+
+init();
+</script>
+</body>
+</html>
