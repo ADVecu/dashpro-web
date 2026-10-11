@@ -11,3 +11,9 @@ python -m http.server 8000
 Then open `http://localhost:8000` in Chrome or Edge, plug in the dash and click **Conectar**.
 
 Close other programs that have the dash's COM port open first; only one program can use it at a time.
+
+## Install
+
+Open https://advecu.github.io/dashpro-web/ in Chrome or Edge and click **Instalar app** (or the install icon in the address bar). The installed app works offline and updates itself when online.
+
+When releasing, bump `CACHE_VERSION` in `sw.js` so installed copies pick up the new files.
