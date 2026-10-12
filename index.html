@@ -106,6 +106,10 @@
     position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--panel-2);
     border: 1px solid var(--line); border-radius: 10px; padding: 10px 16px; display: none; z-index: 5; max-width: 90vw;
   }
+  .opts { display: grid; grid-template-columns: 150px 1fr; gap: 8px 12px; align-items: center; margin-top: 12px; }
+  .opts label { color: var(--muted); }
+  input[type=color] { width: 60px; height: 32px; padding: 2px; background: #0b0d10; border: 1px solid var(--line); border-radius: 8px; }
+  #boot-canvas { width: 100%; max-width: 800px; aspect-ratio: 5 / 3; display: block; border: 1px solid var(--line); border-radius: 8px; background: #000; }
   @media (max-width: 600px) {
     .field { grid-template-columns: 1fr 110px 40px; }
     .kv { grid-template-columns: 110px 1fr; }
@@ -128,6 +132,7 @@
   <button data-page="live">En vivo</button>
   <button data-page="sd">Tarjeta SD</button>
   <button data-page="firmware">Firmware</button>
+  <button data-page="boot">Arranque</button>
   <button data-page="console">Consola</button>
 </nav>
 
@@ -258,6 +263,88 @@
   </div>
 </div>
 
+<!-- Boot image -->
+<div class="page" id="page-boot">
+  <div class="grid">
+    <section>
+      <h2>Imagen de arranque</h2>
+      <div class="actions">
+        <button id="btn-boot-pick">Abrir imagen o GIF…</button>
+        <input type="file" id="boot-file" accept="image/png,image/jpeg,image/gif,image/webp,.apng" hidden>
+      </div>
+      <dl class="kv" style="margin-top:12px">
+        <dt>Archivo</dt><dd id="boot-name">—</dd>
+        <dt>Original</dt><dd id="boot-src">—</dd>
+      </dl>
+      <div class="opts">
+        <label for="boot-fit">Ajuste</label>
+        <select id="boot-fit">
+          <option value="contain" selected>Ajustar sin recortar</option>
+          <option value="cover">Llenar el área (recorta)</option>
+          <option value="none">Tamaño original</option>
+        </select>
+        <label for="boot-size">Área</label>
+        <select id="boot-size">
+          <option value="800x480" selected>800×480 (completa)</option>
+          <option value="640x384">640×384</option>
+          <option value="400x240">400×240</option>
+          <option value="320x192">320×192</option>
+        </select>
+        <label for="boot-bg">Fondo</label>
+        <input type="color" id="boot-bg" value="#000000">
+        <label for="boot-format">Formato</label>
+        <select id="boot-format">
+          <option value="auto" selected>Automático</option>
+          <option value="l8">256 colores (L8)</option>
+          <option value="rgb888">Color total (RGB888)</option>
+          <option value="rgb565">16 bits (RGB565)</option>
+        </select>
+        <label for="boot-fps">Cuadros por segundo</label>
+        <select id="boot-fps">
+          <option value="0" selected>Como el original</option>
+          <option value="30">Máx. 30</option>
+          <option value="25">Máx. 25</option>
+          <option value="15">Máx. 15</option>
+          <option value="10">Máx. 10</option>
+        </select>
+        <label for="boot-loops">Repeticiones</label>
+        <input type="number" id="boot-loops" min="1" max="20" value="1">
+        <label for="boot-minms">Tiempo mínimo (ms)</label>
+        <input type="number" id="boot-minms" min="0" max="10000" step="100" value="2000">
+      </div>
+    </section>
+
+    <section>
+      <h2>Vista previa</h2>
+      <canvas id="boot-canvas" width="800" height="480"></canvas>
+      <dl class="kv" style="margin-top:12px">
+        <dt>Resultado</dt><dd id="boot-out">—</dd>
+        <dt>Espacio</dt><dd id="boot-space">—</dd>
+      </dl>
+      <div class="bar"><div id="boot-bar" style="width:0%"></div></div>
+      <p class="note" id="boot-warn"></p>
+    </section>
+
+    <section>
+      <h2>En el dash</h2>
+      <dl class="kv">
+        <dt>Instalada</dt><dd id="boot-installed">—</dd>
+      </dl>
+      <p class="note">
+        Se convierte la imagen aquí mismo, se copia a la SD del dash y el dash la graba al reiniciar
+        ("INSTALANDO IMAGEN DE ARRANQUE"). No lo apagues mientras tanto.
+      </p>
+      <div class="actions" style="margin-top:10px">
+        <button class="primary" id="btn-boot-install" disabled>Instalar en el dash</button>
+        <button id="btn-boot-download" disabled>Descargar .dashboot</button>
+        <button class="danger" id="btn-boot-clear" disabled>Volver a la original</button>
+      </div>
+      <p class="note" id="boot-step">—</p>
+      <progress id="boot-progress" max="100" value="0"></progress>
+    </section>
+  </div>
+</div>
+
 <!-- SD -->
 <div class="page" id="page-sd">
   <section>
@@ -355,6 +442,9 @@ const state = {
   liveOn: false,
   sdDir: null,
   pkg: null,          // verified .dashfw chosen in the Firmware tab
+  boot: null,         // image chosen in the Boot tab: {name, frames: [{bmp, ms}], w, h}
+  bootOut: null,      // that image converted to .dashboot: {bytes, L}
+  bootBusy: false,    // boot image install in progress
   fwBusy: false,      // firmware update in progress
   page: 'summary',
 };
@@ -393,6 +483,7 @@ function setConnected(on) {
   $('status-text').textContent = on ? 'Conectado' : 'Desconectado';
   $('btn-connect').disabled = on;
   $('btn-disconnect').disabled = !on;
+  updateBootButtons();
   for (const id of ['btn-mem', 'console-input', 'btn-send', 'btn-time-sync', 'btn-trip1', 'btn-trip2',
                     'btn-dfu', 'btn-reload', 'btn-export', 'btn-import', 'btn-defaults']) {
     $(id).disabled = !on;
@@ -467,6 +558,7 @@ async function openPort(port) {
       toast('Firmware sin protocolo de configuración: actualízalo para usar Ajustes');
     }
     await refreshFwInfo();
+    await refreshBootInfo();
   }
 }
 
@@ -1072,7 +1164,7 @@ async function openPackage(file) {
 
 function updateFwButton() {
   const caps = (state.info.caps || '').split(',');
-  $('btn-fw-update').disabled = !(state.pkg && state.port && caps.includes('fw') && !state.fwBusy);
+  $('btn-fw-update').disabled = !(state.pkg && state.port && caps.includes('fw') && !state.fwBusy && !state.bootBusy);
 }
 
 function parseKv(lines) {
@@ -1198,6 +1290,574 @@ async function updateFirmware() {
   }
 }
 
+/* ---------------- Boot image (.dashboot) ---------------- */
+
+/*
+ * The picked image is converted here into the .dashboot format the dash reads
+ * from its OSPI (see tools/make_dashboot.py in the firmware repo): a 256-byte
+ * header, a table of frame durations and the raw frames, 64-byte aligned.
+ */
+const SCREEN_W = 800, SCREEN_H = 480;
+const BOOT_REGION = 16 * 1024 * 1024;
+const BOOT_MAX_FRAMES = 256;
+const BOOT_MAX_SOURCE_FRAMES = 1000;
+const BOOT_SD_NAME = 'BOOTANIM.DBT';
+const BOOT_FORMATS = { l8: 1, rgb565: 2, rgb888: 3 };
+const BOOT_FORMAT_TEXT = { l8: '256 colores (L8)', rgb565: 'RGB565', rgb888: 'RGB888' };
+const BOOT_STEP_TEXT = {
+  checking: 'El dash está verificando la imagen',
+  check_ok: 'Imagen verificada',
+  rebooting: 'Reiniciando para grabarla',
+};
+
+const align = (n, a) => Math.ceil(n / a) * a;
+const mb = (n) => (n / 1048576).toFixed(1) + ' MB';
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const clampInt = (v, min, max, def) => {
+  const n = Math.round(Number(v));
+  return Number.isFinite(n) ? Math.min(max, Math.max(min, n)) : def;
+};
+
+let bootGen = 0;          // bumps on every change; a conversion in progress stops when it is stale
+let bootBuildTimer = 0;
+let bootPlayTimer = 0;
+let bootPreview = null;   // converted frames shown in the preview: [{bmp, ms, enc: true}]
+
+function bootFrameBytes(fmt, w, h) {
+  if (fmt === 'rgb565') return w * h * 2;
+  if (fmt === 'rgb888') return w * h * 3;
+  return align(w * h, 4) + 4 + 256 * 3; // indexes, clut format, clut size, palette
+}
+
+function bootStep(text, percent) {
+  $('boot-step').textContent = text;
+  const p = $('boot-progress');
+  p.style.display = (percent == null) ? 'none' : 'block';
+  if (percent != null) p.value = percent;
+}
+
+/* GIF delays of 10 ms or less play at 100 ms in browsers; do the same */
+const frameMs = (us) => {
+  const ms = Math.round((us || 0) / 1000);
+  return ms > 10 ? Math.min(ms, 65535) : 100;
+};
+
+/* Decode a file into [{bmp, ms}]. Animated GIF/WebP/APNG come with each frame
+ * already composited. */
+async function decodeBootFile(file) {
+  let type = file.type;
+  if (type === 'image/apng' || /\.apng$/i.test(file.name)) type = 'image/png';
+  if ('ImageDecoder' in window && type && await ImageDecoder.isTypeSupported(type)) {
+    const dec = new ImageDecoder({ data: file.stream(), type });
+    try {
+      await dec.tracks.ready;
+      await dec.completed;
+      const count = dec.tracks.selectedTrack ? dec.tracks.selectedTrack.frameCount : 1;
+      if (count > BOOT_MAX_SOURCE_FRAMES) throw new Error(`tiene ${count} cuadros; el máximo que se lee es ${BOOT_MAX_SOURCE_FRAMES}`);
+      const frames = [];
+      for (let i = 0; i < count; i++) {
+        const { image } = await dec.decode({ frameIndex: i });
+        const ms = frameMs(image.duration);
+        frames.push({ bmp: await createImageBitmap(image), ms });
+        image.close();
+        if (count > 1) bootStep(`Leyendo cuadros… ${i + 1} de ${count}`, Math.round((i + 1) * 100 / count));
+      }
+      return frames;
+    } finally {
+      dec.close();
+    }
+  }
+  return [{ bmp: await createImageBitmap(file), ms: 100 }];
+}
+
+async function loadBootImage(file) {
+  bootGen++;
+  clearTimeout(bootBuildTimer);
+  clearTimeout(bootPlayTimer);
+  closeBootPreview();
+  if (state.boot) for (const f of state.boot.frames) f.bmp.close();
+  state.boot = null;
+  state.bootOut = null;
+  updateBootButtons();
+  $('boot-name').textContent = file.name;
+  $('boot-src').textContent = 'leyendo…';
+  $('boot-warn').textContent = '';
+  try {
+    const frames = await decodeBootFile(file);
+    const { width: w, height: h } = frames[0].bmp;
+    const total = frames.reduce((a, f) => a + f.ms, 0);
+    state.boot = { name: file.name.replace(/\.[^.]*$/, '') || 'arranque', frames, w, h };
+    $('boot-src').textContent = frames.length > 1
+      ? `${w}×${h} · ${frames.length} cuadros · ${(total / 1000).toFixed(1)} s`
+      : `${w}×${h} · imagen estática`;
+    bootStep('—', null);
+    await buildBoot();
+  } catch (err) {
+    $('boot-src').innerHTML = `<span class="bad">no se pudo leer: ${esc(err.message)}</span>`;
+    bootStep('—', null);
+  }
+}
+
+/* Merge frames shorter than 1/maxFps into the previous one */
+function limitFps(frames, maxFps) {
+  if (!maxFps) return frames.map((f) => ({ ...f }));
+  const minMs = 1000 / maxFps;
+  const out = [];
+  let acc = 0;
+  for (const f of frames) {
+    if (out.length && acc < minMs) {
+      out[out.length - 1].ms += f.ms;
+      acc += f.ms;
+    } else {
+      out.push({ ...f });
+      acc = f.ms;
+    }
+  }
+  for (const f of out) f.ms = Math.min(f.ms, 65535);
+  return out;
+}
+
+/* Size, position and format of the result for the current options */
+function bootLayout() {
+  const b = state.boot;
+  const fit = $('boot-fit').value;
+  const [boxW, boxH] = $('boot-size').value.split('x').map(Number);
+  let w, h;
+  if (fit === 'none') {
+    w = Math.min(b.w, SCREEN_W); h = Math.min(b.h, SCREEN_H);
+  } else if (fit === 'cover') {
+    w = boxW; h = boxH;
+  } else {
+    const s = Math.min(boxW / b.w, boxH / b.h);
+    w = Math.max(1, Math.round(b.w * s)); h = Math.max(1, Math.round(b.h * s));
+  }
+  const frames = limitFps(b.frames, Number($('boot-fps').value));
+  const n = frames.length;
+  let fmt = $('boot-format').value;
+  if (fmt === 'auto') fmt = n > 1 ? 'l8' : 'rgb888';
+  const stride = align(bootFrameBytes(fmt, w, h), 64);
+  const framesOffset = align(256 + 2 * n, 64);
+  const total = framesOffset + stride * n;
+  return {
+    w, h, x: (SCREEN_W - w) >> 1, y: (SCREEN_H - h) >> 1, fit, fmt, frames, n, stride, framesOffset, total,
+    bg: $('boot-bg').value,
+    loops: clampInt($('boot-loops').value, 1, 20, 1),
+    minMs: clampInt($('boot-minms').value, 0, 10000, 2000),
+    ok: n <= BOOT_MAX_FRAMES && total <= BOOT_REGION,
+  };
+}
+
+/* Draw one source frame scaled like the result, at (dx, dy) */
+function drawBootFrame(ctx, bmp, L, dx, dy) {
+  const sw = bmp.width, sh = bmp.height;
+  if (L.fit === 'cover') {
+    const s = Math.max(L.w / sw, L.h / sh);
+    const cw = L.w / s, ch = L.h / s;
+    ctx.drawImage(bmp, (sw - cw) / 2, (sh - ch) / 2, cw, ch, dx, dy, L.w, L.h);
+  } else if (L.fit === 'contain') {
+    ctx.drawImage(bmp, dx, dy, L.w, L.h);
+  } else {
+    ctx.drawImage(bmp, 0, 0, L.w, L.h, dx, dy, L.w, L.h);
+  }
+}
+
+function playBootPreview(frames, L) {
+  clearTimeout(bootPlayTimer);
+  const ctx = $('boot-canvas').getContext('2d');
+  ctx.imageSmoothingQuality = 'high';
+  let i = 0;
+  const draw = () => {
+    const f = frames[i];
+    ctx.fillStyle = L.bg;
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+    if (f.enc) ctx.drawImage(f.bmp, L.x, L.y);
+    else drawBootFrame(ctx, f.bmp, L, L.x, L.y);
+    if (frames.length > 1) {
+      i = (i + 1) % frames.length;
+      bootPlayTimer = setTimeout(draw, f.ms);
+    }
+  };
+  draw();
+}
+
+function closeBootPreview() {
+  if (bootPreview) for (const f of bootPreview) f.bmp.close();
+  bootPreview = null;
+}
+
+/* ---- L8: median cut palette + Floyd–Steinberg ---- */
+
+/* Palette of up to 256 colors: the exact colors when there are few,
+ * otherwise median cut over a 5-5-5 histogram. Returns [[r, g, b], ...]. */
+function bootPalette(px, n) {
+  const exact = new Map();
+  for (let i = 0; i < n * 4; i += 4) {
+    const c = (px[i] << 16) | (px[i + 1] << 8) | px[i + 2];
+    if (!exact.has(c)) {
+      if (exact.size === 256) { exact.clear(); break; }
+      exact.set(c, exact.size);
+    }
+  }
+  if (exact.size) return { colors: [...exact.keys()].map((c) => [c >> 16, (c >> 8) & 255, c & 255]), exact };
+
+  const count = new Uint32Array(32768), sr = new Float64Array(32768), sg = new Float64Array(32768), sb = new Float64Array(32768);
+  for (let i = 0; i < n * 4; i += 4) {
+    const k = ((px[i] >> 3) << 10) | ((px[i + 1] >> 3) << 5) | (px[i + 2] >> 3);
+    count[k]++; sr[k] += px[i]; sg[k] += px[i + 1]; sb[k] += px[i + 2];
+  }
+  const bins = [];
+  for (let k = 0; k < 32768; k++) if (count[k]) bins.push(k);
+  const ch = (k, c) => (k >> (10 - 5 * c)) & 31; // c: 0 = r, 1 = g, 2 = b
+  const describe = (list) => {
+    let pixels = 0, best = 0, axis = 0;
+    for (let c = 0; c < 3; c++) {
+      let lo = 31, hi = 0;
+      for (const k of list) { const v = ch(k, c); if (v < lo) lo = v; if (v > hi) hi = v; }
+      if (hi - lo > best) { best = hi - lo; axis = c; }
+    }
+    for (const k of list) pixels += count[k];
+    return { list, pixels, range: best, axis };
+  };
+  const boxes = [describe(bins)];
+  while (boxes.length < 256) {
+    let pick = -1, score = 0;
+    boxes.forEach((b, i) => { const s = b.range * b.pixels; if (s > score) { score = s; pick = i; } });
+    if (pick < 0) break;
+    const b = boxes[pick];
+    b.list.sort((p, q) => ch(p, b.axis) - ch(q, b.axis));
+    let acc = 0, cut = 0;
+    while (cut < b.list.length - 1 && acc + count[b.list[cut]] <= b.pixels / 2) acc += count[b.list[cut++]];
+    cut = Math.min(Math.max(cut, 1), b.list.length - 1);
+    boxes.splice(pick, 1, describe(b.list.slice(0, cut)), describe(b.list.slice(cut)));
+  }
+  const colors = boxes.map((b) => {
+    let r = 0, g = 0, bl = 0;
+    for (const k of b.list) { r += sr[k]; g += sg[k]; bl += sb[k]; }
+    return [Math.round(r / b.pixels), Math.round(g / b.pixels), Math.round(bl / b.pixels)];
+  });
+  return { colors, exact: null };
+}
+
+/* Encode RGBA pixels as L8 at out[off]; px is rewritten with the shown colors */
+function encodeL8(px, w, h, out, off) {
+  const n = w * h;
+  const { colors, exact } = bootPalette(px, n);
+  if (exact) {
+    for (let i = 0; i < n; i++) out[off + i] = exact.get((px[i * 4] << 16) | (px[i * 4 + 1] << 8) | px[i * 4 + 2]);
+  } else {
+    const cache = new Int16Array(1 << 18).fill(-1); // nearest color by 6-6-6 key
+    const nearest = (r, g, b) => {
+      const k = ((r >> 2) << 12) | ((g >> 2) << 6) | (b >> 2);
+      let idx = cache[k];
+      if (idx < 0) {
+        let best = Infinity;
+        for (let j = 0; j < colors.length; j++) {
+          const c = colors[j];
+          const d = (c[0] - r) * (c[0] - r) * 2 + (c[1] - g) * (c[1] - g) * 4 + (c[2] - b) * (c[2] - b) * 3;
+          if (d < best) { best = d; idx = j; }
+        }
+        cache[k] = idx;
+      }
+      return idx;
+    };
+    let cur = new Float32Array((w + 2) * 3), next = new Float32Array((w + 2) * 3);
+    for (let y = 0; y < h; y++) {
+      next.fill(0);
+      for (let x = 0; x < w; x++) {
+        const p = (y * w + x) * 4, e = (x + 1) * 3;
+        const r = Math.min(255, Math.max(0, px[p] + cur[e]));
+        const g = Math.min(255, Math.max(0, px[p + 1] + cur[e + 1]));
+        const b = Math.min(255, Math.max(0, px[p + 2] + cur[e + 2]));
+        const idx = nearest(r | 0, g | 0, b | 0);
+        out[off + y * w + x] = idx;
+        const c = colors[idx];
+        const er = r - c[0], eg = g - c[1], eb = b - c[2];
+        cur[e + 3] += er * 7 / 16; cur[e + 4] += eg * 7 / 16; cur[e + 5] += eb * 7 / 16;
+        next[e - 3] += er * 3 / 16; next[e - 2] += eg * 3 / 16; next[e - 1] += eb * 3 / 16;
+        next[e] += er * 5 / 16; next[e + 1] += eg * 5 / 16; next[e + 2] += eb * 5 / 16;
+        next[e + 3] += er / 16; next[e + 4] += eg / 16; next[e + 5] += eb / 16;
+      }
+      [cur, next] = [next, cur];
+    }
+  }
+  for (let i = 0; i < n; i++) {
+    const c = colors[out[off + i]];
+    px[i * 4] = c[0]; px[i * 4 + 1] = c[1]; px[i * 4 + 2] = c[2]; px[i * 4 + 3] = 255;
+  }
+  // indexes padded to 4 bytes, then clut format (1 = RGB888), clut size and the B, G, R palette
+  let q = off + align(n, 4);
+  out[q] = 1; out[q + 1] = 0; out[q + 2] = 0; out[q + 3] = 1; // 256 entries
+  q += 4;
+  for (let j = 0; j < 256; j++) {
+    const c = colors[j] || [0, 0, 0];
+    out[q++] = c[2]; out[q++] = c[1]; out[q++] = c[0];
+  }
+}
+
+function encodeFrame(px, w, h, fmt, out, off) {
+  const n = w * h;
+  if (fmt === 'rgb888') {
+    for (let i = 0; i < n; i++) {
+      out[off + i * 3] = px[i * 4 + 2]; out[off + i * 3 + 1] = px[i * 4 + 1]; out[off + i * 3 + 2] = px[i * 4];
+      px[i * 4 + 3] = 255;
+    }
+  } else if (fmt === 'rgb565') {
+    for (let i = 0; i < n; i++) {
+      const r = px[i * 4] >> 3, g = px[i * 4 + 1] >> 2, b = px[i * 4 + 2] >> 3;
+      const v = (r << 11) | (g << 5) | b;
+      out[off + i * 2] = v & 255; out[off + i * 2 + 1] = v >> 8;
+      px[i * 4] = (r << 3) | (r >> 2); px[i * 4 + 1] = (g << 2) | (g >> 4); px[i * 4 + 2] = (b << 3) | (b >> 2);
+      px[i * 4 + 3] = 255;
+    }
+  } else {
+    encodeL8(px, w, h, out, off);
+  }
+}
+
+/* Build the whole .dashboot. Returns {bytes, preview} or null when a newer
+ * change made this conversion stale. */
+async function encodeBoot(L, gen) {
+  const out = new Uint8Array(L.total);
+  const dv = new DataView(out.buffer);
+  L.frames.forEach((f, i) => dv.setUint16(256 + 2 * i, f.ms, true));
+
+  const cv = new OffscreenCanvas(L.w, L.h);
+  const ctx = cv.getContext('2d', { willReadFrequently: true });
+  ctx.imageSmoothingQuality = 'high';
+  const preview = [];
+  for (let i = 0; i < L.n; i++) {
+    ctx.fillStyle = L.bg;
+    ctx.fillRect(0, 0, L.w, L.h);
+    drawBootFrame(ctx, L.frames[i].bmp, L, 0, 0);
+    const img = ctx.getImageData(0, 0, L.w, L.h);
+    encodeFrame(img.data, L.w, L.h, L.fmt, out, L.framesOffset + L.stride * i);
+    preview.push({ bmp: await createImageBitmap(img), ms: L.frames[i].ms, enc: true });
+    await sleep(0); // keep the page responsive
+    if (gen !== bootGen) { for (const f of preview) f.bmp.close(); return null; }
+    bootStep(`Convirtiendo… cuadro ${i + 1} de ${L.n}`, Math.round((i + 1) * 100 / L.n));
+  }
+
+  const sha = new Uint8Array(await crypto.subtle.digest('SHA-256', out.subarray(256)));
+  out.set(new TextEncoder().encode('DASHBOOT'), 0);
+  dv.setUint16(8, 1, true);              // version
+  dv.setUint16(10, 256, true);           // header size
+  dv.setUint16(12, L.w, true);
+  dv.setUint16(14, L.h, true);
+  dv.setInt16(16, L.x, true);
+  dv.setInt16(18, L.y, true);
+  out[20] = BOOT_FORMATS[L.fmt];
+  out[21] = 0;                           // flags
+  dv.setUint16(22, L.n, true);
+  dv.setUint32(24, parseInt(L.bg.slice(1), 16), true);
+  dv.setUint16(28, L.loops, true);
+  dv.setUint16(30, L.minMs, true);
+  dv.setUint32(32, 256, true);           // durations offset
+  dv.setUint32(36, L.framesOffset, true);
+  dv.setUint32(40, L.stride, true);
+  dv.setUint32(44, L.total, true);
+  out.set(sha, 48);
+  dv.setUint32(252, crc32(out.subarray(0, 252)), true);
+  return { bytes: out, preview };
+}
+
+function scheduleBootBuild() {
+  if (!state.boot || state.bootBusy) return;
+  bootGen++;
+  clearTimeout(bootBuildTimer);
+  bootBuildTimer = setTimeout(buildBoot, 250);
+}
+
+/* Lay out the image for the current options, preview it and convert it */
+async function buildBoot() {
+  const gen = ++bootGen;
+  state.bootOut = null;
+  updateBootButtons();
+  if (!state.boot) return;
+  const L = bootLayout();
+
+  $('boot-out').textContent = `${L.w}×${L.h} · ${BOOT_FORMAT_TEXT[L.fmt]} · ${L.n} cuadro${L.n === 1 ? '' : 's'}`;
+  $('boot-space').textContent = `${mb(L.total)} de 16 MB`;
+  const pct = Math.min(100, Math.round(L.total * 100 / BOOT_REGION));
+  $('boot-bar').style.width = pct + '%';
+  $('boot-bar').className = L.ok ? (pct > 75 ? 'warn' : '') : 'bad';
+
+  const warn = [];
+  if (L.n > BOOT_MAX_FRAMES) warn.push(`Tiene ${L.n} cuadros y el dash admite ${BOOT_MAX_FRAMES}: baja los cuadros por segundo.`);
+  if (L.total > BOOT_REGION) warn.push(`No cabe en los 16 MB: usa 256 colores, un área más pequeña o menos cuadros por segundo.`);
+  if (L.ok) {
+    // Estimates: ~0.6 MB/s copying to the SD, ~4 s per MB writing the OSPI
+    const copy = Math.ceil(L.total / 1048576 / 0.6), write = Math.ceil(L.total / 1048576 * 4);
+    warn.push(`Instalarla toma aprox. ${copy} s copiando a la SD y ${write} s grabando en el dash.`);
+  }
+  if (state.boot.frames.length === 1 && !('ImageDecoder' in window) && /gif|webp|png/i.test(state.boot.name))
+    warn.push('Este navegador solo lee el primer cuadro de las animaciones; usa Chrome o Edge.');
+  $('boot-warn').textContent = warn.join(' ');
+
+  // Show the scaled source right away, then the converted frames
+  closeBootPreview();
+  playBootPreview(L.frames, L);
+  if (!L.ok) { bootStep('—', null); return; }
+
+  const res = await encodeBoot(L, gen);
+  if (!res) return;
+  bootPreview = res.preview;
+  playBootPreview(bootPreview, L);
+  state.bootOut = { bytes: res.bytes, L };
+  bootStep(`Lista: ${mb(L.total)}. ` + (state.port ? 'Pulsa "Instalar en el dash".' : 'Conecta el dash para instalarla.'), null);
+  updateBootButtons();
+}
+
+function bootCaps() {
+  return (state.info.caps || '').split(',').includes('bootimg');
+}
+
+function updateBootButtons() {
+  const ready = state.port && bootCaps() && !state.bootBusy && !state.fwBusy;
+  $('btn-boot-install').disabled = !(ready && state.bootOut);
+  $('btn-boot-clear').disabled = !ready;
+  $('btn-boot-download').disabled = !state.bootOut;
+  for (const id of ['btn-boot-pick', 'boot-fit', 'boot-size', 'boot-bg', 'boot-format', 'boot-fps', 'boot-loops', 'boot-minms'])
+    $(id).disabled = state.bootBusy;
+}
+
+const BOOT_FMT_NAMES = { l8: '256 colores', rgb565: 'RGB565', rgb888: 'RGB888' };
+
+async function refreshBootInfo() {
+  if (!state.port || !bootCaps()) {
+    $('boot-installed').textContent = state.port ? 'firmware sin imagen de arranque (actualízalo)' : '—';
+    updateBootButtons();
+    return null;
+  }
+  try {
+    const st = parseKv(await command('BOOT STATUS?', { quiet: true }));
+    const m = (st.installed || '').match(/^(\d+)x(\d+),(\w+),(\d+) frames,(\d+) bytes$/);
+    $('boot-installed').textContent = st.installed === 'none' ? 'ninguna (animación original)'
+      : m ? `${m[1]}×${m[2]} · ${BOOT_FMT_NAMES[m[3]] || m[3]} · ${m[4]} cuadro${m[4] === '1' ? '' : 's'} · ${mb(Number(m[5]))}`
+      : (st.installed || '—');
+    updateBootButtons();
+    return st;
+  } catch (_) {
+    return null;
+  }
+}
+
+/* Follow BOOT STATUS? after BOOT STAGE / BOOT CLEAR. Resolves 'rebooting' when
+ * the dash resets to write the image, or the final message when there was
+ * nothing to do. */
+async function waitBootJob() {
+  for (;;) {
+    await sleep(1000);
+    if (!state.port) return 'rebooting';
+    let st;
+    try {
+      st = parseKv(await command('BOOT STATUS?', { quiet: true, timeout: 2000 }));
+    } catch (_) {
+      if (!state.port) return 'rebooting';
+      continue;
+    }
+    if (st.state === 'error') throw new Error(st.msg || 'error en el dash');
+    if (st.state === 'check_ok' || st.state === 'idle') return st.msg;
+    bootStep(`${BOOT_STEP_TEXT[st.state] || st.state}…`, Number(st.progress) || 0);
+  }
+}
+
+async function waitBootReboot(what) {
+  bootStep(`El dash se está reiniciando. Espera a que termine "${what}"…`, null);
+  const back = await reconnectGranted(5 * 60 * 1000);
+  if (!back) throw new Error('el dash no volvió a conectarse; revisa el cable y conéctalo a mano');
+  return refreshBootInfo();
+}
+
+async function writeBootToSd(bytes) {
+  let dest;
+  try {
+    dest = await state.sdDir.getFileHandle(BOOT_SD_NAME, { create: true });
+  } catch (_) {
+    // The drive was ejected (e.g. after a reboot of the dash): ask for it again
+    toast('Vuelve a elegir la unidad SD del dash');
+    await pickSd();
+    dest = await state.sdDir.getFileHandle(BOOT_SD_NAME, { create: true });
+  }
+  const w = await dest.createWritable();
+  const CHUNK = 256 * 1024;
+  for (let o = 0; o < bytes.length; o += CHUNK) {
+    await w.write(bytes.subarray(o, o + CHUNK));
+    const done = Math.min(bytes.length, o + CHUNK);
+    bootStep(`Copiando a la SD… ${mb(done)} de ${mb(bytes.length)}`, Math.round(done * 100 / bytes.length));
+  }
+  await w.close();
+}
+
+async function installBoot() {
+  const out = state.bootOut;
+  if (!out) return;
+  if (!state.sdDir) {
+    toast('Elige la unidad SD del dash (la raíz, p. ej. G:)');
+    await pickSd();
+    if (!state.sdDir) return;
+  }
+  if (!confirm('¿Instalar esta imagen de arranque? El dash se reinicia para grabarla; no lo apagues hasta que termine.')) return;
+
+  state.bootBusy = true;
+  updateBootButtons();
+  updateFwButton();
+  try {
+    await stopLive();
+    await writeBootToSd(out.bytes);
+    // Let Windows finish writing before the dash takes the card
+    bootStep('Esperando a que el PC termine de escribir…', 100);
+    await sleep(3000);
+
+    await command('BOOT STAGE ' + BOOT_SD_NAME);
+    const res = await waitBootJob();
+    const st = (res === 'rebooting') ? await waitBootReboot('INSTALANDO IMAGEN DE ARRANQUE') : await refreshBootInfo();
+    if (st && st.installed === `${out.L.w}x${out.L.h},${out.L.fmt},${out.L.n} frames,${out.L.total} bytes`) {
+      bootStep(res === 'rebooting' ? 'Instalada. Ya se ve al encender el dash.' : 'Esa imagen ya estaba instalada.', null);
+      toast('Imagen de arranque instalada');
+    } else {
+      bootStep('El dash no la instaló: revisa su pantalla y que el archivo quedó en la SD.', null);
+    }
+  } catch (err) {
+    bootStep('Error: ' + err.message, null);
+    toast('La imagen no se instaló: ' + err.message);
+  } finally {
+    state.bootBusy = false;
+    updateBootButtons();
+    updateFwButton();
+  }
+}
+
+async function clearBoot() {
+  if (!confirm('¿Volver a la animación original? El dash se reinicia para borrar la imagen.')) return;
+  state.bootBusy = true;
+  updateBootButtons();
+  updateFwButton();
+  try {
+    await stopLive();
+    await command('BOOT CLEAR');
+    const res = await waitBootJob();
+    if (res === 'rebooting') await waitBootReboot('BORRANDO IMAGEN DE ARRANQUE');
+    else await refreshBootInfo();
+    bootStep(res === 'rebooting' ? 'Listo: vuelve la animación original.' : 'No había imagen instalada.', null);
+  } catch (err) {
+    bootStep('Error: ' + err.message, null);
+    toast('No se pudo borrar: ' + err.message);
+  } finally {
+    state.bootBusy = false;
+    updateBootButtons();
+    updateFwButton();
+  }
+}
+
+function downloadBoot() {
+  if (!state.bootOut) return;
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([state.bootOut.bytes], { type: 'application/octet-stream' }));
+  a.download = (state.boot ? state.boot.name : 'arranque') + '.dashboot';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+
 /* ---------------- Tabs and wiring ---------------- */
 
 function showPage(page) {
@@ -1207,6 +1867,7 @@ function showPage(page) {
   if (page === 'live') startLive(); else stopLive();
   if (page === 'summary' && state.port && state.proto >= 1) refreshTime();
   if (page === 'firmware' && state.port && !state.fwBusy) refreshFwInfo();
+  if (page === 'boot' && state.port && !state.bootBusy && !state.fwBusy) refreshBootInfo();
 }
 
 function init() {
@@ -1240,6 +1901,13 @@ function init() {
   $('btn-fw-pick').onclick = () => $('fw-file').click();
   $('fw-file').onchange = (e) => { if (e.target.files[0]) openPackage(e.target.files[0]); e.target.value = ''; };
   $('btn-fw-update').onclick = updateFirmware;
+  $('btn-boot-pick').onclick = () => $('boot-file').click();
+  $('boot-file').onchange = (e) => { if (e.target.files[0]) loadBootImage(e.target.files[0]); e.target.value = ''; };
+  for (const id of ['boot-fit', 'boot-size', 'boot-bg', 'boot-format', 'boot-fps', 'boot-loops', 'boot-minms'])
+    $(id).addEventListener(id === 'boot-bg' ? 'input' : 'change', scheduleBootBuild);
+  $('btn-boot-install').onclick = installBoot;
+  $('btn-boot-download').onclick = downloadBoot;
+  $('btn-boot-clear').onclick = clearBoot;
   $('btn-sd-copy').onclick = copyToSd;
   $('btn-sd-refresh').onclick = listSd;
   $('btn-clear').onclick = () => { $('console-log').innerHTML = ''; };
