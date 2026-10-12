@@ -1,0 +1,32 @@
+name: Feature
+description: Something new that does not exist today
+labels: ["type: feature"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What you want
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: What you would use it for
+  - type: textarea
+    id: how
+    attributes:
+      label: How you picture it
+      description: Optional. Sketch, screenshot or description.
+  - type: dropdown
+    id: repos
+    attributes:
+      label: Touches
+      options:
+        - Dash only
+        - Web only
+        - Both
+  - type: input
+    id: openspec
+    attributes:
+      label: OpenSpec change
+      description: Optional. Folder under openspec/changes/ if there is one.
