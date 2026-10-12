@@ -1,0 +1,29 @@
+name: Improvement
+description: Something that works today, done better (performance, RAM, UX)
+labels: ["type: improvement"]
+body:
+  - type: textarea
+    id: today
+    attributes:
+      label: How it works today
+    validations:
+      required: true
+  - type: textarea
+    id: gain
+    attributes:
+      label: What bothers you or what we gain
+    validations:
+      required: true
+  - type: textarea
+    id: measure
+    attributes:
+      label: How to measure it
+      description: Optional. For example free RAM in MEM?, FPS, time to load.
+  - type: dropdown
+    id: repos
+    attributes:
+      label: Touches
+      options:
+        - Dash only
+        - Web only
+        - Both

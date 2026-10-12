@@ -1,0 +1,41 @@
+name: Bug
+description: Something is broken or misbehaves
+labels: ["type: bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+  - type: input
+    id: version
+    attributes:
+      label: Web app version and browser
+      placeholder: CACHE_VERSION in sw.js, Chrome 130
+  - type: dropdown
+    id: repos
+    attributes:
+      label: Affects
+      options:
+        - Dash only
+        - Web only
+        - Both
+  - type: textarea
+    id: media
+    attributes:
+      label: Photos, video or logs
+      description: Optional. Drag files here.
