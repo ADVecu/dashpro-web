@@ -127,6 +127,7 @@
   <button data-page="settings">Ajustes</button>
   <button data-page="live">En vivo</button>
   <button data-page="sd">Tarjeta SD</button>
+  <button data-page="firmware">Firmware</button>
   <button data-page="console">Consola</button>
 </nav>
 
@@ -211,6 +212,50 @@
     <span class="muted" id="live-state">Detenido</span>
   </div>
   <div class="tiles" id="live-tiles"><div class="empty">Conecta el dash para ver los datos en vivo.</div></div>
+</div>
+
+<!-- Firmware -->
+<div class="page" id="page-firmware">
+  <div class="grid">
+    <section>
+      <h2>Instalado en el dash</h2>
+      <dl class="kv">
+        <dt>Versión</dt><dd id="fw-installed">—</dd>
+        <dt>Banco activo</dt><dd id="fw-bank">—</dd>
+        <dt>Última actualización</dt><dd id="fw-boot">—</dd>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Paquete</h2>
+      <div class="actions">
+        <button id="btn-fw-pick">Abrir paquete .dashfw…</button>
+        <input type="file" id="fw-file" accept=".dashfw" hidden>
+      </div>
+      <dl class="kv" style="margin-top:12px">
+        <dt>Archivo</dt><dd id="pkg-name">—</dd>
+        <dt>Versión</dt><dd id="pkg-version">—</dd>
+        <dt>Compilado</dt><dd id="pkg-built">—</dd>
+        <dt>Código</dt><dd id="pkg-code">—</dd>
+        <dt>Gráficos</dt><dd id="pkg-assets">—</dd>
+        <dt>Integridad</dt><dd id="pkg-check">—</dd>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Actualizar</h2>
+      <p class="note" style="margin-top:0">
+        Se copia el paquete a la SD del dash, el dash lo verifica, instala el código en el banco libre y reinicia.
+        Si cambiaron los gráficos, al arrancar muestra "ACTUALIZANDO GRAFICOS" (puede tardar unos minutos).
+        Conecta la batería y no apagues el dash durante la actualización.
+      </p>
+      <div class="actions" style="margin-top:10px">
+        <button class="primary" id="btn-fw-update" disabled>Actualizar firmware</button>
+      </div>
+      <p class="note" id="fw-step">—</p>
+      <progress id="fw-progress" max="100" value="0"></progress>
+    </section>
+  </div>
 </div>
 
 <!-- SD -->
@@ -309,6 +354,8 @@ const state = {
   dirty: new Set(),
   liveOn: false,
   sdDir: null,
+  pkg: null,          // verified .dashfw chosen in the Firmware tab
+  fwBusy: false,      // firmware update in progress
   page: 'summary',
 };
 
@@ -368,6 +415,35 @@ function setConnected(on) {
 async function connect() {
   try {
     const port = await navigator.serial.requestPort({ filters: DASH_FILTERS });
+    await openPort(port);
+  } catch (err) {
+    if (err.name !== 'NotFoundError') toast('Error al conectar: ' + err.message);
+    await disconnect();
+  }
+}
+
+/* Reopen a dash the user already granted (no chooser), e.g. after a firmware
+ * update reboot. Resolves true once connected. */
+async function reconnectGranted(timeoutMs) {
+  const t0 = Date.now();
+  while (Date.now() - t0 < timeoutMs) {
+    const ports = (await navigator.serial.getPorts())
+      .filter((p) => p.getInfo().usbVendorId === DASH_FILTERS[0].usbVendorId);
+    for (const p of ports) {
+      try {
+        await openPort(p);
+        return true;
+      } catch (_) {
+        await disconnect();
+      }
+    }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  return false;
+}
+
+async function openPort(port) {
+  {
     await port.open({ baudRate: 115200 }); // CDC ignores the baud rate
     state.port = port;
     state.writer = port.writable.getWriter();
@@ -390,9 +466,7 @@ async function connect() {
       await refreshMemory();
       toast('Firmware sin protocolo de configuración: actualízalo para usar Ajustes');
     }
-  } catch (err) {
-    if (err.name !== 'NotFoundError') toast('Error al conectar: ' + err.message);
-    await disconnect();
+    await refreshFwInfo();
   }
 }
 
@@ -411,12 +485,13 @@ async function disconnect() {
 
 async function readLoop(port) {
   const decoder = new TextDecoder();
-  while (port.readable && state.port === port) {
+  let ended = false;
+  while (!ended && port.readable && state.port === port) {
     state.reader = port.readable.getReader();
     try {
       for (;;) {
         const { value, done } = await state.reader.read();
-        if (done) break;
+        if (done) { ended = true; break; } // stream closed: stop (re-reading a closed stream spins)
         onText(decoder.decode(value, { stream: true }));
       }
     } catch (err) {
@@ -927,6 +1002,202 @@ async function copyToSd() {
   }
 }
 
+/* ---------------- Firmware update ---------------- */
+
+const PKG_HEADER_SIZE = 256;
+const PKG_MAGIC = [0x44, 0x41, 0x53, 0x48, 0x46, 0x57, 0x00, 0x01]; // "DASHFW\0\1"
+const PKG_SD_NAME = 'dashpro_update.dashfw';
+const CRC_TABLE = (() => {
+  const t = new Uint32Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    t[n] = c >>> 0;
+  }
+  return t;
+})();
+
+function crc32(bytes) {
+  let c = 0xFFFFFFFF;
+  for (let i = 0; i < bytes.length; i++) c = CRC_TABLE[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+const toHex = (buf) => [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+
+/* Read and verify a .dashfw entirely in the browser (header, CRC, SHA-256) */
+async function openPackage(file) {
+  state.pkg = null;
+  $('btn-fw-update').disabled = true;
+  $('pkg-name').textContent = file.name;
+  for (const id of ['pkg-version', 'pkg-built', 'pkg-code', 'pkg-assets']) $(id).textContent = '—';
+  $('pkg-check').textContent = 'verificando…';
+
+  const head = new Uint8Array(await file.slice(0, PKG_HEADER_SIZE).arrayBuffer());
+  const dv = new DataView(head.buffer);
+  if (head.length < PKG_HEADER_SIZE || PKG_MAGIC.some((b, i) => head[i] !== b)) {
+    $('pkg-check').innerHTML = '<span class="bad">no es un paquete del DashPRO</span>';
+    return;
+  }
+  const version = new TextDecoder().decode(head.slice(12, 44)).replace(/\0.*$/, '');
+  const codeSize = dv.getUint32(48, true);
+  const assetsSize = dv.getUint32(88, true);
+  const built = new Date(dv.getUint32(124, true) * 1000);
+  $('pkg-version').textContent = version;
+  $('pkg-built').textContent = fmtDate(built);
+  $('pkg-code').textContent = kb(codeSize);
+  $('pkg-assets').textContent = kb(assetsSize);
+
+  if (crc32(head.slice(0, 252)) !== dv.getUint32(252, true)) {
+    $('pkg-check').innerHTML = '<span class="bad">encabezado dañado (CRC)</span>';
+    return;
+  }
+  if (file.size !== PKG_HEADER_SIZE + codeSize + assetsSize) {
+    $('pkg-check').innerHTML = '<span class="bad">tamaño incorrecto (archivo incompleto)</span>';
+    return;
+  }
+  const codeSha = toHex(await crypto.subtle.digest('SHA-256',
+    await file.slice(PKG_HEADER_SIZE, PKG_HEADER_SIZE + codeSize).arrayBuffer()));
+  const assetsSha = toHex(await crypto.subtle.digest('SHA-256',
+    await file.slice(PKG_HEADER_SIZE + codeSize).arrayBuffer()));
+  if (codeSha !== toHex(head.slice(52, 84)) || assetsSha !== toHex(head.slice(92, 124))) {
+    $('pkg-check').innerHTML = '<span class="bad">contenido dañado (SHA-256)</span>';
+    return;
+  }
+
+  $('pkg-check').innerHTML = '<span style="color:var(--ok)">correcto</span>';
+  state.pkg = { file, version };
+  updateFwButton();
+}
+
+function updateFwButton() {
+  const caps = (state.info.caps || '').split(',');
+  $('btn-fw-update').disabled = !(state.pkg && state.port && caps.includes('fw') && !state.fwBusy);
+}
+
+function parseKv(lines) {
+  return Object.fromEntries(lines.map((l) => l.split('=')).filter((kv) => kv.length >= 2)
+    .map(([k, ...v]) => [k, v.join('=')]));
+}
+
+const BOOT_TEXT = {
+  none: 'ninguna', pending: 'pendiente de confirmar', confirmed: 'confirmada',
+  rolled_back: 'falló: volvió a la versión anterior',
+};
+
+async function refreshFwInfo() {
+  $('fw-installed').textContent = state.info.fw || '—';
+  const caps = (state.info.caps || '').split(',');
+  if (!state.port || !caps.includes('fw')) {
+    $('fw-bank').textContent = state.port ? 'firmware sin actualización por SD' : '—';
+    $('fw-boot').textContent = '—';
+    updateFwButton();
+    return null;
+  }
+  try {
+    const st = parseKv(await command('FW STATUS?', { quiet: true }));
+    $('fw-bank').textContent = st.bank || '—';
+    $('fw-boot').textContent = BOOT_TEXT[st.boot] || st.boot || '—';
+    updateFwButton();
+    return st;
+  } catch (_) {
+    return null;
+  }
+}
+
+function fwStep(text, percent) {
+  $('fw-step').textContent = text;
+  const p = $('fw-progress');
+  p.style.display = (percent == null) ? 'none' : 'block';
+  if (percent != null) p.value = percent;
+}
+
+const FW_STEP_TEXT = {
+  checking: 'El dash está verificando el paquete',
+  check_ok: 'Paquete verificado',
+  staging: 'Instalando el código en el banco libre',
+  rebooting: 'Cambiando de banco y reiniciando',
+};
+
+async function copyPackageToSd(file) {
+  const dest = await state.sdDir.getFileHandle(PKG_SD_NAME, { create: true });
+  const w = await dest.createWritable();
+  const reader = file.stream().getReader();
+  let done = 0;
+  for (;;) {
+    const { value, done: end } = await reader.read();
+    if (end) break;
+    await w.write(value);
+    done += value.length;
+    fwStep(`Copiando el paquete a la SD… ${kb(done)} de ${kb(file.size)}`, Math.round(done * 100 / file.size));
+  }
+  await w.close();
+}
+
+async function updateFirmware() {
+  const pkg = state.pkg;
+  if (!pkg) return;
+  if (!state.sdDir) {
+    toast('Elige la unidad SD del dash (la raíz, p. ej. G:)');
+    await pickSd();
+    if (!state.sdDir) return;
+  }
+  if (!confirm(`¿Actualizar el dash a la versión ${pkg.version}? No lo apagues hasta que termine.`)) return;
+
+  state.fwBusy = true;
+  updateFwButton();
+  try {
+    await stopLive();
+    await copyPackageToSd(pkg.file);
+    // Let Windows finish writing before the dash takes the card
+    fwStep('Esperando a que el PC termine de escribir…', 100);
+    await new Promise((r) => setTimeout(r, 3000));
+
+    await command('FW STAGE ' + PKG_SD_NAME);
+    let rebooting = false;
+    for (;;) {
+      await new Promise((r) => setTimeout(r, 1000));
+      if (!state.port) { rebooting = true; break; }
+      let st;
+      try {
+        st = parseKv(await command('FW STATUS?', { quiet: true, timeout: 2000 }));
+      } catch (_) {
+        if (!state.port) { rebooting = true; break; }
+        continue;
+      }
+      if (st.state === 'error') throw new Error(st.msg || 'error en el dash');
+      fwStep(`${FW_STEP_TEXT[st.state] || st.state}… (${st.msg})`, Number(st.progress) || 0);
+      if (st.state === 'rebooting') rebooting = true;
+    }
+    if (!rebooting) return;
+
+    fwStep('El dash se está reiniciando. Si muestra "ACTUALIZANDO GRAFICOS", espera a que termine…', null);
+    const back = await reconnectGranted(15 * 60 * 1000);
+    if (!back) throw new Error('el dash no volvió a conectarse; revisa el cable y conéctalo a mano');
+
+    // The new firmware confirms itself after ~10 s of running
+    for (let i = 0; i < 20; i++) {
+      const st = await refreshFwInfo();
+      if (st && st.boot !== 'pending') break;
+      fwStep('Esperando a que el firmware nuevo se confirme…', null);
+      await new Promise((r) => setTimeout(r, 1500));
+    }
+    const st = await refreshFwInfo();
+    if (st && st.boot === 'confirmed') {
+      fwStep(`Actualizado: versión ${state.info.fw}, banco ${st.bank}.`, null);
+      toast('Firmware actualizado');
+    } else {
+      fwStep(`Terminó con estado: ${BOOT_TEXT[st && st.boot] || '?'}.`, null);
+    }
+  } catch (err) {
+    fwStep('Error: ' + err.message, null);
+    toast('La actualización no se completó: ' + err.message);
+  } finally {
+    state.fwBusy = false;
+    updateFwButton();
+  }
+}
+
 /* ---------------- Tabs and wiring ---------------- */
 
 function showPage(page) {
@@ -935,6 +1206,7 @@ function showPage(page) {
   for (const p of document.querySelectorAll('.page')) p.classList.toggle('active', p.id === 'page-' + page);
   if (page === 'live') startLive(); else stopLive();
   if (page === 'summary' && state.port && state.proto >= 1) refreshTime();
+  if (page === 'firmware' && state.port && !state.fwBusy) refreshFwInfo();
 }
 
 function init() {
@@ -965,6 +1237,9 @@ function init() {
   $('import-file').onchange = (e) => { if (e.target.files[0]) importSettings(e.target.files[0]); e.target.value = ''; };
   $('live-period').onchange = async () => { if (state.liveOn) { await stopLive(); await startLive(); } };
   $('btn-sd-pick').onclick = pickSd;
+  $('btn-fw-pick').onclick = () => $('fw-file').click();
+  $('fw-file').onchange = (e) => { if (e.target.files[0]) openPackage(e.target.files[0]); e.target.value = ''; };
+  $('btn-fw-update').onclick = updateFirmware;
   $('btn-sd-copy').onclick = copyToSd;
   $('btn-sd-refresh').onclick = listSd;
   $('btn-clear').onclick = () => { $('console-log').innerHTML = ''; };
