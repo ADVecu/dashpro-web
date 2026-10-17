@@ -97,11 +97,74 @@
   .trip { background: #0d0d0d; border: 1px solid #222; border-radius: 8px; padding: 12px; }
   .trip-km { font: 600 26px/1.2 var(--display); }
   .trip-km small, .trip-meta { font-size: 12.5px; color: var(--muted); font-family: "Barlow", sans-serif; font-weight: 400; }
-  .advanced { margin-top: 18px; max-width: 560px; }
-  .advanced h2 { color: var(--muted); }
-  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; cursor: pointer; }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; cursor: pointer; }
+  .switch-row + .switch-row { border-top: 1px solid #222; }
   .switch-row small { display: block; color: var(--muted); font-size: 12.5px; }
-  .switch-row input[type=checkbox] { width: 20px; height: 20px; flex: none; }
+  .switch-row input[type=checkbox] { width: 22px; height: 22px; flex: none; }
+  /* Ajustes: one section per settings screen of the dash */
+  .pill { padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .pill.dirty { background: #3a2a00; color: #ffc24a; }
+  .pill.saved { background: #0f2d1c; color: var(--ok); }
+  .set-layout { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  .set-rail { flex: 1 1 230px; max-width: 270px; display: flex; flex-direction: column; gap: 6px; }
+  .set-rail button { display: block; width: 100%; text-align: left; padding: 12px 16px; border-radius: 8px; background: var(--panel); border-color: var(--line); }
+  .set-rail b { display: block; font: 700 15px/1.3 var(--display); letter-spacing: .5px; text-transform: uppercase; }
+  .set-rail small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+  .set-rail button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .set-rail button.active small { color: inherit; opacity: .75; }
+  .set-panel { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  #settings-body { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  #settings-body[hidden] { display: none; }
+  .advanced, .toggles { padding-top: 8px; padding-bottom: 8px; }
+  .set-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .set-head h2 { margin: 0; }
+  .set-head h2.big { font-size: 20px; letter-spacing: .5px; text-transform: none; color: #fff; }
+  .set-title { display: block; font: 700 18px/1.3 var(--display); }
+  .set-row { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
+  .row-text { flex: 1 1 200px; }
+  .row-text small { display: block; font-size: 12.5px; color: var(--muted); }
+  .track { position: relative; height: 30px; margin-top: 26px; cursor: pointer; }
+  .track.thin { height: 16px; margin-top: 0; }
+  .zones { position: absolute; inset: 0; border-radius: 4px; overflow: hidden; background: #232a38; }
+  .zone { position: absolute; top: 0; bottom: 0; }
+  .mark { position: absolute; top: -8px; bottom: -8px; width: 4px; margin-left: -2px; border-radius: 2px; pointer-events: none; }
+  .mark.sel { width: 8px; margin-left: -4px; box-shadow: 0 0 0 3px #fff; }
+  .track.thin .mark { top: -7px; bottom: -7px; background: #fff; }
+  .track.thin .mark.sel { background: var(--accent); box-shadow: 0 0 0 2px #000, 0 0 0 4px var(--accent); }
+  .live-pin { position: relative; height: 26px; margin: 16px 0 8px; }
+  .live-pin span { position: absolute; bottom: 0; transform: translateX(-50%); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .live-line { position: absolute; top: -8px; bottom: 0; width: 2px; margin-left: -1px; pointer-events: none; }
+  #al-now { font-size: 14px; font-weight: 600; color: var(--muted); }
+  .axis { display: flex; justify-content: space-between; margin-top: 10px; font: 13px var(--mono); color: var(--muted); }
+  .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 18px; }
+  .chip { text-align: left; padding: 10px 14px; background: #0f0f0f; border: 2px solid var(--line); border-radius: 8px; }
+  .chip.sel { border-color: var(--accent); }
+  .chip span { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #cfcfcf; }
+  .chip i, .sensors i { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  .chip b { display: block; font: 600 24px/1.2 var(--display); color: #fff; }
+  .stepper { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding: 12px 14px; background: #0f0f0f; border: 1px solid #222; border-radius: 8px; }
+  .stepper .hint { flex: 1 1 160px; font-size: 13.5px; color: var(--muted); }
+  .stepctl { display: flex; align-items: center; gap: 10px; flex: none; }
+  .stepctl output { min-width: 120px; text-align: center; font: 600 28px/1.2 var(--display); }
+  .step-btn { width: 52px; height: 48px; padding: 0; background: #222; color: #fff; border: 0; font-size: 26px; line-height: 1; }
+  .hours { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .hours .stepper .hint { color: #cfcfcf; font-size: 15px; flex-basis: 80px; }
+  .hours .stepctl output { min-width: 84px; font-size: 22px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  .seg button { min-height: 40px; min-width: 72px; padding: 0 16px; border: 0; background: transparent; color: #b5b5b5; font-weight: 600; }
+  .seg button.on { background: var(--accent); color: var(--on-accent); }
+  .map-range { margin-top: 14px; }
+  .bright-bars { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; margin-top: 16px; }
+  .bright-bars button { height: 26px; padding: 0; border: 0; border-radius: 3px; background: #2a2a2a; }
+  .bright-bars button.on { background: var(--accent); }
+  .alerts { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .alerts > section { flex: 999 1 380px; }
+  .sensors { flex: 1 1 190px; max-width: 220px; display: flex; flex-direction: column; gap: 6px; }
+  .sensors button { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 42px; padding: 0 14px; text-align: left; background: var(--panel); border: 0; color: #cfcfcf; }
+  .sensors button.active { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .sensors i { background: #4a4a4a; }
+  .sensors button.active i { box-shadow: 0 0 0 2px #000; }
+  #set-advanced[hidden] { display: none; }
   .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; margin: 0; }
   .kv dt { color: var(--muted); }
   .kv dd { margin: 0; font-family: var(--mono); word-break: break-all; }
@@ -117,7 +180,6 @@
   .note { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
-  .toolbar .dirty { color: var(--warn); font-size: 13px; }
   .field { display: grid; grid-template-columns: 1fr 150px 48px; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
   .field:last-child { border-bottom: 0; }
   .field small { display: block; color: var(--muted); font-size: 11.5px; }
@@ -164,6 +226,14 @@
     .page { padding: 16px 16px 32px; }
     .field { grid-template-columns: 1fr 110px 40px; }
     .kv { grid-template-columns: 110px 1fr; }
+    /* Section and sensor lists turn into rows above the panel */
+    .set-rail { flex: 1 1 100%; max-width: none; flex-direction: row; overflow-x: auto; }
+    .set-rail button { width: auto; flex: none; padding: 10px 14px; }
+    .set-rail small { display: none; }
+    .sensors { flex: 1 1 100%; max-width: none; flex-direction: row; flex-wrap: wrap; }
+    .sensors button { flex: 1 1 140px; }
+    .stepctl { flex: 1 1 100%; }
+    .stepctl output { flex: 1; min-width: 0; }
   }
 </style>
 </head>
@@ -251,23 +321,26 @@
   <div class="toolbar">
     <button class="primary" id="btn-save" disabled>Guardar en el dash</button>
     <button id="btn-revert" disabled>Descartar cambios</button>
-    <button id="btn-reload" disabled>Releer</button>
-    <span class="dirty" id="dirty-text"></span>
+    <span class="pill" id="dirty-text" hidden></span>
     <span class="spacer"></span>
+    <button id="btn-reload" disabled>Releer</button>
     <button id="btn-export" disabled>Exportar…</button>
     <button id="btn-import" disabled>Importar…</button>
     <button class="danger" id="btn-defaults" disabled>Valores de fábrica</button>
     <input type="file" id="import-file" accept=".json,application/json" hidden>
   </div>
-  <div class="grid" id="settings-body"><div class="empty">Conecta el dash para ver sus ajustes.</div></div>
-
-  <section class="advanced">
-    <h2>Avanzado</h2>
-    <label class="switch-row">
-      <span>Modo desarrollador<small>Muestra memoria, modo DFU y la consola. Solo para diagnóstico.</small></span>
-      <input type="checkbox" id="dev-toggle">
-    </label>
-  </section>
+  <div class="set-layout">
+    <div class="set-rail" id="set-rail"></div>
+    <div class="set-panel">
+      <div id="settings-body"><div class="empty">Conecta el dash para ver sus ajustes.</div></div>
+      <section class="advanced" id="set-advanced" hidden>
+        <label class="switch-row">
+          <span><b class="set-title">Modo desarrollador</b><small>Muestra memoria, modo DFU y la consola. Se guarda en este navegador, no en el dash.</small></span>
+          <input type="checkbox" id="dev-toggle">
+        </label>
+      </section>
+    </div>
+  </div>
 </div>
 
 <!-- Live -->
@@ -478,9 +551,13 @@ const SETTING_INFO = {
   oilt_danger: ['Temperatura de aceite', 'Peligro'],
   bright_day: ['Pantalla y unidades', 'Brillo de día'],
   bright_night: ['Pantalla y unidades', 'Brillo de noche'],
+  bright_source: ['Pantalla y unidades', 'Cambio día / noche'],
+  day_start_hour: ['Pantalla y unidades', 'Día desde'],
+  night_start_hour: ['Pantalla y unidades', 'Noche desde'],
   speed_unit: ['Pantalla y unidades', 'Unidad de velocidad'],
   engine_map: ['ECU', 'Mapa de motor'],
   launch_armed: ['ECU', 'Launch armado al arrancar'],
+  turn_blink_internal: ['ECU', 'Parpadeo interno de direccionales'],
 };
 
 /* Live values: key in the "L" line -> [label, unit, scale]; scale 0 = hex */
@@ -504,8 +581,12 @@ const state = {
   proto: 0,
   info: {},
   schema: [],         // [{name,type,min,max,unit,options,value}]
-  dirty: new Set(),
+  savedValues: null,  // {name: value} as last saved in the dash
+  dirty: new Set(),   // names whose value differs from savedValues
+  settingsMsg: '',    // why there are no settings to show
+  set: { section: 'rpm', rpm: 'rpm_shift', sensor: 'clt', slot: 2 }, // Ajustes tab selection
   liveOn: false,
+  live: null,         // last live values, for the alerts section
   sdDir: null,
   pkg: null,          // verified .dashfw chosen in the Firmware tab
   boot: null,         // image chosen in the Boot tab: {name, frames: [{bmp, ms}], w, h}
@@ -541,6 +622,9 @@ const hex4 = (n) => n == null ? '—' : '0x' + n.toString(16).toUpperCase().padS
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const pad = (n) => String(n).padStart(2, '0');
 const fmtDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+/* Clocks on screen use 12 h, like the dash: "2026-10-17 2:05:09 PM" */
+const fmtClock = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+  `${d.getHours() % 12 || 12}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${d.getHours() < 12 ? 'AM' : 'PM'}`;
 
 /* ---------------- Connection ---------------- */
 
@@ -558,15 +642,16 @@ function setConnected(on) {
     for (const id of ['dev-product', 'dev-fw', 'dev-proto', 'dev-serial', 'dev-usb', 'time-dash']) $(id).textContent = '—';
     $('mem-body').innerHTML = '<span class="muted">Conecta el dash para ver la memoria.</span>';
     $('trip-body').textContent = '—';
-    $('settings-body').innerHTML = '<div class="empty">Conecta el dash para ver sus ajustes.</div>';
     $('live-tiles').innerHTML = '<div class="empty">Conecta el dash para ver los datos en vivo.</div>';
     delete $('live-tiles').dataset.ready;
     $('live-state').textContent = 'Detenido';
     state.schema = [];
-    state.dirty.clear();
+    state.savedValues = null;
+    state.settingsMsg = '';
     state.liveOn = false;
-    updateDirty();
+    state.live = null;
   }
+  renderSettings();
 }
 
 async function connect() {
@@ -617,10 +702,12 @@ async function openPort(port) {
       await refreshTime();
       await refreshTrips();
       if (isDev()) await refreshMemory();
-      await loadSettings();
-      if (state.page === 'live') startLive();
+      await loadSettings(true);
+      syncLive();
     } else {
       if (isDev()) await refreshMemory();
+      state.settingsMsg = 'Este firmware no publica sus ajustes: actualízalo para usar esta pestaña.';
+      renderSettings();
       toast('Firmware sin protocolo de configuración: actualízalo para usar Ajustes');
     }
     await refreshFwInfo();
@@ -751,7 +838,8 @@ async function loadInfo() {
 async function refreshTime() {
   try {
     const [t] = await command('TIME?', { quiet: true });
-    $('time-dash').textContent = t;
+    const m = t.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+    $('time-dash').textContent = m ? fmtClock(new Date(m[1], m[2] - 1, m[3], m[4], m[5], m[6])) : t;
   } catch (err) {
     $('time-dash').textContent = 'error: ' + err.message;
   }
@@ -847,6 +935,81 @@ async function enterDfu() {
 
 /* ---------------- Settings ---------------- */
 
+/* The Ajustes tab mirrors the dash's settings screens: one section per screen,
+ * bars in the dash's zone colors, and the same steps and limits. Values in the
+ * schema are canonical (rpm, °C, kPa, mV, %); the units only change the text. */
+
+const ZONE = { cold: '#3b9eff', ok: '#2e9e5b', warn: '#f5a623', danger: '#ff3b4f', shift: '#2f6bff' };
+
+const SET_SECTIONS = [
+  ['rpm', 'RPM y cambio'], ['alerts', 'Alertas'], ['display', 'Pantalla'],
+  ['units', 'Unidades'], ['ecu', 'ECU y luces'], ['other', 'Otros'], ['advanced', 'Avanzado'],
+];
+
+/* RPM thresholds from the lowest up: [name, label, color] */
+const RPM_FIELDS = [
+  ['rpm_warning', 'Aviso', ZONE.warn],
+  ['rpm_shift', 'Luz de cambio', ZONE.shift],
+  ['rpm_redline', 'Línea roja', ZONE.danger],
+];
+
+/* Sensors of the dash's alerts screen. fields: [cold, warning, danger];
+ * low: alerts when the value drops; bar: drawn range (max 0 = MAP sensor range);
+ * unit: the setting with its kPa/psi choice; engine: reads 0 with the engine off */
+const ALERT_SENSORS = [
+  { id: 'clt', name: 'Refrigerante', fields: ['clt_cold', 'clt_warning', 'clt_danger'], kind: 'temp', step: 1, bar: [0, 150], live: 'clt' },
+  { id: 'oilt', name: 'Temp. aceite', fields: ['oilt_cold', 'oilt_warning', 'oilt_danger'], kind: 'temp', step: 1, bar: [0, 150], live: 'oilt' },
+  { id: 'oilp', name: 'Presión aceite', fields: [null, 'oilp_warning', 'oilp_danger'], low: true, kind: 'press', unit: 'oilp_unit', step: 5, bar: [0, 700], live: 'oilp', engine: true },
+  { id: 'fuelp', name: 'Presión comb.', fields: [null, 'fuelp_warning', 'fuelp_danger'], low: true, kind: 'press', unit: 'fuelp_unit', step: 5, bar: [0, 700], live: 'fuelp', engine: true },
+  { id: 'map', name: 'MAP', fields: [null, 'map_warning', 'map_danger'], kind: 'press', unit: 'map_unit', step: 5, bar: [0, 0], live: 'map' },
+  { id: 'batt', name: 'Batería baja', fields: [null, 'batt_warning', 'batt_danger'], low: true, kind: 'volt', step: 100, bar: [8000, 16000], live: 'batt' },
+  { id: 'batt_high', name: 'Batería alta', fields: [null, 'batt_warning_high', 'batt_danger_high'], kind: 'volt', step: 100, bar: [12000, 20000], live: 'batt' },
+  { id: 'fuel', name: 'Combustible', fields: [null, 'fuel_warning', 'fuel_danger'], low: true, kind: 'pct', step: 1, bar: [0, 100], live: 'fuel' },
+];
+const SLOTS = [['Frío', ZONE.cold], ['Aviso', ZONE.warn], ['Peligro', ZONE.danger]];
+/* MAP thresholds the dash falls back to when they don't fit a smaller sensor range */
+const MAP_DEFAULTS = { 100: [95, 98], 250: [230, 240], 300: [280, 290], 600: [550, 580] };
+
+const DISPLAY_FIELDS = ['bright_day', 'bright_night', 'bright_source', 'day_start_hour', 'night_start_hour'];
+const BRIGHT_SOURCES = { BEAM_OR_TIME: 'Luces bajas u horario', LOW_BEAM: 'Solo luces bajas', TIME: 'Solo horario' };
+
+/* Oil and fuel pressure share one choice, as on the dash's units screen */
+const UNIT_ROWS = [
+  { label: 'Temperatura', sub: 'Motor, aceite y admisión', fields: ['temp_unit'], opts: { C: '°C', F: '°F' } },
+  { label: 'Velocidad', sub: 'Velocímetro y trips', fields: ['speed_unit'], opts: { KPH: 'km/h', MPH: 'mph' } },
+  { label: 'Mezcla', sub: 'Sonda lambda', fields: ['lambda_unit'], opts: { AFR: 'AFR', LAMBDA: 'λ' } },
+  { label: 'Presión MAP', sub: 'Presión de admisión', fields: ['map_unit'], opts: { KPA: 'kPa', PSI: 'psi' } },
+  { label: 'Presión de aceite y combustible', sub: 'Las dos usan la misma unidad', fields: ['oilp_unit', 'fuelp_unit'], opts: { KPA: 'kPa', PSI: 'psi' } },
+];
+
+const ECU_TOGGLES = [
+  ['launch_armed', 'Launch armado al arrancar', 'Se arma solo cada vez que enciendes el auto'],
+  ['turn_blink_internal', 'Parpadeo interno de direccionales', 'Solo para autos sin flasher; si no, las flechas siguen al auto'],
+];
+
+const fieldOf = (name) => (name && state.schema.find((f) => f.name === name)) || null;
+const valOf = (name) => (fieldOf(name) || {}).value;
+const numOf = (name) => Number(valOf(name));
+const labelOf = (name) => (SETTING_INFO[name] || [null, name])[1];
+
+const isF = () => valOf('temp_unit') === 'F';
+const isPsi = (s) => !!s.unit && valOf(s.unit) === 'PSI';
+const kpaToPsi = (kpa) => Math.trunc((kpa * 145 + 500) / 1000);
+const psiToKpa = (psi) => Math.trunc((psi * 6895 + 500) / 1000);
+
+/* 12 h like the dash: "7 AM", "12 PM" */
+const fmtHour = (h) => `${h % 12 || 12} ${h < 12 ? 'AM' : 'PM'}`;
+
+/* A threshold or reading in the unit the user picked, as the dash writes it */
+function fmtAlert(s, v) {
+  switch (s.kind) {
+    case 'temp': return isF() ? `${Math.trunc(v * 9 / 5) + 32} °F` : `${v} °C`;
+    case 'press': return isPsi(s) ? `${kpaToPsi(v)} psi` : `${v} kPa`;
+    case 'volt': return `${(Math.trunc(v / 100) / 10).toFixed(1)} V`;
+    default: return `${v} %`;
+  }
+}
+
 function parseSchemaLine(line) {
   // name,type,min,max,unit_or_options,value
   const p = line.split(',');
@@ -861,43 +1024,309 @@ function parseSchemaLine(line) {
   };
 }
 
-async function loadSettings() {
+/* fresh: the values just read are what the dash has saved (after connecting,
+ * saving, discarding or restoring defaults); changes are counted against them */
+async function loadSettings(fresh = false) {
   try {
     const lines = await command('CFG LIST?', { quiet: true });
     state.schema = lines.map(parseSchemaLine).filter(Boolean);
+    if (fresh || !state.savedValues) state.savedValues = Object.fromEntries(state.schema.map((f) => [f.name, f.value]));
+    state.settingsMsg = '';
     log(`(${state.schema.length} ajustes leídos)`, 'sys');
-    renderSettings();
   } catch (err) {
-    $('settings-body').innerHTML = `<div class="empty">No se pudieron leer los ajustes: ${esc(err.message)}</div>`;
+    state.schema = [];
+    state.settingsMsg = 'No se pudieron leer los ajustes: ' + err.message;
+  }
+  renderSettings();
+}
+
+/* Sensors this firmware has thresholds for */
+const alertSensors = () => ALERT_SENSORS.filter((s) => fieldOf(s.fields[1]) && fieldOf(s.fields[2]));
+
+/* Fields each section shows; whatever is left (a newer firmware) goes to "Otros" */
+function sectionFields() {
+  const has = (n) => !!fieldOf(n);
+  const sensors = alertSensors();
+  const alerts = sensors.flatMap((s) => s.fields.filter(has));
+  if (sensors.some((s) => s.id === 'map') && has('map_max')) alerts.push('map_max');
+  const out = {
+    rpm: RPM_FIELDS.every(([n]) => has(n)) ? RPM_FIELDS.map(([n]) => n) : [],
+    alerts,
+    display: DISPLAY_FIELDS.filter(has),
+    units: UNIT_ROWS.flatMap((r) => r.fields).filter(has),
+    ecu: ['engine_map', ...ECU_TOGGLES.map(([n]) => n)].filter(has),
+  };
+  const used = new Set(Object.values(out).flat());
+  out.other = state.schema.map((f) => f.name).filter((n) => !used.has(n));
+  return out;
+}
+
+function railSub(id, fields) {
+  if (id === 'advanced') return isDev() ? 'Modo desarrollador activo' : 'Modo desarrollador';
+  if (!state.schema.length) return '—';
+  switch (id) {
+    case 'rpm': return `Cambio ${valOf('rpm_shift')} · Roja ${valOf('rpm_redline')}`;
+    case 'alerts': return `${alertSensors().length} sensores · aviso y peligro`;
+    case 'display':
+      return [['bright_day', 'Día'], ['bright_night', 'Noche']].filter(([n]) => fieldOf(n))
+        .map(([n, l]) => `${l} ${valOf(n)}%`).join(' · ');
+    case 'units': {
+      const labels = UNIT_ROWS.map((r) => r.fields.find(fieldOf)).filter(Boolean)
+        .map((n) => UNIT_ROWS.find((r) => r.fields.includes(n)).opts[valOf(n)] || valOf(n));
+      return [...new Set(labels)].join(' · ');
+    }
+    case 'ecu':
+      return [fieldOf('engine_map') && `Mapa ${valOf('engine_map')}`,
+              fieldOf('launch_armed') && `Launch ${valOf('launch_armed') === '1' ? 'armado' : 'apagado'}`]
+        .filter(Boolean).join(' · ');
+    default: return `${fields.other.length} ajustes`;
   }
 }
 
-function renderSettings() {
-  const groups = new Map();
-  for (const f of state.schema) {
-    const [group] = SETTING_INFO[f.name] || ['Otros'];
-    if (!groups.has(group)) groups.set(group, []);
-    groups.get(group).push(f);
+const esca = (s) => esc(s).replace(/'/g, '&#39;');
+const dataAttrs = (act, name = '', v = '') => `data-act="${act}" data-name="${esca(name)}" data-v="${esca(v)}"`;
+
+const stepBtns = (act, name, value) => '<span class="stepctl">' +
+  `<button class="step-btn" ${dataAttrs(act, name)} data-delta="-1" aria-label="Bajar">−</button>` +
+  `<output>${esc(value)}</output>` +
+  `<button class="step-btn" ${dataAttrs(act, name)} data-delta="1" aria-label="Subir">+</button></span>`;
+
+const stepper = (act, hint, value) => `<div class="stepper"><span class="hint">${esc(hint)}</span>${stepBtns(act, '', value)}</div>`;
+
+const chip = (act, name, v, label, color, value, sel) =>
+  `<button class="chip${sel ? ' sel' : ''}" ${dataAttrs(act, name, v)}>` +
+  `<span><i style="background:${color}"></i>${esc(label)}</span><b>${esc(value)}</b></button>`;
+
+/* Segmented choice; opts: [[value, label], ...] */
+const seg = (act, name, opts, cur) => '<div class="seg">' + opts.map(([v, label]) =>
+  `<button class="${v === cur ? 'on' : ''}" ${dataAttrs(act, name, v)}>${esc(label)}</button>`).join('') + '</div>';
+
+const barPct = (v, min, max) => Math.min(100, Math.max(0, (v - min) / (max - min) * 100));
+const zoneDiv = (from, to, color) => `<div class="zone" style="left:${from}%;width:${Math.max(0, to - from)}%;background:${color}"></div>`;
+
+/* Smallest scale that leaves room after the redline, as the dash draws it */
+const rpmScale = () => [8000, 12000, 16000, 20000].find((s) => numOf('rpm_redline') + 500 <= s) || 20000;
+
+function renderRpm() {
+  const scale = rpmScale();
+  const x = (v) => barPct(v, 0, scale);
+  const [w, s, r] = RPM_FIELDS.map(([n]) => numOf(n));
+  const sel = state.set.rpm;
+  const zones = zoneDiv(x(w), x(s), ZONE.warn + '99') + zoneDiv(x(s), x(r), ZONE.shift + 'cc') + zoneDiv(x(r), 100, ZONE.danger + 'cc');
+  const marks = RPM_FIELDS.map(([n, , c]) => `<div class="mark${n === sel ? ' sel' : ''}" style="left:${x(numOf(n))}%;background:${c}"></div>`).join('');
+  const ticks = [0, 1, 2, 3, 4].map((i) => `<span>${(scale / 4) * i / 1000}</span>`).join('');
+  const chips = RPM_FIELDS.map(([n, label, c]) => chip('rpm-sel', n, '', label, c, valOf(n), n === sel)).join('');
+  const [, selLabel] = RPM_FIELDS.find(([n]) => n === sel);
+  return `<section>
+    <div class="set-head"><h2>RPM y luz de cambio</h2><span class="muted">x1000 rpm</span></div>
+    <div class="track" data-act="rpm-track" title="Haz clic para mover el valor seleccionado"><div class="zones">${zones}</div>${marks}</div>
+    <div class="axis">${ticks}</div>
+    <div class="chips">${chips}</div>
+    ${stepper('rpm-step', `${selLabel} · pasos de 100 rpm · también puedes hacer clic en la barra`, valOf(sel))}
+    <p class="note">Siempre se cumple aviso ≤ luz de cambio ≤ línea roja, igual que en el dash. La escala crece sola (8, 12, 16 o 20 mil rpm) según la línea roja.</p>
+  </section>`;
+}
+
+/* Threshold slots from the lowest value up; low-side sensors put danger first */
+function alertSlots(s) {
+  if (s.low) return [2, 1];
+  return fieldOf(s.fields[0]) ? [0, 1, 2] : [1, 2];
+}
+
+const alertBar = (s) => [s.bar[0], s.bar[1] || Number(valOf('map_max')) || 250];
+const curSensor = () => alertSensors().find((s) => s.id === state.set.sensor) || alertSensors()[0];
+
+/* Zone color of a reading, as the dash colors its dots */
+function zoneColor(s, v) {
+  const warn = numOf(s.fields[1]), danger = numOf(s.fields[2]);
+  if (s.low) return v <= danger ? ZONE.danger : v <= warn ? ZONE.warn : ZONE.ok;
+  if (v >= danger) return ZONE.danger;
+  if (v >= warn) return ZONE.warn;
+  if (fieldOf(s.fields[0]) && v < numOf(s.fields[0])) return ZONE.cold;
+  return ZONE.ok;
+}
+
+/* Current reading, or null without the live stream or (pressures) with the engine off */
+function liveOf(s) {
+  const L = state.live;
+  if (!L || L[s.live] === undefined) return null;
+  if (s.engine && !(Number(L.rpm) > 0)) return null;
+  return Number(L[s.live]);
+}
+
+function renderAlerts() {
+  const sensors = alertSensors();
+  const s = curSensor();
+  state.set.sensor = s.id;
+  const order = alertSlots(s);
+  if (!order.includes(state.set.slot)) state.set.slot = 2;
+  const slot = state.set.slot;
+  const [min, max] = alertBar(s);
+  const xs = order.map((k) => barPct(numOf(s.fields[k]), min, max));
+  const colors = s.low ? [ZONE.danger, ZONE.warn, ZONE.ok]
+    : order.length === 3 ? [ZONE.cold, ZONE.ok, ZONE.warn, ZONE.danger] : [ZONE.ok, ZONE.warn, ZONE.danger];
+  const zones = colors.map((c, k) => zoneDiv(k ? xs[k - 1] : 0, k < xs.length ? xs[k] : 100, c)).join('');
+  const marks = order.map((k, n) => `<div class="mark${k === slot ? ' sel' : ''}" style="left:${xs[n]}%"></div>`).join('');
+  const chips = order.map((k) => chip('slot', '', k, SLOTS[k][0], SLOTS[k][1], fmtAlert(s, numOf(s.fields[k])), k === slot)).join('');
+  const list = sensors.map((x) =>
+    `<button class="${x === s ? 'active' : ''}" ${dataAttrs('sensor', '', x.id)}><span>${esc(x.name)}</span><i data-dot="${x.id}"></i></button>`).join('');
+  const stepText = s.kind === 'temp' ? '1 °C' : s.kind === 'press' ? (isPsi(s) ? '1 psi' : '5 kPa') : s.kind === 'volt' ? '0.1 V' : '1 %';
+  const mapMax = fieldOf('map_max');
+  const mapRange = s.id === 'map' && mapMax
+    ? `<div class="set-row map-range"><span class="muted">Rango del sensor (kPa)</span>${seg('map-max', 'map_max', mapMax.options.map((o) => [o, o]), mapMax.value)}</div>`
+    : '';
+  return `<div class="alerts">
+    <div class="sensors">${list}</div>
+    <section>
+      <div class="set-head"><h2 class="big">${esc(s.name)}</h2><span id="al-now"></span></div>
+      <div class="live-pin"><span id="al-pin" hidden></span></div>
+      <div class="track thin" data-act="alert-track" title="Haz clic para mover el valor seleccionado">
+        <div class="zones">${zones}</div><div class="live-line" id="al-line" hidden></div>${marks}
+      </div>
+      <div class="axis"><span>${fmtAlert(s, min)}</span><span>${fmtAlert(s, max)}</span></div>
+      <div class="chips">${chips}</div>
+      ${mapRange}
+      ${stepper('alert-step', `${SLOTS[slot][0]} · paso ${stepText}${s.low ? ' · alerta cuando baja' : ''}`, fmtAlert(s, numOf(s.fields[slot])))}
+    </section>
+  </div>`;
+}
+
+/* Live reading on the alerts section: text, pin, line and the sensor dots */
+function updateAlertLive() {
+  if (state.set.section !== 'alerts' || !$('al-now')) return;
+  for (const s of alertSensors()) {
+    const dot = document.querySelector(`[data-dot="${s.id}"]`);
+    const v = liveOf(s);
+    if (dot) dot.style.background = v === null ? '' : zoneColor(s, v);
   }
+  const s = curSensor();
+  const v = liveOf(s);
+  const now = $('al-now'), pin = $('al-pin'), line = $('al-line');
+  pin.hidden = line.hidden = v === null;
+  if (v === null) {
+    const L = state.live;
+    now.textContent = L && s.engine && L[s.live] !== undefined ? 'motor apagado' : 'sin lectura en vivo';
+    now.style.color = '';
+    return;
+  }
+  const [min, max] = alertBar(s);
+  const x = barPct(v, min, max);
+  const color = zoneColor(s, v);
+  now.textContent = 'ahora ' + fmtAlert(s, v);
+  now.style.color = color;
+  pin.textContent = fmtAlert(s, v);
+  pin.style.left = Math.min(94, Math.max(6, x)) + '%';
+  pin.style.color = color;
+  line.style.left = x + '%';
+  line.style.background = color;
+}
+
+function renderDisplay() {
+  const out = [];
+  for (const [name, label] of [['bright_day', 'Brillo de día'], ['bright_night', 'Brillo de noche']]) {
+    if (!fieldOf(name)) continue;
+    const v = numOf(name);
+    const bars = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((p) =>
+      `<button class="${v >= p - 5 ? 'on' : ''}" ${dataAttrs('set', name, p)} aria-label="${p}%"></button>`).join('');
+    out.push(`<section>
+      <div class="set-row"><b class="set-title row-text">${label}</b>${stepBtns('bright', name, v + '%')}</div>
+      <div class="bright-bars">${bars}</div>
+    </section>`);
+  }
+  const src = fieldOf('bright_source');
+  if (src) {
+    const hours = src.value === 'LOW_BEAM' ? []
+      : [['day_start_hour', 'Día desde'], ['night_start_hour', 'Noche desde']].filter(([n]) => fieldOf(n));
+    out.push(`<section>
+      <h2>Cambio día / noche</h2>
+      ${seg('set', 'bright_source', src.options.map((o) => [o, BRIGHT_SOURCES[o] || o]), src.value)}
+      ${hours.length ? '<div class="hours">' + hours.map(([n, l]) =>
+        `<div class="stepper"><span class="hint">${l}</span>${stepBtns('hour', n, fmtHour(numOf(n)))}</div>`).join('') + '</div>' : ''}
+      <p class="note">El brillo de noche se usa con las luces bajas encendidas o fuera del horario de día, según lo que elijas arriba.</p>
+    </section>`);
+  }
+  return out.join('');
+}
+
+function renderUnits() {
+  return UNIT_ROWS.map((r) => {
+    const names = r.fields.filter(fieldOf);
+    if (!names.length) return '';
+    const f = fieldOf(names[0]);
+    return `<section class="set-row">
+      <div class="row-text"><b class="set-title">${r.label}</b><small>${r.sub}</small></div>
+      ${seg('set', names.join(' '), f.options.map((o) => [o, r.opts[o] || o]), f.value)}
+    </section>`;
+  }).join('');
+}
+
+function renderEcu() {
+  const out = [];
+  const m = fieldOf('engine_map');
+  if (m) {
+    const opts = [];
+    for (let i = m.min; i <= m.max; i++) opts.push([String(i), `Mapa ${i}`]);
+    out.push(`<section class="set-row">
+      <div class="row-text"><b class="set-title">Mapa de motor</b><small>El que la ECU usa al arrancar</small></div>
+      ${seg('set', 'engine_map', opts, m.value)}
+    </section>`);
+  }
+  const toggles = ECU_TOGGLES.filter(([n]) => fieldOf(n));
+  if (toggles.length) {
+    out.push('<section class="toggles">' + toggles.map(([n, title, sub]) =>
+      `<label class="switch-row"><span><b class="set-title">${title}</b><small>${sub}</small></span>` +
+      `<input type="checkbox" ${dataAttrs('bool', n)}${valOf(n) === '1' ? ' checked' : ''}></label>`).join('') + '</section>');
+  }
+  return out.join('');
+}
+
+const SECTION_RENDER = { rpm: renderRpm, alerts: renderAlerts, display: renderDisplay, units: renderUnits, ecu: renderEcu };
+
+/* Identity of a control across re-renders, to keep the keyboard focus on it */
+const controlKey = (el) => (el && el.dataset && el.dataset.act)
+  ? [el.dataset.act, el.dataset.name, el.dataset.v, el.dataset.delta].join('|') : '';
+
+function renderSettings() {
+  const fields = sectionFields();
+  const sections = SET_SECTIONS.filter(([id]) => id === 'advanced' ||
+    (state.schema.length ? fields[id].length : id !== 'other'));
+  if (!sections.some(([id]) => id === state.set.section)) state.set.section = sections[0][0];
+  const sec = state.set.section;
+  const focusKey = controlKey(document.activeElement);
+
+  $('set-rail').innerHTML = sections.map(([id, title]) =>
+    `<button class="${id === sec ? 'active' : ''}" ${dataAttrs('section', '', id)}><b>${title}</b><small>${esc(railSub(id, fields))}</small></button>`).join('');
 
   const body = $('settings-body');
-  body.innerHTML = '';
-  for (const [group, fields] of groups) {
-    const sec = document.createElement('section');
-    sec.innerHTML = `<h2>${esc(group)}</h2>`;
-    for (const f of fields) sec.appendChild(renderField(f));
-    body.appendChild(sec);
+  body.hidden = sec === 'advanced';
+  $('set-advanced').hidden = sec !== 'advanced';
+  if (sec === 'advanced') {
+    body.innerHTML = '';
+  } else if (!state.schema.length) {
+    const msg = state.settingsMsg || (state.port ? 'Leyendo los ajustes del dash…' : 'Conecta el dash para ver sus ajustes.');
+    body.innerHTML = `<div class="empty">${esc(msg)}</div>`;
+  } else if (sec === 'other') {
+    body.innerHTML = '<section><h2>Otros</h2></section>';
+    for (const n of fields.other) body.firstChild.appendChild(renderField(fieldOf(n)));
+  } else {
+    body.innerHTML = SECTION_RENDER[sec]();
+    updateAlertLive();
+  }
+
+  if (focusKey) {
+    const el = [...document.querySelectorAll('#page-settings [data-act]')].find((e) => controlKey(e) === focusKey);
+    if (el) el.focus();
   }
   updateDirty();
 }
 
+/* Generic row for settings no section knows about */
 function renderField(f) {
-  const [, label] = SETTING_INFO[f.name] || [null, f.name];
   const row = document.createElement('div');
   row.className = 'field' + (state.dirty.has(f.name) ? ' changed' : '');
 
   const lab = document.createElement('label');
-  lab.innerHTML = `${esc(label)}${f.type === 'int' ? `<small>${f.min} a ${f.max}</small>` : ''}`;
+  lab.innerHTML = `${esc(labelOf(f.name))}${f.type === 'int' ? `<small>${f.min} a ${f.max}</small>` : ''}`;
   row.appendChild(lab);
 
   let input;
@@ -932,33 +1361,117 @@ function renderField(f) {
   row.appendChild(unit);
 
   input.addEventListener('change', () => {
-    const value = f.type === 'bool' ? (input.checked ? '1' : '0') : input.value.trim();
-    setSetting(f, value, row);
+    changeSetting(f.name, f.type === 'bool' ? (input.checked ? '1' : '0') : input.value.trim());
   });
   return row;
 }
 
-async function setSetting(f, value, row) {
+/* The page shows the new value at once, then sends it. If the dash refuses it,
+ * the settings are read back so the page matches the dash again. */
+async function changeSetting(name, value) {
+  const f = fieldOf(name);
+  value = String(value);
+  if (!f || !state.port || f.value === value) return;
+  f.value = value;
+  renderSettings();
   try {
-    await command(`CFG SET ${f.name}=${value}`);
-    f.value = value;
-    state.dirty.add(f.name);
-    row.classList.remove('error');
-    row.classList.add('changed');
-    row.title = '';
-    updateDirty();
-    // Units of other fields depend on enum settings: refresh the list
-    if (f.type === 'enum') await loadSettings();
+    await command(`CFG SET ${name}=${value}`);
   } catch (err) {
-    row.classList.add('error');
-    row.title = err.message;
-    toast(`${f.name}: ${err.message === 'out of range' ? 'valor fuera de rango' : err.message}`);
+    toast(`${labelOf(name)}: ${err.message === 'out of range' ? 'valor fuera de rango' : err.message}`);
+    await loadSettings();
   }
 }
 
+/* RPM thresholds keep aviso ≤ cambio ≤ línea roja, like the dash */
+function setRpm(name, value) {
+  const k = RPM_FIELDS.findIndex(([n]) => n === name);
+  const f = fieldOf(name);
+  const lo = k > 0 ? numOf(RPM_FIELDS[k - 1][0]) : f.min;
+  const hi = k < RPM_FIELDS.length - 1 ? numOf(RPM_FIELDS[k + 1][0]) : f.max;
+  changeSetting(name, Math.min(hi, Math.max(lo, value)));
+}
+
+/* A threshold stays inside the bar and its field limits, and one step away
+ * from its neighbours so the zones keep their order (as on the dash) */
+function setAlert(s, slot, value) {
+  const f = fieldOf(s.fields[slot]);
+  const [barMin, barMax] = alertBar(s);
+  const order = alertSlots(s);
+  const k = order.indexOf(slot);
+  const lo = k > 0 ? numOf(s.fields[order[k - 1]]) + s.step : Math.max(f.min, barMin);
+  const hi = k < order.length - 1 ? numOf(s.fields[order[k + 1]]) - s.step : Math.min(f.max, barMax);
+  if (hi < lo) return; // neighbours too close: nothing valid to move to
+  changeSetting(f.name, Math.min(hi, Math.max(lo, value)));
+}
+
+/* Whole psi in psi mode, like the dash */
+function stepAlert(s, slot, dir) {
+  const v = numOf(s.fields[slot]);
+  setAlert(s, slot, s.kind === 'press' && isPsi(s) ? psiToKpa(kpaToPsi(v) + dir) : v + dir * s.step);
+}
+
+function snapAlert(s, v) {
+  if (s.kind === 'press' && isPsi(s)) return psiToKpa(Math.round(v * 145 / 1000));
+  return Math.round(v / s.step) * s.step;
+}
+
+/* A smaller MAP range moves thresholds that no longer fit to the dash's defaults */
+function setMapMax(label) {
+  const max = Number(label);
+  changeSetting('map_max', label);
+  if ((numOf('map_warning') > max || numOf('map_danger') > max) && MAP_DEFAULTS[label]) {
+    const [warn, danger] = MAP_DEFAULTS[label];
+    changeSetting('map_warning', warn);
+    changeSetting('map_danger', danger);
+  }
+}
+
+/* Brightness: steps of 5 %, aligned to multiples of 5, within the field limits */
+function stepBright(name, dir) {
+  const f = fieldOf(name), v = Number(f.value);
+  const next = dir > 0 ? (Math.trunc(v / 5) + 1) * 5 : (Math.trunc((v + 4) / 5) - 1) * 5;
+  changeSetting(name, Math.min(f.max, Math.max(f.min, next)));
+}
+
+/* Value under the pointer on a bar */
+function trackValue(el, e, lo, hi) {
+  const r = el.getBoundingClientRect();
+  return lo + Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * (hi - lo);
+}
+
+function settingsAction(el, e) {
+  const { act, name, v } = el.dataset;
+  const dir = Number(el.dataset.delta);
+  switch (act) {
+    case 'section': state.set.section = v; renderSettings(); syncLive(); break;
+    case 'rpm-sel': state.set.rpm = name; renderSettings(); break;
+    case 'rpm-step': setRpm(state.set.rpm, Math.trunc((numOf(state.set.rpm) + dir * 100) / 100) * 100); break;
+    case 'rpm-track': setRpm(state.set.rpm, Math.round(trackValue(el, e, 0, rpmScale()) / 100) * 100); break;
+    case 'sensor': state.set.sensor = v; state.set.slot = 2; renderSettings(); break;
+    case 'slot': state.set.slot = Number(v); renderSettings(); break;
+    case 'alert-step': stepAlert(curSensor(), state.set.slot, dir); break;
+    case 'alert-track': {
+      const s = curSensor();
+      const [lo, hi] = alertBar(s);
+      setAlert(s, state.set.slot, snapAlert(s, trackValue(el, e, lo, hi)));
+      break;
+    }
+    case 'map-max': setMapMax(v); break;
+    case 'set': for (const n of name.split(' ')) changeSetting(n, v); break;
+    case 'bright': stepBright(name, dir); break;
+    case 'hour': changeSetting(name, (numOf(name) + (dir > 0 ? 1 : 23)) % 24); break;
+  }
+}
+
+/* Changes since the last save: settings whose value differs from the saved one */
 function updateDirty() {
+  const saved = state.savedValues || {};
+  state.dirty = new Set(state.schema.filter((f) => f.name in saved && f.value !== saved[f.name]).map((f) => f.name));
   const n = state.dirty.size;
-  $('dirty-text').textContent = n ? `${n} cambio(s) sin guardar en el dash` : '';
+  const pill = $('dirty-text');
+  pill.hidden = !state.schema.length;
+  pill.className = 'pill ' + (n ? 'dirty' : 'saved');
+  pill.textContent = n ? `${n} ${n === 1 ? 'cambio' : 'cambios'} sin guardar` : 'Guardado en el dash';
   $('btn-save').disabled = !n || !state.port;
   $('btn-revert').disabled = !n || !state.port;
 }
@@ -966,8 +1479,7 @@ function updateDirty() {
 async function saveSettings() {
   try {
     await command('CFG SAVE');
-    state.dirty.clear();
-    await loadSettings();
+    await loadSettings(true);
     toast('Ajustes guardados en el dash');
   } catch (err) {
     toast('No se pudo guardar: ' + err.message);
@@ -977,8 +1489,7 @@ async function saveSettings() {
 async function revertSettings() {
   try {
     await command('CFG REVERT');
-    state.dirty.clear();
-    await loadSettings();
+    await loadSettings(true);
     toast('Cambios descartados');
   } catch (err) {
     toast('Error: ' + err.message);
@@ -988,9 +1499,8 @@ async function revertSettings() {
 async function factoryDefaults() {
   if (!confirm('¿Restaurar todos los ajustes a valores de fábrica? El odómetro no se toca.')) return;
   try {
-    await command('CFG DEFAULTS');
-    state.dirty.clear();
-    await loadSettings();
+    await command('CFG DEFAULTS'); // the dash also saves them
+    await loadSettings(true);
     toast('Valores de fábrica restaurados');
   } catch (err) {
     toast('Error: ' + err.message);
@@ -1037,7 +1547,6 @@ async function importSettings(file) {
     if (!byName.has(name)) { failed.push(name); continue; }
     try {
       await command(`CFG SET ${name}=${value}`, { quiet: true });
-      state.dirty.add(name);
       ok++;
     } catch (_) {
       failed.push(name);
@@ -1064,12 +1573,22 @@ async function startLive() {
 async function stopLive() {
   if (!state.port || !state.liveOn) return;
   state.liveOn = false;
+  state.live = null;
   $('live-state').textContent = 'Detenido';
   try { await command('LIVE OFF', { quiet: true }); } catch (_) {}
 }
 
+/* The stream runs on the En vivo tab and on Ajustes › Alertas (live reading on the bar) */
+function syncLive() {
+  const wanted = state.page === 'live' || (state.page === 'settings' && state.set.section === 'alerts');
+  if (wanted) startLive(); else stopLive();
+}
+
 function onLive(text) {
   const values = Object.fromEntries(text.split(',').map((kv) => kv.split('=')));
+  if (!state.liveOn) return; // a line still in flight after LIVE OFF
+  state.live = values;
+  updateAlertLive();
   const tiles = $('live-tiles');
   if (!tiles.dataset.ready) {
     tiles.innerHTML = Object.keys(values).map((k) => {
@@ -1941,6 +2460,7 @@ function setDevMode(on) {
   prefs.set('devMode', on ? '1' : '0');
   if (!on && state.page === 'console') showPage('summary');
   if (on && state.port) refreshMemory();
+  renderSettings(); // Avanzado's subtitle says whether it is on
 }
 
 const THEMES = { amarillo: 'icons/logo-amarillo.png', rojo: 'icons/logo-rojo.png' };
@@ -1971,7 +2491,7 @@ function showPage(page) {
   state.page = page;
   for (const b of $('tabs').children) b.classList.toggle('active', b.dataset.page === page);
   for (const p of document.querySelectorAll('.page')) p.classList.toggle('active', p.id === 'page-' + page);
-  if (page === 'live') startLive(); else stopLive();
+  syncLive();
   if (page === 'summary' && state.port && state.proto >= 1) refreshTime();
   if (page === 'firmware' && state.port && !state.fwBusy) refreshFwInfo();
   if (page === 'boot' && state.port && !state.bootBusy && !state.fwBusy) refreshBootInfo();
@@ -2001,7 +2521,15 @@ function init() {
   $('btn-dfu').onclick = enterDfu;
   $('btn-save').onclick = saveSettings;
   $('btn-revert').onclick = revertSettings;
-  $('btn-reload').onclick = loadSettings;
+  $('btn-reload').onclick = () => loadSettings();
+  $('page-settings').addEventListener('click', (e) => {
+    const el = e.target.closest('[data-act]');
+    if (el && el.dataset.act !== 'bool' && !el.disabled) settingsAction(el, e);
+  });
+  $('page-settings').addEventListener('change', (e) => {
+    const el = e.target.closest('[data-act="bool"]');
+    if (el) changeSetting(el.dataset.name, el.checked ? '1' : '0');
+  });
   $('btn-defaults').onclick = factoryDefaults;
   $('btn-export').onclick = exportSettings;
   $('btn-import').onclick = () => $('import-file').click();
@@ -2040,8 +2568,8 @@ function init() {
     }
   };
 
-  setInterval(() => { $('time-pc').textContent = fmtDate(new Date()); }, 1000);
-  $('time-pc').textContent = fmtDate(new Date());
+  setInterval(() => { $('time-pc').textContent = fmtClock(new Date()); }, 1000);
+  $('time-pc').textContent = fmtClock(new Date());
 
   if (hasSerial) {
     navigator.serial.addEventListener('disconnect', (e) => {
