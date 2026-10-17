@@ -72,6 +72,8 @@
   button:disabled { opacity: .45; cursor: default; }
   button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
   button.primary:hover:not(:disabled) { filter: brightness(1.1); }
+  /* A disabled main action turns grey instead of a faded yellow */
+  button.primary:disabled { background: var(--panel-2); border-color: #333; color: var(--muted); font-weight: 400; opacity: 1; }
   button.danger { background: transparent; color: #ff8a8a; border-color: #4a2626; }
   button.danger:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
   nav { display: flex; gap: 6px; padding: 10px 24px 0; background: #000; overflow-x: auto; }
@@ -105,7 +107,10 @@
   .pill { padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
   .pill.dirty { background: #3a2a00; color: #ffc24a; }
   .pill.saved { background: #0f2d1c; color: var(--ok); }
-  .set-layout { display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  #page-settings.active { display: flex; flex-wrap: wrap; align-items: flex-start; column-gap: 8px; }
+  #page-settings > .toolbar { flex: 1 1 auto; }
+  #page-settings > .set-more { flex: 0 1 auto; justify-content: flex-end; }
+  .set-layout { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
   .set-rail { flex: 1 1 230px; max-width: 270px; display: flex; flex-direction: column; gap: 6px; }
   .set-rail button { display: block; width: 100%; text-align: left; padding: 12px 16px; border-radius: 8px; background: var(--panel); border-color: var(--line); }
   .set-rail b { display: block; font: 700 15px/1.3 var(--display); letter-spacing: .5px; text-transform: uppercase; }
@@ -167,7 +172,7 @@
   #set-advanced[hidden] { display: none; }
   .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; margin: 0; }
   .kv dt { color: var(--muted); }
-  .kv dd { margin: 0; font-family: var(--mono); word-break: break-all; }
+  .kv dd { margin: 0; font-family: var(--mono); overflow-wrap: anywhere; }
   .bar { height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; margin: 3px 0 10px; }
   .bar > div { height: 100%; background: var(--ok); }
   .bar > div.warn { background: var(--warn); }
@@ -221,19 +226,53 @@
   input[type=color] { width: 60px; height: 32px; padding: 2px; background: var(--field); border: 1px solid var(--line); border-radius: 8px; }
   #boot-canvas { width: 100%; max-width: 800px; aspect-ratio: 5 / 3; display: block; border: 1px solid var(--line); border-radius: 8px; background: #000; }
   @media (max-width: 600px) {
-    header { position: static; gap: 10px; padding: 12px 16px; }
-    nav { padding: 10px 16px 0; }
+    /* Header in one row: smaller brand, the status as a dot, one compact button */
+    header { position: static; gap: 8px; padding: 10px 16px; }
+    .brand { gap: 10px; }
+    .brand img { width: 40px; height: 40px; }
+    .brand-name { font-size: 21px; gap: 6px; }
+    .brand-sub { margin-top: 4px; font-size: 9.5px; letter-spacing: 2.6px; }
+    /* DEV becomes a small tag on the logo so the header stays one row */
+    .brand { position: relative; }
+    .dev-chip { position: absolute; left: 20px; bottom: -3px; padding: 2px 3px; font-size: 8px; letter-spacing: 1px; background: #000; }
+    .status { padding: 6px; border: 0; }
+    #status-text { display: none; }
+    header button { padding: 8px 12px; font-size: 14px; }
+    nav { padding: 8px 16px 0; gap: 4px; }
+    nav button { padding: 12px 14px; font-size: 13px; }
     .page { padding: 16px 16px 32px; }
+    section { padding: 16px 14px; }
     .field { grid-template-columns: 1fr 110px 40px; }
     .kv { grid-template-columns: 110px 1fr; }
-    /* Section and sensor lists turn into rows above the panel */
-    .set-rail { flex: 1 1 100%; max-width: none; flex-direction: row; overflow-x: auto; }
-    .set-rail button { width: auto; flex: none; padding: 10px 14px; }
+    .opts { grid-template-columns: 1fr; gap: 4px; }
+    .opts label { margin-top: 8px; }
+    /* Ajustes: save/discard on top, the rest of the actions below the settings */
+    #page-settings > .toolbar button { flex: 1 1 auto; }
+    #page-settings > .set-more { order: 1; flex: 1 1 100%; margin: 18px 0 0; display: grid; grid-template-columns: 1fr 1fr; }
+    /* Section and sensor lists wrap above the panel, all visible */
+    .set-rail { flex: 1 1 100%; max-width: none; flex-direction: row; flex-wrap: wrap; }
+    .set-rail button { width: auto; flex: 1 1 auto; padding: 9px 10px; text-align: center; }
+    .set-rail b { font-size: 13px; }
     .set-rail small { display: none; }
     .sensors { flex: 1 1 100%; max-width: none; flex-direction: row; flex-wrap: wrap; }
-    .sensors button { flex: 1 1 140px; }
+    .sensors button { flex: 1 1 140px; min-height: 38px; }
+    .chips { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-top: 16px; }
+    .chip { padding: 8px 10px; }
+    .chip span { font-size: 12px; }
+    .chip b { font-size: 19px; }
+    .set-row .seg { flex: 1 1 100%; }
+    .seg button { flex: 1 1 auto; min-width: 0; padding: 0 10px; }
     .stepctl { flex: 1 1 100%; }
     .stepctl output { flex: 1; min-width: 0; }
+  }
+  @media (max-width: 350px) {
+    header { padding: 10px 12px; }
+    .brand { gap: 8px; }
+    .brand img { width: 34px; height: 34px; }
+    .brand-name { font-size: 18px; }
+    .brand-sub { font-size: 8px; letter-spacing: 2px; }
+    .dev-chip { left: 16px; }
+    header button { padding: 8px 10px; }
   }
 </style>
 </head>
@@ -250,7 +289,7 @@
   <div class="status"><div class="dot" id="dot"></div><span id="status-text">Desconectado</span></div>
   <button id="btn-install" hidden>Instalar app</button>
   <button class="primary" id="btn-connect">Conectar</button>
-  <button id="btn-disconnect" disabled>Desconectar</button>
+  <button id="btn-disconnect" disabled hidden>Desconectar</button>
 </header>
 
 <nav id="tabs">
@@ -322,7 +361,8 @@
     <button class="primary" id="btn-save" disabled>Guardar en el dash</button>
     <button id="btn-revert" disabled>Descartar cambios</button>
     <span class="pill" id="dirty-text" hidden></span>
-    <span class="spacer"></span>
+  </div>
+  <div class="toolbar set-more">
     <button id="btn-reload" disabled>Releer</button>
     <button id="btn-export" disabled>Exportar…</button>
     <button id="btn-import" disabled>Importar…</button>
@@ -633,6 +673,8 @@ function setConnected(on) {
   $('status-text').textContent = on ? 'Conectado' : 'Desconectado';
   $('btn-connect').disabled = on;
   $('btn-disconnect').disabled = !on;
+  $('btn-connect').hidden = on;
+  $('btn-disconnect').hidden = !on;
   updateBootButtons();
   for (const id of ['btn-mem', 'btn-time-sync', 'btn-trip1', 'btn-trip2',
                     'btn-dfu', 'btn-reload', 'btn-export', 'btn-import', 'btn-defaults']) {
@@ -2489,7 +2531,10 @@ function localCommand(cmd) {
 
 function showPage(page) {
   state.page = page;
-  for (const b of $('tabs').children) b.classList.toggle('active', b.dataset.page === page);
+  for (const b of $('tabs').children) {
+    b.classList.toggle('active', b.dataset.page === page);
+    if (b.dataset.page === page && b.offsetParent) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
   for (const p of document.querySelectorAll('.page')) p.classList.toggle('active', p.id === 'page-' + page);
   syncLive();
   if (page === 'summary' && state.port && state.proto >= 1) refreshTime();
