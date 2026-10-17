@@ -5,55 +5,103 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DashPRO Config</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#171b21">
+<meta name="theme-color" content="#000000">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+  // Apply the saved palette and developer mode before the first paint
+  try {
+    if (localStorage.getItem('theme') === 'rojo') document.documentElement.dataset.theme = 'rojo';
+    if (localStorage.getItem('devMode') === '1') document.documentElement.classList.add('dev');
+  } catch (_) {}
+</script>
 <style>
+  @font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("fonts/barlow-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url("fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Barlow"; font-weight: 600; font-display: swap; src: url("fonts/barlow-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: swap; src: url("fonts/chakra-petch-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 700; font-display: swap; src: url("fonts/chakra-petch-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 700; font-style: italic; font-display: swap; src: url("fonts/chakra-petch-latin-700-italic.woff2") format("woff2"); }
   :root {
-    --bg: #0f1216;
-    --panel: #171b21;
-    --panel-2: #1e232b;
-    --line: #2a313b;
-    --text: #e6e9ee;
-    --muted: #8b94a3;
-    --accent: #ff7a1a;
-    --ok: #3ecf8e;
-    --warn: #f5b942;
-    --bad: #ff5d5d;
+    --bg: #0a0a0a;
+    --panel: #141414;
+    --panel-2: #1c1c1c;
+    --field: #050505;
+    --line: #262626;
+    --text: #ececec;
+    --muted: #9a9a9a;
+    --accent: #fbed21;       /* fills: active tab, primary buttons, header line */
+    --accent-text: #fbed21;  /* the accent used as text on dark backgrounds */
+    --on-accent: #000;       /* text on top of an accent fill */
+    --ok: #4ade80;
+    --warn: #ff9f1a;
+    --bad: #ff6b6b;
     --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --display: "Chakra Petch", "Barlow", system-ui, sans-serif;
   }
+  /* Red palette, switched from the console with TEMA ROJO */
+  :root[data-theme="rojo"] { --accent: #e10600; --accent-text: #ff4d40; --on-accent: #fff; }
+  /* Memory, DFU and the console only show in developer mode (Ajustes › Avanzado) */
+  :root:not(.dev) .dev-only { display: none !important; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 "Barlow", system-ui, "Segoe UI", sans-serif; }
   header {
-    display: flex; align-items: center; gap: 16px; padding: 12px 20px;
-    border-bottom: 1px solid var(--line); background: var(--panel);
+    display: flex; align-items: center; gap: 14px; padding: 12px 24px;
+    border-bottom: 3px solid var(--accent); background: #000;
     position: sticky; top: 0; z-index: 2; flex-wrap: wrap;
   }
-  header h1 { font-size: 17px; margin: 0; letter-spacing: .3px; }
-  header h1 span { color: var(--accent); }
-  .status { display: flex; align-items: center; gap: 8px; color: var(--muted); }
-  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { width: 48px; height: 48px; display: block; }
+  .brand-text { display: flex; flex-direction: column; }
+  .brand-name { display: flex; align-items: center; gap: 8px; font: italic 700 25px/1 var(--display); letter-spacing: .5px; color: #fff; }
+  .brand-name b { color: var(--accent-text); font-weight: inherit; }
+  .brand-sub { margin-top: 5px; font: 600 11px/1 var(--display); letter-spacing: 3.5px; color: var(--muted); }
+  .dev-chip {
+    font: 600 10px/1 var(--display); letter-spacing: 1.5px; padding: 3px 6px;
+    border: 1px solid var(--accent-text); color: var(--accent-text); border-radius: 3px;
+  }
+  .status { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #2c2c2c; border-radius: 999px; color: #cfcfcf; font-size: 13px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bad); }
   .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
   .spacer { flex: 1; }
   button {
-    background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
-    border-radius: 8px; padding: 8px 14px; font: inherit; cursor: pointer;
+    background: var(--panel-2); color: var(--text); border: 1px solid #333;
+    border-radius: 6px; padding: 9px 16px; font: inherit; cursor: pointer;
   }
   button:hover:not(:disabled) { border-color: var(--accent); }
   button:disabled { opacity: .45; cursor: default; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #111; font-weight: 600; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  button.primary:hover:not(:disabled) { filter: brightness(1.1); }
+  button.danger { background: transparent; color: #ff8a8a; border-color: #4a2626; }
   button.danger:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
-  nav { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--panel); overflow-x: auto; }
-  nav button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 12px 14px; color: var(--muted); }
-  nav button.active { color: var(--text); border-bottom-color: var(--accent); }
-  .page { display: none; padding: 16px 20px 40px; max-width: 1300px; margin: 0 auto; }
-  .page.active { display: block; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
-  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
-  section h2 {
-    margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: .8px;
-    color: var(--muted); display: flex; align-items: center; gap: 8px;
+  nav { display: flex; gap: 6px; padding: 10px 24px 0; background: #000; overflow-x: auto; }
+  nav button {
+    border: 0; border-radius: 4px 4px 0 0; background: #161616; color: #a8a8a8; padding: 13px 20px;
+    font: 600 14px/1 var(--display); letter-spacing: 1px; text-transform: uppercase;
+    transform: skewX(-12deg); white-space: nowrap;
   }
+  nav button:hover:not(.active) { color: #fff; }
+  nav button.active { background: var(--accent); color: var(--on-accent); }
+  .page { display: none; padding: 22px 24px 40px; max-width: 1300px; margin: 0 auto; }
+  .page.active { display: block; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; min-width: 0; }
+  section h2 {
+    margin: 0 0 14px; font: 700 14px/1.2 var(--display); text-transform: uppercase; letter-spacing: 2px;
+    color: var(--accent-text); display: flex; align-items: center; gap: 8px;
+  }
+  .clock { display: flex; flex-direction: column; gap: 8px; }
+  .clock span { display: block; color: var(--muted); font-size: 13px; }
+  .clock b { display: block; font: 600 22px/1.2 var(--display); }
+  .trips { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .trip { background: #0d0d0d; border: 1px solid #222; border-radius: 8px; padding: 12px; }
+  .trip-km { font: 600 26px/1.2 var(--display); }
+  .trip-km small, .trip-meta { font-size: 12.5px; color: var(--muted); font-family: "Barlow", sans-serif; font-weight: 400; }
+  .advanced { margin-top: 18px; max-width: 560px; }
+  .advanced h2 { color: var(--muted); }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 44px; cursor: pointer; }
+  .switch-row small { display: block; color: var(--muted); font-size: 12.5px; }
+  .switch-row input[type=checkbox] { width: 20px; height: 20px; flex: none; }
   .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; margin: 0; }
   .kv dt { color: var(--muted); }
   .kv dd { margin: 0; font-family: var(--mono); word-break: break-all; }
@@ -77,20 +125,20 @@
   .field.changed label::after { content: " •"; color: var(--warn); }
   .field.error input, .field.error select { border-color: var(--bad); }
   input[type=text], input[type=number], select {
-    width: 100%; min-width: 0; background: #0b0d10; color: var(--text);
-    border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: 13px var(--mono);
+    width: 100%; min-width: 0; background: var(--field); color: var(--text);
+    border: 1px solid #333; border-radius: 6px; padding: 7px 9px; font: 13px var(--mono);
   }
   input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
   .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
   .tile .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .6px; }
   .tile .value { font: 600 28px/1.2 var(--mono); margin-top: 6px; }
   .tile .value small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
   #console-log {
-    height: 360px; overflow: auto; background: #0b0d10; border: 1px solid var(--line);
-    border-radius: 8px; padding: 8px 10px; font: 12.5px/1.5 var(--mono); white-space: pre-wrap;
+    height: 360px; overflow: auto; background: #000; border: 1px solid #222;
+    border-radius: 6px; padding: 8px 10px; font: 12.5px/1.5 var(--mono); white-space: pre-wrap;
   }
-  #console-log .tx { color: var(--accent); }
+  #console-log .tx { color: var(--accent-text); }
   #console-log .sys { color: var(--muted); font-style: italic; }
   .console-in { display: flex; gap: 8px; margin-top: 8px; }
   .files { max-height: 300px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; margin-top: 10px; }
@@ -98,7 +146,7 @@
   .files td { padding: 6px 10px; border-bottom: 1px solid var(--line); }
   .files td:last-child { text-align: right; font-family: var(--mono); color: var(--muted); }
   .banner { margin: 16px 20px 0; padding: 12px 14px; border-radius: 10px; background: #3a1d1d; border: 1px solid var(--bad); display: none; }
-  .banner.update { background: #3a2a14; border-color: var(--accent); align-items: center; gap: 12px; }
+  .banner.update { background: var(--panel-2); border-color: var(--accent); align-items: center; gap: 12px; }
   .banner.update button { margin-left: 12px; }
   .empty { padding: 40px 20px; text-align: center; color: var(--muted); }
   progress { width: 100%; height: 8px; margin-top: 10px; accent-color: var(--accent); display: none; }
@@ -108,9 +156,12 @@
   }
   .opts { display: grid; grid-template-columns: 150px 1fr; gap: 8px 12px; align-items: center; margin-top: 12px; }
   .opts label { color: var(--muted); }
-  input[type=color] { width: 60px; height: 32px; padding: 2px; background: #0b0d10; border: 1px solid var(--line); border-radius: 8px; }
+  input[type=color] { width: 60px; height: 32px; padding: 2px; background: var(--field); border: 1px solid var(--line); border-radius: 8px; }
   #boot-canvas { width: 100%; max-width: 800px; aspect-ratio: 5 / 3; display: block; border: 1px solid var(--line); border-radius: 8px; background: #000; }
   @media (max-width: 600px) {
+    header { position: static; gap: 10px; padding: 12px 16px; }
+    nav { padding: 10px 16px 0; }
+    .page { padding: 16px 16px 32px; }
     .field { grid-template-columns: 1fr 110px 40px; }
     .kv { grid-template-columns: 110px 1fr; }
   }
@@ -118,9 +169,15 @@
 </head>
 <body>
 <header>
-  <h1>ADV <span>DashPRO</span> · Config</h1>
-  <div class="status"><div class="dot" id="dot"></div><span id="status-text">Desconectado</span></div>
+  <div class="brand">
+    <img id="brand-logo" src="icons/logo-amarillo.png" alt="PRD ADV.ECU">
+    <div class="brand-text">
+      <span class="brand-name"><span>DASH<b>PRO</b></span><span class="dev-chip dev-only" title="Modo desarrollador">DEV</span></span>
+      <span class="brand-sub">GNVPERFORMANCE</span>
+    </div>
+  </div>
   <div class="spacer"></div>
+  <div class="status"><div class="dot" id="dot"></div><span id="status-text">Desconectado</span></div>
   <button id="btn-install" hidden>Instalar app</button>
   <button class="primary" id="btn-connect">Conectar</button>
   <button id="btn-disconnect" disabled>Desconectar</button>
@@ -133,7 +190,7 @@
   <button data-page="sd">Tarjeta SD</button>
   <button data-page="firmware">Firmware</button>
   <button data-page="boot">Arranque</button>
-  <button data-page="console">Consola</button>
+  <button data-page="console" class="dev-only">Consola</button>
 </nav>
 
 <div class="banner update" id="update-banner">
@@ -159,28 +216,29 @@
     </section>
 
     <section>
-      <h2>Reloj <span class="spacer"></span><button id="btn-time-sync" disabled>Sincronizar con el PC</button></h2>
-      <dl class="kv">
-        <dt>Hora del dash</dt><dd id="time-dash">—</dd>
-        <dt>Hora del PC</dt><dd id="time-pc">—</dd>
-      </dl>
+      <h2>Reloj</h2>
+      <div class="clock">
+        <div><span>Hora del dash</span><b id="time-dash">—</b></div>
+        <div><span>Hora del PC</span><b id="time-pc" class="muted">—</b></div>
+      </div>
+      <div class="actions" style="margin-top:14px"><button class="primary" id="btn-time-sync" disabled>Sincronizar con el PC</button></div>
     </section>
 
     <section>
       <h2>Trips</h2>
-      <div id="trip-body" class="muted">—</div>
+      <div id="trip-body">—</div>
       <div class="actions" style="margin-top:10px">
         <button class="danger" id="btn-trip1" disabled>Reiniciar trip 1</button>
         <button class="danger" id="btn-trip2" disabled>Reiniciar trip 2</button>
       </div>
     </section>
 
-    <section>
+    <section class="dev-only">
       <h2>Memoria <span class="spacer"></span><button id="btn-mem" disabled>Actualizar</button></h2>
       <div id="mem-body" class="muted">Conecta el dash para ver la memoria.</div>
     </section>
 
-    <section>
+    <section class="dev-only">
       <h2>Firmware</h2>
       <p class="note" style="margin-top:0">Reinicia el dash en modo DFU (bootloader de ST) para cargar firmware con STM32CubeProgrammer.</p>
       <div class="actions" style="margin-top:10px"><button class="danger" id="btn-dfu" disabled>Entrar en modo DFU</button></div>
@@ -202,6 +260,14 @@
     <input type="file" id="import-file" accept=".json,application/json" hidden>
   </div>
   <div class="grid" id="settings-body"><div class="empty">Conecta el dash para ver sus ajustes.</div></div>
+
+  <section class="advanced">
+    <h2>Avanzado</h2>
+    <label class="switch-row">
+      <span>Modo desarrollador<small>Muestra memoria, modo DFU y la consola. Solo para diagnóstico.</small></span>
+      <input type="checkbox" id="dev-toggle">
+    </label>
+  </section>
 </div>
 
 <!-- Live -->
@@ -366,8 +432,8 @@
     <h2>Consola <span class="spacer"></span><button id="btn-clear">Limpiar</button></h2>
     <div id="console-log"></div>
     <form class="console-in" id="console-form">
-      <input type="text" id="console-input" placeholder="Comando, p. ej. HELP?" autocomplete="off" disabled>
-      <button type="submit" id="btn-send" disabled>Enviar</button>
+      <input type="text" id="console-input" placeholder="Comando, p. ej. HELP?" autocomplete="off">
+      <button type="submit" class="primary" id="btn-send">Enviar</button>
     </form>
   </section>
 </div>
@@ -484,7 +550,7 @@ function setConnected(on) {
   $('btn-connect').disabled = on;
   $('btn-disconnect').disabled = !on;
   updateBootButtons();
-  for (const id of ['btn-mem', 'console-input', 'btn-send', 'btn-time-sync', 'btn-trip1', 'btn-trip2',
+  for (const id of ['btn-mem', 'btn-time-sync', 'btn-trip1', 'btn-trip2',
                     'btn-dfu', 'btn-reload', 'btn-export', 'btn-import', 'btn-defaults']) {
     $(id).disabled = !on;
   }
@@ -550,11 +616,11 @@ async function openPort(port) {
     if (state.proto >= 1) {
       await refreshTime();
       await refreshTrips();
-      await refreshMemory();
+      if (isDev()) await refreshMemory();
       await loadSettings();
       if (state.page === 'live') startLive();
     } else {
-      await refreshMemory();
+      if (isDev()) await refreshMemory();
       toast('Firmware sin protocolo de configuración: actualízalo para usar Ajustes');
     }
     await refreshFwInfo();
@@ -704,14 +770,15 @@ async function syncTime() {
 async function refreshTrips() {
   try {
     const lines = await command('TRIP?', { quiet: true });
-    $('trip-body').innerHTML = lines.map((l) => {
+    $('trip-body').innerHTML = '<div class="trips">' + lines.map((l) => {
       const parts = l.split(' ');
       const v = Object.fromEntries(parts.slice(1).map((kv) => kv.split('=')));
       const km = (Number(v.dist_m) / 1000).toFixed(1);
       const h = Math.floor(Number(v.time_s) / 3600), m = Math.floor((Number(v.time_s) % 3600) / 60);
-      return `<div class="row"><span>${parts[0] === 'trip1' ? 'Trip 1' : 'Trip 2'}</span>` +
-             `<span>${km} km · ${h}h ${pad(m)}m · prom ${v.avg_kmh} · máx ${v.max_kmh} km/h</span></div>`;
-    }).join('');
+      return `<div class="trip"><div class="muted">${parts[0] === 'trip1' ? 'Trip 1' : 'Trip 2'}</div>` +
+             `<div class="trip-km">${km} <small>km</small></div>` +
+             `<div class="trip-meta">${h}h ${pad(m)}m · prom ${esc(v.avg_kmh)} · máx ${esc(v.max_kmh)} km/h</div></div>`;
+    }).join('') + '</div>';
   } catch (err) {
     $('trip-body').textContent = 'error: ' + err.message;
   }
@@ -1858,6 +1925,46 @@ function downloadBoot() {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+/* ---------------- Developer mode and palette ---------------- */
+
+/* Browser storage can be blocked (private window, site data off): fall back to defaults */
+const prefs = {
+  get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
+  set(key, val) { try { localStorage.setItem(key, val); } catch (_) {} },
+};
+
+const isDev = () => document.documentElement.classList.contains('dev');
+
+function setDevMode(on) {
+  document.documentElement.classList.toggle('dev', on);
+  $('dev-toggle').checked = on;
+  prefs.set('devMode', on ? '1' : '0');
+  if (!on && state.page === 'console') showPage('summary');
+  if (on && state.port) refreshMemory();
+}
+
+const THEMES = { amarillo: 'icons/logo-amarillo.png', rojo: 'icons/logo-rojo.png' };
+
+function setTheme(name) {
+  const theme = THEMES[name] ? name : 'amarillo';
+  if (theme === 'amarillo') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+  $('brand-logo').src = THEMES[theme];
+  prefs.set('theme', theme);
+  return theme;
+}
+
+/* Console commands the app answers itself; they never reach the dash.
+ * Returns the reply lines, or null when the command is for the dash. */
+function localCommand(cmd) {
+  const [word, arg] = cmd.split(/\s+/);
+  if (word.toUpperCase() !== 'TEMA') return null;
+  if (!arg) return [`Tema actual: ${prefs.get('theme') || 'amarillo'}. Usa TEMA AMARILLO o TEMA ROJO.`];
+  const name = arg.toLowerCase();
+  if (!THEMES[name]) return [`Tema desconocido: ${arg}. Opciones: AMARILLO, ROJO.`];
+  return [`Tema ${setTheme(name)} aplicado`];
+}
+
 /* ---------------- Tabs and wiring ---------------- */
 
 function showPage(page) {
@@ -1882,6 +1989,9 @@ function init() {
   }
 
   for (const b of $('tabs').children) b.onclick = () => showPage(b.dataset.page);
+  setTheme(prefs.get('theme'));
+  setDevMode(prefs.get('devMode') === '1');
+  $('dev-toggle').onchange = (e) => setDevMode(e.target.checked);
   $('btn-connect').onclick = connect;
   $('btn-disconnect').onclick = disconnect;
   $('btn-mem').onclick = refreshMemory;
@@ -1916,6 +2026,12 @@ function init() {
     const cmd = $('console-input').value.trim();
     if (!cmd) return;
     $('console-input').value = '';
+    const local = localCommand(cmd);
+    if (local) {
+      log(cmd, 'tx');
+      for (const line of local) log(line, 'sys');
+      return;
+    }
     const isId = cmd.toUpperCase() === 'ID?';
     try {
       await command(cmd, { isDone: isId ? oneLine : untilEnd });

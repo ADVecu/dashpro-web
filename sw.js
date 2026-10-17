@@ -2,7 +2,7 @@
  * Service worker: makes the app open offline and update itself.
  * Bump CACHE_VERSION on every release so clients pick up the new files.
  */
-const CACHE_VERSION = 'dashpro-v4';
+const CACHE_VERSION = 'dashpro-v5';
 const APP_SHELL = [
   './',
   './index.html',
@@ -11,6 +11,14 @@ const APP_SHELL = [
   './icons/icon-512.png',
   './icons/icon-maskable-512.png',
   './icons/apple-touch-icon.png',
+  './icons/logo-amarillo.png',
+  './icons/logo-rojo.png',
+  './fonts/barlow-latin-400-normal.woff2',
+  './fonts/barlow-latin-500-normal.woff2',
+  './fonts/barlow-latin-600-normal.woff2',
+  './fonts/chakra-petch-latin-600-normal.woff2',
+  './fonts/chakra-petch-latin-700-normal.woff2',
+  './fonts/chakra-petch-latin-700-italic.woff2',
 ];
 
 self.addEventListener('install', (event) => {
