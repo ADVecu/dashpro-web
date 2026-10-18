@@ -5,58 +5,179 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DashPRO Config</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#171b21">
+<meta name="theme-color" content="#000000">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script>
+  // Apply the saved palette and developer mode before the first paint
+  try {
+    if (localStorage.getItem('theme') === 'rojo') document.documentElement.dataset.theme = 'rojo';
+    if (localStorage.getItem('devMode') === '1') document.documentElement.classList.add('dev');
+  } catch (_) {}
+</script>
 <style>
+  @font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("fonts/barlow-latin-400-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url("fonts/barlow-latin-500-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Barlow"; font-weight: 600; font-display: swap; src: url("fonts/barlow-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 600; font-display: swap; src: url("fonts/chakra-petch-latin-600-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 700; font-display: swap; src: url("fonts/chakra-petch-latin-700-normal.woff2") format("woff2"); }
+  @font-face { font-family: "Chakra Petch"; font-weight: 700; font-style: italic; font-display: swap; src: url("fonts/chakra-petch-latin-700-italic.woff2") format("woff2"); }
   :root {
-    --bg: #0f1216;
-    --panel: #171b21;
-    --panel-2: #1e232b;
-    --line: #2a313b;
-    --text: #e6e9ee;
-    --muted: #8b94a3;
-    --accent: #ff7a1a;
-    --ok: #3ecf8e;
-    --warn: #f5b942;
-    --bad: #ff5d5d;
+    --bg: #0a0a0a;
+    --panel: #141414;
+    --panel-2: #1c1c1c;
+    --field: #050505;
+    --line: #262626;
+    --text: #ececec;
+    --muted: #9a9a9a;
+    --accent: #fbed21;       /* fills: active tab, primary buttons, header line */
+    --accent-text: #fbed21;  /* the accent used as text on dark backgrounds */
+    --on-accent: #000;       /* text on top of an accent fill */
+    --ok: #4ade80;
+    --warn: #ff9f1a;
+    --bad: #ff6b6b;
     --mono: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    --display: "Chakra Petch", "Barlow", system-ui, sans-serif;
   }
+  /* Red palette, switched from the console with TEMA ROJO */
+  :root[data-theme="rojo"] { --accent: #e10600; --accent-text: #ff4d40; --on-accent: #fff; }
+  /* Memory, DFU and the console only show in developer mode (Ajustes › Avanzado) */
+  :root:not(.dev) .dev-only { display: none !important; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, "Segoe UI", Roboto, sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 "Barlow", system-ui, "Segoe UI", sans-serif; }
   header {
-    display: flex; align-items: center; gap: 16px; padding: 12px 20px;
-    border-bottom: 1px solid var(--line); background: var(--panel);
+    display: flex; align-items: center; gap: 14px; padding: 12px 24px;
+    border-bottom: 3px solid var(--accent); background: #000;
     position: sticky; top: 0; z-index: 2; flex-wrap: wrap;
   }
-  header h1 { font-size: 17px; margin: 0; letter-spacing: .3px; }
-  header h1 span { color: var(--accent); }
-  .status { display: flex; align-items: center; gap: 8px; color: var(--muted); }
-  .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand img { width: 48px; height: 48px; display: block; }
+  .brand-text { display: flex; flex-direction: column; }
+  .brand-name { display: flex; align-items: center; gap: 8px; font: italic 700 25px/1 var(--display); letter-spacing: .5px; color: #fff; }
+  .brand-name b { color: var(--accent-text); font-weight: inherit; }
+  .brand-sub { margin-top: 5px; font: 600 11px/1 var(--display); letter-spacing: 3.5px; color: var(--muted); }
+  .dev-chip {
+    font: 600 10px/1 var(--display); letter-spacing: 1.5px; padding: 3px 6px;
+    border: 1px solid var(--accent-text); color: var(--accent-text); border-radius: 3px;
+  }
+  .status { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid #2c2c2c; border-radius: 999px; color: #cfcfcf; font-size: 13px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bad); }
   .dot.on { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
   .spacer { flex: 1; }
   button {
-    background: var(--panel-2); color: var(--text); border: 1px solid var(--line);
-    border-radius: 8px; padding: 8px 14px; font: inherit; cursor: pointer;
+    background: var(--panel-2); color: var(--text); border: 1px solid #333;
+    border-radius: 6px; padding: 9px 16px; font: inherit; cursor: pointer;
   }
   button:hover:not(:disabled) { border-color: var(--accent); }
   button:disabled { opacity: .45; cursor: default; }
-  button.primary { background: var(--accent); border-color: var(--accent); color: #111; font-weight: 600; }
+  button.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  button.primary:hover:not(:disabled) { filter: brightness(1.1); }
+  /* A disabled main action turns grey instead of a faded yellow */
+  button.primary:disabled { background: var(--panel-2); border-color: #333; color: var(--muted); font-weight: 400; opacity: 1; }
+  button.danger { background: transparent; color: #ff8a8a; border-color: #4a2626; }
   button.danger:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
-  nav { display: flex; gap: 4px; padding: 0 20px; border-bottom: 1px solid var(--line); background: var(--panel); overflow-x: auto; }
-  nav button { border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; padding: 12px 14px; color: var(--muted); }
-  nav button.active { color: var(--text); border-bottom-color: var(--accent); }
-  .page { display: none; padding: 16px 20px 40px; max-width: 1300px; margin: 0 auto; }
-  .page.active { display: block; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
-  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
-  section h2 {
-    margin: 0 0 12px; font-size: 13px; text-transform: uppercase; letter-spacing: .8px;
-    color: var(--muted); display: flex; align-items: center; gap: 8px;
+  nav { display: flex; gap: 6px; padding: 10px 24px 0; background: #000; overflow-x: auto; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  /* No scrollbar under the tabs; the edge fades while more tabs are hidden that way */
+  nav.more-right { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+  nav.more-left { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px); mask-image: linear-gradient(to right, transparent, #000 40px); }
+  nav.more-left.more-right { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
+  nav button {
+    border: 0; border-radius: 4px 4px 0 0; background: #161616; color: #a8a8a8; padding: 13px 20px;
+    font: 600 14px/1 var(--display); letter-spacing: 1px; text-transform: uppercase;
+    transform: skewX(-12deg); white-space: nowrap;
   }
+  nav button:hover:not(.active) { color: #fff; }
+  nav button.active { background: var(--accent); color: var(--on-accent); }
+  .page { display: none; padding: 22px 24px 40px; max-width: 1300px; margin: 0 auto; }
+  .page.active { display: block; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; min-width: 0; }
+  section h2 {
+    margin: 0 0 14px; font: 700 14px/1.2 var(--display); text-transform: uppercase; letter-spacing: 2px;
+    color: var(--accent-text); display: flex; align-items: center; gap: 8px;
+  }
+  .clock { display: flex; flex-direction: column; gap: 8px; }
+  .clock span { display: block; color: var(--muted); font-size: 13px; }
+  .clock b { display: block; font: 600 22px/1.2 var(--display); }
+  .trips { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+  .trip { background: #0d0d0d; border: 1px solid #222; border-radius: 8px; padding: 12px; }
+  .trip-km { font: 600 26px/1.2 var(--display); }
+  .trip-km small, .trip-meta { font-size: 12.5px; color: var(--muted); font-family: "Barlow", sans-serif; font-weight: 400; }
+  .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 56px; cursor: pointer; }
+  .switch-row + .switch-row { border-top: 1px solid #222; }
+  .switch-row small { display: block; color: var(--muted); font-size: 12.5px; }
+  .switch-row input[type=checkbox] { width: 22px; height: 22px; flex: none; }
+  /* Ajustes: one section per settings screen of the dash */
+  .pill { padding: 6px 12px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+  .pill.dirty { background: #3a2a00; color: #ffc24a; }
+  .pill.saved { background: #0f2d1c; color: var(--ok); }
+  #page-settings.active { display: flex; flex-wrap: wrap; align-items: flex-start; column-gap: 8px; }
+  #page-settings > .toolbar { flex: 1 1 auto; }
+  #page-settings > .set-more { flex: 0 1 auto; justify-content: flex-end; }
+  .set-layout { flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start; }
+  .set-rail { flex: 1 1 230px; max-width: 270px; display: flex; flex-direction: column; gap: 6px; }
+  .set-rail button { display: block; width: 100%; text-align: left; padding: 12px 16px; border-radius: 8px; background: var(--panel); border-color: var(--line); }
+  .set-rail b { display: block; font: 700 15px/1.3 var(--display); letter-spacing: .5px; text-transform: uppercase; }
+  .set-rail small { display: block; margin-top: 2px; font-size: 13px; color: var(--muted); }
+  .set-rail button.active { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .set-rail button.active small { color: inherit; opacity: .75; }
+  .set-panel { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  #settings-body { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  #settings-body[hidden] { display: none; }
+  .advanced, .toggles { padding-top: 8px; padding-bottom: 8px; }
+  .set-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .set-head h2 { margin: 0; }
+  .set-head h2.big { font-size: 20px; letter-spacing: .5px; text-transform: none; color: #fff; }
+  .set-title { display: block; font: 700 18px/1.3 var(--display); }
+  .set-row { display: flex; align-items: center; gap: 12px 16px; flex-wrap: wrap; }
+  .row-text { flex: 1 1 200px; }
+  .row-text small { display: block; font-size: 12.5px; color: var(--muted); }
+  .track { position: relative; height: 30px; margin-top: 26px; cursor: pointer; }
+  .track.thin { height: 16px; margin-top: 0; }
+  .zones { position: absolute; inset: 0; border-radius: 4px; overflow: hidden; background: #232a38; }
+  .zone { position: absolute; top: 0; bottom: 0; }
+  .mark { position: absolute; top: -8px; bottom: -8px; width: 4px; margin-left: -2px; border-radius: 2px; pointer-events: none; }
+  .mark.sel { width: 8px; margin-left: -4px; box-shadow: 0 0 0 3px #fff; }
+  .track.thin .mark { top: -7px; bottom: -7px; background: #fff; }
+  .track.thin .mark.sel { background: var(--accent); box-shadow: 0 0 0 2px #000, 0 0 0 4px var(--accent); }
+  .live-pin { position: relative; height: 26px; margin: 16px 0 8px; }
+  .live-pin span { position: absolute; bottom: 0; transform: translateX(-50%); font-size: 12px; font-weight: 600; white-space: nowrap; }
+  .live-line { position: absolute; top: -8px; bottom: 0; width: 2px; margin-left: -1px; pointer-events: none; }
+  #al-now { font-size: 14px; font-weight: 600; color: var(--muted); }
+  .axis { display: flex; justify-content: space-between; margin-top: 10px; font: 13px var(--mono); color: var(--muted); }
+  .chips { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-top: 18px; }
+  .chip { text-align: left; padding: 10px 14px; background: #0f0f0f; border: 2px solid var(--line); border-radius: 8px; }
+  .chip.sel { border-color: var(--accent); }
+  .chip span { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #cfcfcf; }
+  .chip i, .sensors i { width: 10px; height: 10px; border-radius: 2px; flex: none; }
+  .chip b { display: block; font: 600 24px/1.2 var(--display); color: #fff; }
+  .stepper { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 16px; padding: 12px 14px; background: #0f0f0f; border: 1px solid #222; border-radius: 8px; }
+  .stepper .hint { flex: 1 1 160px; font-size: 13.5px; color: var(--muted); }
+  .stepctl { display: flex; align-items: center; gap: 10px; flex: none; }
+  .stepctl output { min-width: 120px; text-align: center; font: 600 28px/1.2 var(--display); }
+  .step-btn { width: 52px; height: 48px; padding: 0; background: #222; color: #fff; border: 0; font-size: 26px; line-height: 1; }
+  .hours { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+  .hours .stepper .hint { color: #cfcfcf; font-size: 15px; flex-basis: 80px; }
+  .hours .stepctl output { min-width: 84px; font-size: 22px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  .seg button { min-height: 40px; min-width: 72px; padding: 0 16px; border: 0; background: transparent; color: #b5b5b5; font-weight: 600; }
+  .seg button.on { background: var(--accent); color: var(--on-accent); }
+  .map-range { margin-top: 14px; }
+  .bright-bars { display: grid; grid-template-columns: repeat(10, minmax(0, 1fr)); gap: 5px; margin-top: 16px; }
+  .bright-bars button { height: 26px; padding: 0; border: 0; border-radius: 3px; background: #2a2a2a; }
+  .bright-bars button.on { background: var(--accent); }
+  .alerts { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
+  .alerts > section { flex: 999 1 380px; }
+  .sensors { flex: 1 1 190px; max-width: 220px; display: flex; flex-direction: column; gap: 6px; }
+  .sensors button { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 42px; padding: 0 14px; text-align: left; background: var(--panel); border: 0; color: #cfcfcf; }
+  .sensors button.active { background: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .sensors i { background: #4a4a4a; }
+  .sensors button.active i { box-shadow: 0 0 0 2px #000; }
+  #set-advanced[hidden] { display: none; }
   .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; margin: 0; }
   .kv dt { color: var(--muted); }
-  .kv dd { margin: 0; font-family: var(--mono); word-break: break-all; }
+  .kv dd { margin: 0; font-family: var(--mono); overflow-wrap: anywhere; }
   .bar { height: 8px; background: var(--panel-2); border-radius: 4px; overflow: hidden; margin: 3px 0 10px; }
   .bar > div { height: 100%; background: var(--ok); }
   .bar > div.warn { background: var(--warn); }
@@ -69,7 +190,6 @@
   .note { color: var(--muted); font-size: 12.5px; margin: 8px 0 0; }
   .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
   .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 16px; }
-  .toolbar .dirty { color: var(--warn); font-size: 13px; }
   .field { display: grid; grid-template-columns: 1fr 150px 48px; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line); }
   .field:last-child { border-bottom: 0; }
   .field small { display: block; color: var(--muted); font-size: 11.5px; }
@@ -77,20 +197,93 @@
   .field.changed label::after { content: " •"; color: var(--warn); }
   .field.error input, .field.error select { border-color: var(--bad); }
   input[type=text], input[type=number], select {
-    width: 100%; min-width: 0; background: #0b0d10; color: var(--text);
-    border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; font: 13px var(--mono);
+    width: 100%; min-width: 0; background: var(--field); color: var(--text);
+    border: 1px solid #333; border-radius: 6px; padding: 7px 9px; font: 13px var(--mono);
   }
   input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
-  .tile .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .6px; }
-  .tile .value { font: 600 28px/1.2 var(--mono); margin-top: 6px; }
-  .tile .value small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+  /* En vivo: a big chart with the signals picked in the boxes below; each box keeps its own trend */
+  .lv-state { display: inline-flex; align-items: center; gap: 8px; }
+  .lv-state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .lv-state.off { background: var(--panel-2); color: var(--muted); }
+  #live-win button { min-width: 56px; min-height: 36px; padding: 0 12px; }
+  #btn-live-pause { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+  #btn-live-pause svg { width: 14px; height: 14px; }
+  #btn-live-pause.resume { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .lv-hint { margin: -6px 0 14px; font-size: 13px; color: var(--muted); }
+  .lv-hint:empty { display: none; }
+  .lv { display: flex; flex-direction: column; gap: 14px; }
+  .lv-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 10px; }
+  .lv-head h2 { margin: 0; }
+  .lv-note { font-size: 12.5px; color: var(--muted); }
+  .lv-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .lv-legend:empty { display: none; }
+  .lv-leg { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 2px 0 10px; background: #0f0f0f; border: 1px solid #2a2a2a; border-left: 4px solid; border-radius: 6px; }
+  .lv-leg b { font: 600 12.5px/1 var(--display); letter-spacing: 1px; text-transform: uppercase; color: #cfcfcf; white-space: nowrap; }
+  .lv-leg output { font: 14px/1 var(--mono); color: #fff; white-space: nowrap; }
+  .lv-leg small { font: 11px/1 var(--mono); color: #7a7a7a; white-space: nowrap; }
+  .lv-leg button { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; background: transparent; border: 0; color: var(--muted); }
+  .lv-leg button:hover { color: #fff; }
+  .lv-leg path { fill: none; stroke: currentColor; stroke-width: 3px; stroke-linecap: round; }
+  .lv-plot { position: relative; display: block; overflow: hidden; background: #0f0f0f; }
+  .lv-plot[data-pause] { cursor: crosshair; touch-action: pan-y; }
+  .lv-chart { height: 300px; background: #0c0c0c; border: 1px solid #1f1f1f; border-radius: 6px; }
+  .lv-spark { height: 56px; margin-top: 10px; border-radius: 6px; }
+  .lv-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .lv-plot path { fill: none; stroke-width: 2px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .lv-plot path.area { stroke: none; fill-opacity: .15; }
+  .lv-grid { position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, #1e2127 1px, transparent 1px), linear-gradient(to bottom, #1e2127 1px, transparent 1px);
+    background-size: calc(100% / 6) 100%, 100% 25%; }
+  .lv-ref { position: absolute; left: 0; right: 0; border-top: 1px dashed; pointer-events: none; }
+  .lv-cursor { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; pointer-events: none; }
+  .lv-cursor[hidden] { display: none; }
+  .lv-dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; border: 2px solid #0c0c0c; pointer-events: none; }
+  .lv-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 24px; text-align: center; font-size: 14px; color: var(--muted); }
+  .lv-axis { display: flex; justify-content: space-between; margin-top: 6px; font: 11.5px var(--mono); color: #8a8a8a; }
+  .lv-hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; }
+  .lv-top { display: flex; align-items: center; gap: 10px; min-height: 34px; }
+  .lv-top > span:first-child { font: 600 12.5px/1 var(--display); letter-spacing: 1.5px; text-transform: uppercase; color: #b5b5b5; }
+  .lv-flag { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #fff; }
+  .lv-pick { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px 0 10px; background: transparent; color: #b5b5b5; font-size: 13px; font-weight: 600; }
+  .lv-pick[aria-pressed=true] { background: var(--panel-2); border-color: var(--c); color: #fff; }
+  .lv-check { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; flex: none; border: 2px solid var(--c); border-radius: 4px; }
+  .lv-check svg { width: 12px; height: 12px; visibility: hidden; }
+  .lv-check path { fill: none; stroke: #000; stroke-width: 3.5px; stroke-linecap: round; stroke-linejoin: round; }
+  [aria-pressed=true] .lv-check { background: var(--c); }
+  [aria-pressed=true] .lv-check svg { visibility: visible; }
+  .lv-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+  .lv-big { font: 600 52px/1.1 var(--display); color: #fff; }
+  .lv-big small, .lv-val small { margin-left: 6px; font: 400 15px "Barlow", sans-serif; color: var(--muted); }
+  .lv-mm { font: 12px var(--mono); color: var(--muted); }
+  .lv-rpmbar { position: relative; height: 16px; margin-top: 8px; background: #1d222c; border-radius: 4px; overflow: hidden; }
+  .lv-rpmbar i { position: absolute; top: 0; bottom: 0; opacity: .35; }
+  .lv-rpmbar b { position: absolute; left: 0; top: 0; bottom: 0; }
+  .lv-ticks { display: flex; justify-content: space-between; margin-top: 4px; font: 11px var(--mono); color: #8a8a8a; }
+  .lv-spd { display: flex; align-items: flex-end; gap: 16px; }
+  .lv-spd > div:first-child { flex: 1; min-width: 0; }
+  .lv-gear { display: flex; flex-direction: column; align-items: center; gap: 4px; font: 600 12px/1 var(--display); letter-spacing: 1.5px; color: #b5b5b5; }
+  .lv-gear output { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border: 2px solid var(--accent-text); border-radius: 10px; font: 700 40px/1 var(--display); color: var(--accent-text); }
+  .lv-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .lv-tile { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px 16px; text-align: left; background: var(--panel); border: 2px solid var(--line); border-radius: 10px; }
+  .lv-tile[aria-pressed=true] { border-color: var(--c); }
+  .lv-tile.warn { border-color: #f5a623; }
+  .lv-tile.danger { border-color: #ff3b4f; }
+  .lv-name { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
+  .lv-name b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 12.5px/1.2 var(--display); letter-spacing: 1px; text-transform: uppercase; color: #cfcfcf; }
+  .lv-val { font: 600 30px/1.15 var(--display); color: #fff; }
+  .lv-val small { font-size: 14px; }
+  .lv-tile .lv-spark { width: 100%; height: 48px; margin-top: 2px; border-radius: 4px; }
+  .lv-zone { flex: none; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: .5px; }
+  .lv-zone:empty { display: none; }
+  .lv-zone.cold { background: #3b9eff; color: #000; }
+  .lv-zone.warn { background: #f5a623; color: #000; }
+  .lv-zone.danger { background: #d4213a; color: #fff; }
+  .lv-foot { margin: 4px 0 0; font: 12px var(--mono); color: #6f6f6f; overflow-wrap: anywhere; }
   #console-log {
-    height: 360px; overflow: auto; background: #0b0d10; border: 1px solid var(--line);
-    border-radius: 8px; padding: 8px 10px; font: 12.5px/1.5 var(--mono); white-space: pre-wrap;
+    height: 360px; overflow: auto; background: #000; border: 1px solid #222;
+    border-radius: 6px; padding: 8px 10px; font: 12.5px/1.5 var(--mono); white-space: pre-wrap;
   }
-  #console-log .tx { color: var(--accent); }
+  #console-log .tx { color: var(--accent-text); }
   #console-log .sys { color: var(--muted); font-style: italic; }
   .console-in { display: flex; gap: 8px; margin-top: 8px; }
   .files { max-height: 300px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; margin-top: 10px; }
@@ -98,7 +291,7 @@
   .files td { padding: 6px 10px; border-bottom: 1px solid var(--line); }
   .files td:last-child { text-align: right; font-family: var(--mono); color: var(--muted); }
   .banner { margin: 16px 20px 0; padding: 12px 14px; border-radius: 10px; background: #3a1d1d; border: 1px solid var(--bad); display: none; }
-  .banner.update { background: #3a2a14; border-color: var(--accent); align-items: center; gap: 12px; }
+  .banner.update { background: var(--panel-2); border-color: var(--accent); align-items: center; gap: 12px; }
   .banner.update button { margin-left: 12px; }
   .empty { padding: 40px 20px; text-align: center; color: var(--muted); }
   progress { width: 100%; height: 8px; margin-top: 10px; accent-color: var(--accent); display: none; }
@@ -108,22 +301,91 @@
   }
   .opts { display: grid; grid-template-columns: 150px 1fr; gap: 8px 12px; align-items: center; margin-top: 12px; }
   .opts label { color: var(--muted); }
-  input[type=color] { width: 60px; height: 32px; padding: 2px; background: #0b0d10; border: 1px solid var(--line); border-radius: 8px; }
+  input[type=color] { width: 60px; height: 32px; padding: 2px; background: var(--field); border: 1px solid var(--line); border-radius: 8px; }
   #boot-canvas { width: 100%; max-width: 800px; aspect-ratio: 5 / 3; display: block; border: 1px solid var(--line); border-radius: 8px; background: #000; }
   @media (max-width: 600px) {
+    /* Header in one row: smaller brand, the status as a dot, one compact button */
+    header { position: static; gap: 8px; padding: 10px 16px; }
+    .brand { gap: 10px; }
+    .brand img { width: 40px; height: 40px; }
+    .brand-name { font-size: 21px; gap: 6px; }
+    .brand-sub { margin-top: 4px; font-size: 9.5px; letter-spacing: 2.6px; }
+    /* DEV becomes a small tag on the logo so the header stays one row */
+    .brand { position: relative; }
+    .dev-chip { position: absolute; left: 20px; bottom: -3px; padding: 2px 3px; font-size: 8px; letter-spacing: 1px; background: #000; }
+    .status { padding: 6px; border: 0; }
+    #status-text { display: none; }
+    header button { padding: 8px 12px; font-size: 14px; }
+    nav { padding: 8px 16px 0; gap: 4px; }
+    nav button { padding: 12px 14px; font-size: 13px; }
+    .page { padding: 16px 16px 32px; }
+    section { padding: 16px 14px; }
     .field { grid-template-columns: 1fr 110px 40px; }
     .kv { grid-template-columns: 110px 1fr; }
+    .opts { grid-template-columns: 1fr; gap: 4px; }
+    .opts label { margin-top: 8px; }
+    /* Ajustes: save/discard on top, the rest of the actions below the settings */
+    #page-settings > .toolbar button { flex: 1 1 auto; }
+    #page-settings > .set-more { order: 1; flex: 1 1 100%; margin: 18px 0 0; display: grid; grid-template-columns: 1fr 1fr; }
+    /* Section and sensor lists wrap above the panel, all visible */
+    .set-rail { flex: 1 1 100%; max-width: none; flex-direction: row; flex-wrap: wrap; }
+    .set-rail button { width: auto; flex: 1 1 auto; padding: 9px 10px; text-align: center; }
+    .set-rail b { font-size: 13px; }
+    .set-rail small { display: none; }
+    .sensors { flex: 1 1 100%; max-width: none; flex-direction: row; flex-wrap: wrap; }
+    .sensors button { flex: 1 1 140px; min-height: 38px; }
+    .chips { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 8px; margin-top: 16px; }
+    .chip { padding: 8px 10px; }
+    .chip span { font-size: 12px; }
+    .chip b { font-size: 19px; }
+    .set-row .seg { flex: 1 1 100%; }
+    .seg button { flex: 1 1 auto; min-width: 0; padding: 0 10px; }
+    .stepctl { flex: 1 1 100%; }
+    .stepctl output { flex: 1; min-width: 0; }
+    /* En vivo: shorter chart, two boxes per row */
+    .lv-chart { height: 220px; }
+    .lv-winlabel { display: none; }
+    #page-live > .toolbar .lv-state { flex: 1 1 100%; justify-content: flex-start; }
+    #page-live > .toolbar .spacer { display: none; }
+    #live-win { flex: 1 1 auto; }
+    /* Legend two per row; long names are cut */
+    .lv-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .lv-leg { min-width: 0; gap: 6px; padding-left: 8px; }
+    .lv-leg b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; }
+    .lv-leg output { font-size: 13px; }
+    .lv-leg small { display: none; }
+    .lv-leg button { width: 28px; }
+    .lv-tile .lv-mm { font-size: 11px; }
+    .lv-big { font-size: 46px; }
+    .lv-tiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .lv-tile { padding: 12px; }
+    .lv-val { font-size: 26px; }
+  }
+  @media (max-width: 350px) {
+    header { padding: 10px 12px; }
+    .brand { gap: 8px; }
+    .brand img { width: 34px; height: 34px; }
+    .brand-name { font-size: 18px; }
+    .brand-sub { font-size: 8px; letter-spacing: 2px; }
+    .dev-chip { left: 16px; }
+    header button { padding: 8px 10px; }
   }
 </style>
 </head>
 <body>
 <header>
-  <h1>ADV <span>DashPRO</span> · Config</h1>
-  <div class="status"><div class="dot" id="dot"></div><span id="status-text">Desconectado</span></div>
+  <div class="brand">
+    <img id="brand-logo" src="icons/logo-amarillo.png" alt="PRD ADV.ECU">
+    <div class="brand-text">
+      <span class="brand-name"><span>DASH<b>PRO</b></span><span class="dev-chip dev-only" title="Modo desarrollador">DEV</span></span>
+      <span class="brand-sub">GNVPERFORMANCE</span>
+    </div>
+  </div>
   <div class="spacer"></div>
+  <div class="status"><div class="dot" id="dot"></div><span id="status-text">Desconectado</span></div>
   <button id="btn-install" hidden>Instalar app</button>
   <button class="primary" id="btn-connect">Conectar</button>
-  <button id="btn-disconnect" disabled>Desconectar</button>
+  <button id="btn-disconnect" disabled hidden>Desconectar</button>
 </header>
 
 <nav id="tabs">
@@ -133,7 +395,7 @@
   <button data-page="sd">Tarjeta SD</button>
   <button data-page="firmware">Firmware</button>
   <button data-page="boot">Arranque</button>
-  <button data-page="console">Consola</button>
+  <button data-page="console" class="dev-only">Consola</button>
 </nav>
 
 <div class="banner update" id="update-banner">
@@ -159,28 +421,29 @@
     </section>
 
     <section>
-      <h2>Reloj <span class="spacer"></span><button id="btn-time-sync" disabled>Sincronizar con el PC</button></h2>
-      <dl class="kv">
-        <dt>Hora del dash</dt><dd id="time-dash">—</dd>
-        <dt>Hora del PC</dt><dd id="time-pc">—</dd>
-      </dl>
+      <h2>Reloj</h2>
+      <div class="clock">
+        <div><span>Hora del dash</span><b id="time-dash">—</b></div>
+        <div><span>Hora del PC</span><b id="time-pc" class="muted">—</b></div>
+      </div>
+      <div class="actions" style="margin-top:14px"><button class="primary" id="btn-time-sync" disabled>Sincronizar con el PC</button></div>
     </section>
 
     <section>
       <h2>Trips</h2>
-      <div id="trip-body" class="muted">—</div>
+      <div id="trip-body">—</div>
       <div class="actions" style="margin-top:10px">
         <button class="danger" id="btn-trip1" disabled>Reiniciar trip 1</button>
         <button class="danger" id="btn-trip2" disabled>Reiniciar trip 2</button>
       </div>
     </section>
 
-    <section>
+    <section class="dev-only">
       <h2>Memoria <span class="spacer"></span><button id="btn-mem" disabled>Actualizar</button></h2>
       <div id="mem-body" class="muted">Conecta el dash para ver la memoria.</div>
     </section>
 
-    <section>
+    <section class="dev-only">
       <h2>Firmware</h2>
       <p class="note" style="margin-top:0">Reinicia el dash en modo DFU (bootloader de ST) para cargar firmware con STM32CubeProgrammer.</p>
       <div class="actions" style="margin-top:10px"><button class="danger" id="btn-dfu" disabled>Entrar en modo DFU</button></div>
@@ -193,30 +456,48 @@
   <div class="toolbar">
     <button class="primary" id="btn-save" disabled>Guardar en el dash</button>
     <button id="btn-revert" disabled>Descartar cambios</button>
+    <span class="pill" id="dirty-text" hidden></span>
+  </div>
+  <div class="toolbar set-more">
     <button id="btn-reload" disabled>Releer</button>
-    <span class="dirty" id="dirty-text"></span>
-    <span class="spacer"></span>
     <button id="btn-export" disabled>Exportar…</button>
     <button id="btn-import" disabled>Importar…</button>
     <button class="danger" id="btn-defaults" disabled>Valores de fábrica</button>
     <input type="file" id="import-file" accept=".json,application/json" hidden>
   </div>
-  <div class="grid" id="settings-body"><div class="empty">Conecta el dash para ver sus ajustes.</div></div>
+  <div class="set-layout">
+    <div class="set-rail" id="set-rail"></div>
+    <div class="set-panel">
+      <div id="settings-body"><div class="empty">Conecta el dash para ver sus ajustes.</div></div>
+      <section class="advanced" id="set-advanced" hidden>
+        <label class="switch-row">
+          <span><b class="set-title">Modo desarrollador</b><small>Muestra memoria, modo DFU y la consola. Se guarda en este navegador, no en el dash.</small></span>
+          <input type="checkbox" id="dev-toggle">
+        </label>
+      </section>
+    </div>
+  </div>
 </div>
 
 <!-- Live -->
 <div class="page" id="page-live">
   <div class="toolbar">
-    <span class="muted">Período</span>
-    <select id="live-period" style="width:auto">
-      <option value="100">100 ms</option>
-      <option value="200" selected>200 ms</option>
-      <option value="500">500 ms</option>
-      <option value="1000">1 s</option>
-    </select>
-    <span class="muted" id="live-state">Detenido</span>
+    <span class="pill lv-state off" id="live-state">Detenido</span>
+    <span class="spacer"></span>
+    <span class="muted lv-winlabel">Ventana</span>
+    <div class="seg" id="live-win"><button data-v="10">10 s</button><button data-v="30" class="on">30 s</button><button data-v="60">1 min</button></div>
+    <button id="btn-live-pause" disabled></button>
+    <label class="dev-only"><span class="muted">Lecturas cada</span>
+      <select id="live-period" style="width:auto">
+        <option value="100">100 ms</option>
+        <option value="200" selected>200 ms</option>
+        <option value="500">500 ms</option>
+        <option value="1000">1 s</option>
+      </select>
+    </label>
   </div>
-  <div class="tiles" id="live-tiles"><div class="empty">Conecta el dash para ver los datos en vivo.</div></div>
+  <p class="lv-hint" id="live-hint"></p>
+  <div id="live-body"><div class="empty">Conecta el dash para ver los datos en vivo.</div></div>
 </div>
 
 <!-- Firmware -->
@@ -366,8 +647,8 @@
     <h2>Consola <span class="spacer"></span><button id="btn-clear">Limpiar</button></h2>
     <div id="console-log"></div>
     <form class="console-in" id="console-form">
-      <input type="text" id="console-input" placeholder="Comando, p. ej. HELP?" autocomplete="off" disabled>
-      <button type="submit" id="btn-send" disabled>Enviar</button>
+      <input type="text" id="console-input" placeholder="Comando, p. ej. HELP?" autocomplete="off">
+      <button type="submit" class="primary" id="btn-send">Enviar</button>
     </form>
   </section>
 </div>
@@ -412,19 +693,37 @@ const SETTING_INFO = {
   oilt_danger: ['Temperatura de aceite', 'Peligro'],
   bright_day: ['Pantalla y unidades', 'Brillo de día'],
   bright_night: ['Pantalla y unidades', 'Brillo de noche'],
+  bright_source: ['Pantalla y unidades', 'Cambio día / noche'],
+  day_start_hour: ['Pantalla y unidades', 'Día desde'],
+  night_start_hour: ['Pantalla y unidades', 'Noche desde'],
   speed_unit: ['Pantalla y unidades', 'Unidad de velocidad'],
   engine_map: ['ECU', 'Mapa de motor'],
   launch_armed: ['ECU', 'Launch armado al arrancar'],
+  turn_blink_internal: ['ECU', 'Parpadeo interno de direccionales'],
 };
 
-/* Live values: key in the "L" line -> [label, unit, scale]; scale 0 = hex */
-const LIVE_INFO = {
-  rpm: ['RPM', '', 1], spd: ['Velocidad', 'km/h', 1], gear: ['Marcha', '', 1],
-  clt: ['Temp. motor', '°C', 1], iat: ['Temp. admisión', '°C', 1], oilt: ['Temp. aceite', '°C', 1],
-  oilp: ['Presión aceite', 'kPa', 1], fuelp: ['Presión comb.', 'kPa', 1], map: ['MAP', 'kPa', 1],
-  tps: ['TPS', '%', 1], lambda: ['Lambda', 'mV', 1], batt: ['Batería', 'V', 0.001],
-  fuel: ['Combustible', '%', 1], can_id: ['Último CAN ID', '', 0],
+/* Channels of the "L" line with the colors and ranges of the dash's Live Data screen.
+ * Ranges are in the line's own units: °C, kPa, mV, lambda × 10000.
+ * alert: the Ajustes › Alertas sensors that color the box */
+const LV = {
+  rpm: { name: 'RPM', color: '#ff5a4f', kind: 'rpm' },
+  spd: { name: 'Velocidad', color: '#b48cff', min: 0, max: 260, kind: 'speed' },
+  gear: { name: 'Marcha', color: '#c8c8d2', min: 0, max: 7, kind: 'gear' },
+  tps: { name: 'Acelerador', color: '#f5c542', min: 0, max: 100, kind: 'pct' },
+  map: { name: 'MAP', color: '#3b9bff', min: 0, kind: 'press', unit: 'map_unit', alert: ['map'] },
+  lambda: { name: 'AFR', color: '#3ddc6a', min: 6803, max: 13605, kind: 'lambda' },
+  clt: { name: 'Refrigerante', color: '#ff8c3c', min: 0, max: 130, kind: 'temp', alert: ['clt'] },
+  iat: { name: 'Admisión', color: '#5ad2e6', min: -20, max: 80, kind: 'temp' },
+  oilt: { name: 'Temp. aceite', color: '#ff78b4', min: 0, max: 150, kind: 'temp', alert: ['oilt'] },
+  oilp: { name: 'Presión aceite', color: '#e6dc6e', min: 0, max: 700, kind: 'press', unit: 'oilp_unit', alert: ['oilp'] },
+  fuelp: { name: 'Presión comb.', color: '#96d25a', min: 0, max: 700, kind: 'press', unit: 'fuelp_unit', alert: ['fuelp'] },
+  batt: { name: 'Batería', color: '#78aaff', min: 8000, max: 16000, kind: 'volt', alert: ['batt', 'batt_high'] },
+  fuel: { name: 'Combustible', color: '#ffaa64', min: 0, max: 100, kind: 'pct', alert: ['fuel'] },
 };
+const LV_TILES = ['tps', 'map', 'lambda', 'clt', 'iat', 'oilt', 'oilp', 'fuelp', 'batt', 'fuel'];
+const LV_DEFAULT_SEL = ['rpm', 'tps', 'map', 'lambda']; // the dash's Live Data screen
+const LV_MAX_SEL = 4;
+const LV_KEEP_MS = 65000;
 
 const $ = (id) => document.getElementById(id);
 
@@ -438,8 +737,14 @@ const state = {
   proto: 0,
   info: {},
   schema: [],         // [{name,type,min,max,unit,options,value}]
-  dirty: new Set(),
+  savedValues: null,  // {name: value} as last saved in the dash
+  dirty: new Set(),   // names whose value differs from savedValues
+  settingsMsg: '',    // why there are no settings to show
+  set: { section: 'rpm', rpm: 'rpm_shift', sensor: 'clt', slot: 2 }, // Ajustes tab selection
   liveOn: false,
+  live: null,         // last live values, for the alerts section
+  // En vivo: samples of the last minute, the signals on the big chart, window in s, pause and cursor (0..1 of the window)
+  lv: { keys: null, t: [], v: {}, sel: LV_DEFAULT_SEL, win: 30, paused: false, end: 0, cursor: 1, dropped: null, error: '' },
   sdDir: null,
   pkg: null,          // verified .dashfw chosen in the Firmware tab
   boot: null,         // image chosen in the Boot tab: {name, frames: [{bmp, ms}], w, h}
@@ -475,6 +780,9 @@ const hex4 = (n) => n == null ? '—' : '0x' + n.toString(16).toUpperCase().padS
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const pad = (n) => String(n).padStart(2, '0');
 const fmtDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+/* Clocks on screen use 12 h, like the dash: "2026-10-17 2:05:09 PM" */
+const fmtClock = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ` +
+  `${d.getHours() % 12 || 12}:${pad(d.getMinutes())}:${pad(d.getSeconds())} ${d.getHours() < 12 ? 'AM' : 'PM'}`;
 
 /* ---------------- Connection ---------------- */
 
@@ -483,8 +791,10 @@ function setConnected(on) {
   $('status-text').textContent = on ? 'Conectado' : 'Desconectado';
   $('btn-connect').disabled = on;
   $('btn-disconnect').disabled = !on;
+  $('btn-connect').hidden = on;
+  $('btn-disconnect').hidden = !on;
   updateBootButtons();
-  for (const id of ['btn-mem', 'console-input', 'btn-send', 'btn-time-sync', 'btn-trip1', 'btn-trip2',
+  for (const id of ['btn-mem', 'btn-time-sync', 'btn-trip1', 'btn-trip2',
                     'btn-dfu', 'btn-reload', 'btn-export', 'btn-import', 'btn-defaults']) {
     $(id).disabled = !on;
   }
@@ -492,15 +802,15 @@ function setConnected(on) {
     for (const id of ['dev-product', 'dev-fw', 'dev-proto', 'dev-serial', 'dev-usb', 'time-dash']) $(id).textContent = '—';
     $('mem-body').innerHTML = '<span class="muted">Conecta el dash para ver la memoria.</span>';
     $('trip-body').textContent = '—';
-    $('settings-body').innerHTML = '<div class="empty">Conecta el dash para ver sus ajustes.</div>';
-    $('live-tiles').innerHTML = '<div class="empty">Conecta el dash para ver los datos en vivo.</div>';
-    delete $('live-tiles').dataset.ready;
-    $('live-state').textContent = 'Detenido';
     state.schema = [];
-    state.dirty.clear();
+    state.savedValues = null;
+    state.settingsMsg = '';
     state.liveOn = false;
-    updateDirty();
+    state.live = null;
+    lvReset();
   }
+  renderSettings();
+  renderLive();
 }
 
 async function connect() {
@@ -550,11 +860,13 @@ async function openPort(port) {
     if (state.proto >= 1) {
       await refreshTime();
       await refreshTrips();
-      await refreshMemory();
-      await loadSettings();
-      if (state.page === 'live') startLive();
+      if (isDev()) await refreshMemory();
+      await loadSettings(true);
+      syncLive();
     } else {
-      await refreshMemory();
+      if (isDev()) await refreshMemory();
+      state.settingsMsg = 'Este firmware no publica sus ajustes: actualízalo para usar esta pestaña.';
+      renderSettings();
       toast('Firmware sin protocolo de configuración: actualízalo para usar Ajustes');
     }
     await refreshFwInfo();
@@ -685,7 +997,8 @@ async function loadInfo() {
 async function refreshTime() {
   try {
     const [t] = await command('TIME?', { quiet: true });
-    $('time-dash').textContent = t;
+    const m = t.match(/^(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})$/);
+    $('time-dash').textContent = m ? fmtClock(new Date(m[1], m[2] - 1, m[3], m[4], m[5], m[6])) : t;
   } catch (err) {
     $('time-dash').textContent = 'error: ' + err.message;
   }
@@ -704,14 +1017,15 @@ async function syncTime() {
 async function refreshTrips() {
   try {
     const lines = await command('TRIP?', { quiet: true });
-    $('trip-body').innerHTML = lines.map((l) => {
+    $('trip-body').innerHTML = '<div class="trips">' + lines.map((l) => {
       const parts = l.split(' ');
       const v = Object.fromEntries(parts.slice(1).map((kv) => kv.split('=')));
       const km = (Number(v.dist_m) / 1000).toFixed(1);
       const h = Math.floor(Number(v.time_s) / 3600), m = Math.floor((Number(v.time_s) % 3600) / 60);
-      return `<div class="row"><span>${parts[0] === 'trip1' ? 'Trip 1' : 'Trip 2'}</span>` +
-             `<span>${km} km · ${h}h ${pad(m)}m · prom ${v.avg_kmh} · máx ${v.max_kmh} km/h</span></div>`;
-    }).join('');
+      return `<div class="trip"><div class="muted">${parts[0] === 'trip1' ? 'Trip 1' : 'Trip 2'}</div>` +
+             `<div class="trip-km">${km} <small>km</small></div>` +
+             `<div class="trip-meta">${h}h ${pad(m)}m · prom ${esc(v.avg_kmh)} · máx ${esc(v.max_kmh)} km/h</div></div>`;
+    }).join('') + '</div>';
   } catch (err) {
     $('trip-body').textContent = 'error: ' + err.message;
   }
@@ -780,6 +1094,81 @@ async function enterDfu() {
 
 /* ---------------- Settings ---------------- */
 
+/* The Ajustes tab mirrors the dash's settings screens: one section per screen,
+ * bars in the dash's zone colors, and the same steps and limits. Values in the
+ * schema are canonical (rpm, °C, kPa, mV, %); the units only change the text. */
+
+const ZONE = { cold: '#3b9eff', ok: '#2e9e5b', warn: '#f5a623', danger: '#ff3b4f', shift: '#2f6bff' };
+
+const SET_SECTIONS = [
+  ['rpm', 'RPM y cambio'], ['alerts', 'Alertas'], ['display', 'Pantalla'],
+  ['units', 'Unidades'], ['ecu', 'ECU y luces'], ['other', 'Otros'], ['advanced', 'Avanzado'],
+];
+
+/* RPM thresholds from the lowest up: [name, label, color] */
+const RPM_FIELDS = [
+  ['rpm_warning', 'Aviso', ZONE.warn],
+  ['rpm_shift', 'Luz de cambio', ZONE.shift],
+  ['rpm_redline', 'Línea roja', ZONE.danger],
+];
+
+/* Sensors of the dash's alerts screen. fields: [cold, warning, danger];
+ * low: alerts when the value drops; bar: drawn range (max 0 = MAP sensor range);
+ * unit: the setting with its kPa/psi choice; engine: reads 0 with the engine off */
+const ALERT_SENSORS = [
+  { id: 'clt', name: 'Refrigerante', fields: ['clt_cold', 'clt_warning', 'clt_danger'], kind: 'temp', step: 1, bar: [0, 150], live: 'clt' },
+  { id: 'oilt', name: 'Temp. aceite', fields: ['oilt_cold', 'oilt_warning', 'oilt_danger'], kind: 'temp', step: 1, bar: [0, 150], live: 'oilt' },
+  { id: 'oilp', name: 'Presión aceite', fields: [null, 'oilp_warning', 'oilp_danger'], low: true, kind: 'press', unit: 'oilp_unit', step: 5, bar: [0, 700], live: 'oilp', engine: true },
+  { id: 'fuelp', name: 'Presión comb.', fields: [null, 'fuelp_warning', 'fuelp_danger'], low: true, kind: 'press', unit: 'fuelp_unit', step: 5, bar: [0, 700], live: 'fuelp', engine: true },
+  { id: 'map', name: 'MAP', fields: [null, 'map_warning', 'map_danger'], kind: 'press', unit: 'map_unit', step: 5, bar: [0, 0], live: 'map' },
+  { id: 'batt', name: 'Batería baja', fields: [null, 'batt_warning', 'batt_danger'], low: true, kind: 'volt', step: 100, bar: [8000, 16000], live: 'batt' },
+  { id: 'batt_high', name: 'Batería alta', fields: [null, 'batt_warning_high', 'batt_danger_high'], kind: 'volt', step: 100, bar: [12000, 20000], live: 'batt' },
+  { id: 'fuel', name: 'Combustible', fields: [null, 'fuel_warning', 'fuel_danger'], low: true, kind: 'pct', step: 1, bar: [0, 100], live: 'fuel' },
+];
+const SLOTS = [['Frío', ZONE.cold], ['Aviso', ZONE.warn], ['Peligro', ZONE.danger]];
+/* MAP thresholds the dash falls back to when they don't fit a smaller sensor range */
+const MAP_DEFAULTS = { 100: [95, 98], 250: [230, 240], 300: [280, 290], 600: [550, 580] };
+
+const DISPLAY_FIELDS = ['bright_day', 'bright_night', 'bright_source', 'day_start_hour', 'night_start_hour'];
+const BRIGHT_SOURCES = { BEAM_OR_TIME: 'Luces bajas u horario', LOW_BEAM: 'Solo luces bajas', TIME: 'Solo horario' };
+
+/* Oil and fuel pressure share one choice, as on the dash's units screen */
+const UNIT_ROWS = [
+  { label: 'Temperatura', sub: 'Motor, aceite y admisión', fields: ['temp_unit'], opts: { C: '°C', F: '°F' } },
+  { label: 'Velocidad', sub: 'Velocímetro y trips', fields: ['speed_unit'], opts: { KPH: 'km/h', MPH: 'mph' } },
+  { label: 'Mezcla', sub: 'Sonda lambda', fields: ['lambda_unit'], opts: { AFR: 'AFR', LAMBDA: 'λ' } },
+  { label: 'Presión MAP', sub: 'Presión de admisión', fields: ['map_unit'], opts: { KPA: 'kPa', PSI: 'psi' } },
+  { label: 'Presión de aceite y combustible', sub: 'Las dos usan la misma unidad', fields: ['oilp_unit', 'fuelp_unit'], opts: { KPA: 'kPa', PSI: 'psi' } },
+];
+
+const ECU_TOGGLES = [
+  ['launch_armed', 'Launch armado al arrancar', 'Se arma solo cada vez que enciendes el auto'],
+  ['turn_blink_internal', 'Parpadeo interno de direccionales', 'Solo para autos sin flasher; si no, las flechas siguen al auto'],
+];
+
+const fieldOf = (name) => (name && state.schema.find((f) => f.name === name)) || null;
+const valOf = (name) => (fieldOf(name) || {}).value;
+const numOf = (name) => Number(valOf(name));
+const labelOf = (name) => (SETTING_INFO[name] || [null, name])[1];
+
+const isF = () => valOf('temp_unit') === 'F';
+const isPsi = (s) => !!s.unit && valOf(s.unit) === 'PSI';
+const kpaToPsi = (kpa) => Math.trunc((kpa * 145 + 500) / 1000);
+const psiToKpa = (psi) => Math.trunc((psi * 6895 + 500) / 1000);
+
+/* 12 h like the dash: "7 AM", "12 PM" */
+const fmtHour = (h) => `${h % 12 || 12} ${h < 12 ? 'AM' : 'PM'}`;
+
+/* A threshold or reading in the unit the user picked, as the dash writes it */
+function fmtAlert(s, v) {
+  switch (s.kind) {
+    case 'temp': return isF() ? `${Math.trunc(v * 9 / 5) + 32} °F` : `${v} °C`;
+    case 'press': return isPsi(s) ? `${kpaToPsi(v)} psi` : `${v} kPa`;
+    case 'volt': return `${(Math.trunc(v / 100) / 10).toFixed(1)} V`;
+    default: return `${v} %`;
+  }
+}
+
 function parseSchemaLine(line) {
   // name,type,min,max,unit_or_options,value
   const p = line.split(',');
@@ -794,43 +1183,310 @@ function parseSchemaLine(line) {
   };
 }
 
-async function loadSettings() {
+/* fresh: the values just read are what the dash has saved (after connecting,
+ * saving, discarding or restoring defaults); changes are counted against them */
+async function loadSettings(fresh = false) {
   try {
     const lines = await command('CFG LIST?', { quiet: true });
     state.schema = lines.map(parseSchemaLine).filter(Boolean);
+    if (fresh || !state.savedValues) state.savedValues = Object.fromEntries(state.schema.map((f) => [f.name, f.value]));
+    state.settingsMsg = '';
     log(`(${state.schema.length} ajustes leídos)`, 'sys');
-    renderSettings();
   } catch (err) {
-    $('settings-body').innerHTML = `<div class="empty">No se pudieron leer los ajustes: ${esc(err.message)}</div>`;
+    state.schema = [];
+    state.settingsMsg = 'No se pudieron leer los ajustes: ' + err.message;
+  }
+  renderSettings();
+  if (state.page === 'live') { renderLive(); updateLive(); } // ranges, units and thresholds come from the settings
+}
+
+/* Sensors this firmware has thresholds for */
+const alertSensors = () => ALERT_SENSORS.filter((s) => fieldOf(s.fields[1]) && fieldOf(s.fields[2]));
+
+/* Fields each section shows; whatever is left (a newer firmware) goes to "Otros" */
+function sectionFields() {
+  const has = (n) => !!fieldOf(n);
+  const sensors = alertSensors();
+  const alerts = sensors.flatMap((s) => s.fields.filter(has));
+  if (sensors.some((s) => s.id === 'map') && has('map_max')) alerts.push('map_max');
+  const out = {
+    rpm: RPM_FIELDS.every(([n]) => has(n)) ? RPM_FIELDS.map(([n]) => n) : [],
+    alerts,
+    display: DISPLAY_FIELDS.filter(has),
+    units: UNIT_ROWS.flatMap((r) => r.fields).filter(has),
+    ecu: ['engine_map', ...ECU_TOGGLES.map(([n]) => n)].filter(has),
+  };
+  const used = new Set(Object.values(out).flat());
+  out.other = state.schema.map((f) => f.name).filter((n) => !used.has(n));
+  return out;
+}
+
+function railSub(id, fields) {
+  if (id === 'advanced') return isDev() ? 'Modo desarrollador activo' : 'Modo desarrollador';
+  if (!state.schema.length) return '—';
+  switch (id) {
+    case 'rpm': return `Cambio ${valOf('rpm_shift')} · Roja ${valOf('rpm_redline')}`;
+    case 'alerts': return `${alertSensors().length} sensores · aviso y peligro`;
+    case 'display':
+      return [['bright_day', 'Día'], ['bright_night', 'Noche']].filter(([n]) => fieldOf(n))
+        .map(([n, l]) => `${l} ${valOf(n)}%`).join(' · ');
+    case 'units': {
+      const labels = UNIT_ROWS.map((r) => r.fields.find(fieldOf)).filter(Boolean)
+        .map((n) => UNIT_ROWS.find((r) => r.fields.includes(n)).opts[valOf(n)] || valOf(n));
+      return [...new Set(labels)].join(' · ');
+    }
+    case 'ecu':
+      return [fieldOf('engine_map') && `Mapa ${valOf('engine_map')}`,
+              fieldOf('launch_armed') && `Launch ${valOf('launch_armed') === '1' ? 'armado' : 'apagado'}`]
+        .filter(Boolean).join(' · ');
+    default: return `${fields.other.length} ajustes`;
   }
 }
 
-function renderSettings() {
-  const groups = new Map();
-  for (const f of state.schema) {
-    const [group] = SETTING_INFO[f.name] || ['Otros'];
-    if (!groups.has(group)) groups.set(group, []);
-    groups.get(group).push(f);
+const esca = (s) => esc(s).replace(/'/g, '&#39;');
+const dataAttrs = (act, name = '', v = '') => `data-act="${act}" data-name="${esca(name)}" data-v="${esca(v)}"`;
+
+const stepBtns = (act, name, value) => '<span class="stepctl">' +
+  `<button class="step-btn" ${dataAttrs(act, name)} data-delta="-1" aria-label="Bajar">−</button>` +
+  `<output>${esc(value)}</output>` +
+  `<button class="step-btn" ${dataAttrs(act, name)} data-delta="1" aria-label="Subir">+</button></span>`;
+
+const stepper = (act, hint, value) => `<div class="stepper"><span class="hint">${esc(hint)}</span>${stepBtns(act, '', value)}</div>`;
+
+const chip = (act, name, v, label, color, value, sel) =>
+  `<button class="chip${sel ? ' sel' : ''}" ${dataAttrs(act, name, v)}>` +
+  `<span><i style="background:${color}"></i>${esc(label)}</span><b>${esc(value)}</b></button>`;
+
+/* Segmented choice; opts: [[value, label], ...] */
+const seg = (act, name, opts, cur) => '<div class="seg">' + opts.map(([v, label]) =>
+  `<button class="${v === cur ? 'on' : ''}" ${dataAttrs(act, name, v)}>${esc(label)}</button>`).join('') + '</div>';
+
+const barPct = (v, min, max) => Math.min(100, Math.max(0, (v - min) / (max - min) * 100));
+const zoneDiv = (from, to, color) => `<div class="zone" style="left:${from}%;width:${Math.max(0, to - from)}%;background:${color}"></div>`;
+
+/* Smallest scale that leaves room after the redline, as the dash draws it */
+const rpmScale = () => [8000, 12000, 16000, 20000].find((s) => numOf('rpm_redline') + 500 <= s) || 20000;
+
+function renderRpm() {
+  const scale = rpmScale();
+  const x = (v) => barPct(v, 0, scale);
+  const [w, s, r] = RPM_FIELDS.map(([n]) => numOf(n));
+  const sel = state.set.rpm;
+  const zones = zoneDiv(x(w), x(s), ZONE.warn + '99') + zoneDiv(x(s), x(r), ZONE.shift + 'cc') + zoneDiv(x(r), 100, ZONE.danger + 'cc');
+  const marks = RPM_FIELDS.map(([n, , c]) => `<div class="mark${n === sel ? ' sel' : ''}" style="left:${x(numOf(n))}%;background:${c}"></div>`).join('');
+  const ticks = [0, 1, 2, 3, 4].map((i) => `<span>${(scale / 4) * i / 1000}</span>`).join('');
+  const chips = RPM_FIELDS.map(([n, label, c]) => chip('rpm-sel', n, '', label, c, valOf(n), n === sel)).join('');
+  const [, selLabel] = RPM_FIELDS.find(([n]) => n === sel);
+  return `<section>
+    <div class="set-head"><h2>RPM y luz de cambio</h2><span class="muted">x1000 rpm</span></div>
+    <div class="track" data-act="rpm-track" title="Haz clic para mover el valor seleccionado"><div class="zones">${zones}</div>${marks}</div>
+    <div class="axis">${ticks}</div>
+    <div class="chips">${chips}</div>
+    ${stepper('rpm-step', `${selLabel} · pasos de 100 rpm · también puedes hacer clic en la barra`, valOf(sel))}
+    <p class="note">Siempre se cumple aviso ≤ luz de cambio ≤ línea roja, igual que en el dash. La escala crece sola (8, 12, 16 o 20 mil rpm) según la línea roja.</p>
+  </section>`;
+}
+
+/* Threshold slots from the lowest value up; low-side sensors put danger first */
+function alertSlots(s) {
+  if (s.low) return [2, 1];
+  return fieldOf(s.fields[0]) ? [0, 1, 2] : [1, 2];
+}
+
+const alertBar = (s) => [s.bar[0], s.bar[1] || Number(valOf('map_max')) || 250];
+const curSensor = () => alertSensors().find((s) => s.id === state.set.sensor) || alertSensors()[0];
+
+/* Zone color of a reading, as the dash colors its dots */
+function zoneColor(s, v) {
+  const warn = numOf(s.fields[1]), danger = numOf(s.fields[2]);
+  if (s.low) return v <= danger ? ZONE.danger : v <= warn ? ZONE.warn : ZONE.ok;
+  if (v >= danger) return ZONE.danger;
+  if (v >= warn) return ZONE.warn;
+  if (fieldOf(s.fields[0]) && v < numOf(s.fields[0])) return ZONE.cold;
+  return ZONE.ok;
+}
+
+/* Current reading, or null without the live stream or (pressures) with the engine off */
+function liveOf(s) {
+  const L = state.live;
+  if (!L || L[s.live] === undefined) return null;
+  if (s.engine && !(Number(L.rpm) > 0)) return null;
+  return Number(L[s.live]);
+}
+
+function renderAlerts() {
+  const sensors = alertSensors();
+  const s = curSensor();
+  state.set.sensor = s.id;
+  const order = alertSlots(s);
+  if (!order.includes(state.set.slot)) state.set.slot = 2;
+  const slot = state.set.slot;
+  const [min, max] = alertBar(s);
+  const xs = order.map((k) => barPct(numOf(s.fields[k]), min, max));
+  const colors = s.low ? [ZONE.danger, ZONE.warn, ZONE.ok]
+    : order.length === 3 ? [ZONE.cold, ZONE.ok, ZONE.warn, ZONE.danger] : [ZONE.ok, ZONE.warn, ZONE.danger];
+  const zones = colors.map((c, k) => zoneDiv(k ? xs[k - 1] : 0, k < xs.length ? xs[k] : 100, c)).join('');
+  const marks = order.map((k, n) => `<div class="mark${k === slot ? ' sel' : ''}" style="left:${xs[n]}%"></div>`).join('');
+  const chips = order.map((k) => chip('slot', '', k, SLOTS[k][0], SLOTS[k][1], fmtAlert(s, numOf(s.fields[k])), k === slot)).join('');
+  const list = sensors.map((x) =>
+    `<button class="${x === s ? 'active' : ''}" ${dataAttrs('sensor', '', x.id)}><span>${esc(x.name)}</span><i data-dot="${x.id}"></i></button>`).join('');
+  const stepText = s.kind === 'temp' ? '1 °C' : s.kind === 'press' ? (isPsi(s) ? '1 psi' : '5 kPa') : s.kind === 'volt' ? '0.1 V' : '1 %';
+  const mapMax = fieldOf('map_max');
+  const mapRange = s.id === 'map' && mapMax
+    ? `<div class="set-row map-range"><span class="muted">Rango del sensor (kPa)</span>${seg('map-max', 'map_max', mapMax.options.map((o) => [o, o]), mapMax.value)}</div>`
+    : '';
+  return `<div class="alerts">
+    <div class="sensors">${list}</div>
+    <section>
+      <div class="set-head"><h2 class="big">${esc(s.name)}</h2><span id="al-now"></span></div>
+      <div class="live-pin"><span id="al-pin" hidden></span></div>
+      <div class="track thin" data-act="alert-track" title="Haz clic para mover el valor seleccionado">
+        <div class="zones">${zones}</div><div class="live-line" id="al-line" hidden></div>${marks}
+      </div>
+      <div class="axis"><span>${fmtAlert(s, min)}</span><span>${fmtAlert(s, max)}</span></div>
+      <div class="chips">${chips}</div>
+      ${mapRange}
+      ${stepper('alert-step', `${SLOTS[slot][0]} · paso ${stepText}${s.low ? ' · alerta cuando baja' : ''}`, fmtAlert(s, numOf(s.fields[slot])))}
+    </section>
+  </div>`;
+}
+
+/* Live reading on the alerts section: text, pin, line and the sensor dots */
+function updateAlertLive() {
+  if (state.set.section !== 'alerts' || !$('al-now')) return;
+  for (const s of alertSensors()) {
+    const dot = document.querySelector(`[data-dot="${s.id}"]`);
+    const v = liveOf(s);
+    if (dot) dot.style.background = v === null ? '' : zoneColor(s, v);
   }
+  const s = curSensor();
+  const v = liveOf(s);
+  const now = $('al-now'), pin = $('al-pin'), line = $('al-line');
+  pin.hidden = line.hidden = v === null;
+  if (v === null) {
+    const L = state.live;
+    now.textContent = L && s.engine && L[s.live] !== undefined ? 'motor apagado' : 'sin lectura en vivo';
+    now.style.color = '';
+    return;
+  }
+  const [min, max] = alertBar(s);
+  const x = barPct(v, min, max);
+  const color = zoneColor(s, v);
+  now.textContent = 'ahora ' + fmtAlert(s, v);
+  now.style.color = color;
+  pin.textContent = fmtAlert(s, v);
+  pin.style.left = Math.min(94, Math.max(6, x)) + '%';
+  pin.style.color = color;
+  line.style.left = x + '%';
+  line.style.background = color;
+}
+
+function renderDisplay() {
+  const out = [];
+  for (const [name, label] of [['bright_day', 'Brillo de día'], ['bright_night', 'Brillo de noche']]) {
+    if (!fieldOf(name)) continue;
+    const v = numOf(name);
+    const bars = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100].map((p) =>
+      `<button class="${v >= p - 5 ? 'on' : ''}" ${dataAttrs('set', name, p)} aria-label="${p}%"></button>`).join('');
+    out.push(`<section>
+      <div class="set-row"><b class="set-title row-text">${label}</b>${stepBtns('bright', name, v + '%')}</div>
+      <div class="bright-bars">${bars}</div>
+    </section>`);
+  }
+  const src = fieldOf('bright_source');
+  if (src) {
+    const hours = src.value === 'LOW_BEAM' ? []
+      : [['day_start_hour', 'Día desde'], ['night_start_hour', 'Noche desde']].filter(([n]) => fieldOf(n));
+    out.push(`<section>
+      <h2>Cambio día / noche</h2>
+      ${seg('set', 'bright_source', src.options.map((o) => [o, BRIGHT_SOURCES[o] || o]), src.value)}
+      ${hours.length ? '<div class="hours">' + hours.map(([n, l]) =>
+        `<div class="stepper"><span class="hint">${l}</span>${stepBtns('hour', n, fmtHour(numOf(n)))}</div>`).join('') + '</div>' : ''}
+      <p class="note">El brillo de noche se usa con las luces bajas encendidas o fuera del horario de día, según lo que elijas arriba.</p>
+    </section>`);
+  }
+  return out.join('');
+}
+
+function renderUnits() {
+  return UNIT_ROWS.map((r) => {
+    const names = r.fields.filter(fieldOf);
+    if (!names.length) return '';
+    const f = fieldOf(names[0]);
+    return `<section class="set-row">
+      <div class="row-text"><b class="set-title">${r.label}</b><small>${r.sub}</small></div>
+      ${seg('set', names.join(' '), f.options.map((o) => [o, r.opts[o] || o]), f.value)}
+    </section>`;
+  }).join('');
+}
+
+function renderEcu() {
+  const out = [];
+  const m = fieldOf('engine_map');
+  if (m) {
+    const opts = [];
+    for (let i = m.min; i <= m.max; i++) opts.push([String(i), `Mapa ${i}`]);
+    out.push(`<section class="set-row">
+      <div class="row-text"><b class="set-title">Mapa de motor</b><small>El que la ECU usa al arrancar</small></div>
+      ${seg('set', 'engine_map', opts, m.value)}
+    </section>`);
+  }
+  const toggles = ECU_TOGGLES.filter(([n]) => fieldOf(n));
+  if (toggles.length) {
+    out.push('<section class="toggles">' + toggles.map(([n, title, sub]) =>
+      `<label class="switch-row"><span><b class="set-title">${title}</b><small>${sub}</small></span>` +
+      `<input type="checkbox" ${dataAttrs('bool', n)}${valOf(n) === '1' ? ' checked' : ''}></label>`).join('') + '</section>');
+  }
+  return out.join('');
+}
+
+const SECTION_RENDER = { rpm: renderRpm, alerts: renderAlerts, display: renderDisplay, units: renderUnits, ecu: renderEcu };
+
+/* Identity of a control across re-renders, to keep the keyboard focus on it */
+const controlKey = (el) => (el && el.dataset && el.dataset.act)
+  ? [el.dataset.act, el.dataset.name, el.dataset.v, el.dataset.delta].join('|') : '';
+
+function renderSettings() {
+  const fields = sectionFields();
+  const sections = SET_SECTIONS.filter(([id]) => id === 'advanced' ||
+    (state.schema.length ? fields[id].length : id !== 'other'));
+  if (!sections.some(([id]) => id === state.set.section)) state.set.section = sections[0][0];
+  const sec = state.set.section;
+  const focusKey = controlKey(document.activeElement);
+
+  $('set-rail').innerHTML = sections.map(([id, title]) =>
+    `<button class="${id === sec ? 'active' : ''}" ${dataAttrs('section', '', id)}><b>${title}</b><small>${esc(railSub(id, fields))}</small></button>`).join('');
 
   const body = $('settings-body');
-  body.innerHTML = '';
-  for (const [group, fields] of groups) {
-    const sec = document.createElement('section');
-    sec.innerHTML = `<h2>${esc(group)}</h2>`;
-    for (const f of fields) sec.appendChild(renderField(f));
-    body.appendChild(sec);
+  body.hidden = sec === 'advanced';
+  $('set-advanced').hidden = sec !== 'advanced';
+  if (sec === 'advanced') {
+    body.innerHTML = '';
+  } else if (!state.schema.length) {
+    const msg = state.settingsMsg || (state.port ? 'Leyendo los ajustes del dash…' : 'Conecta el dash para ver sus ajustes.');
+    body.innerHTML = `<div class="empty">${esc(msg)}</div>`;
+  } else if (sec === 'other') {
+    body.innerHTML = '<section><h2>Otros</h2></section>';
+    for (const n of fields.other) body.firstChild.appendChild(renderField(fieldOf(n)));
+  } else {
+    body.innerHTML = SECTION_RENDER[sec]();
+    updateAlertLive();
+  }
+
+  if (focusKey) {
+    const el = [...document.querySelectorAll('#page-settings [data-act]')].find((e) => controlKey(e) === focusKey);
+    if (el) el.focus();
   }
   updateDirty();
 }
 
+/* Generic row for settings no section knows about */
 function renderField(f) {
-  const [, label] = SETTING_INFO[f.name] || [null, f.name];
   const row = document.createElement('div');
   row.className = 'field' + (state.dirty.has(f.name) ? ' changed' : '');
 
   const lab = document.createElement('label');
-  lab.innerHTML = `${esc(label)}${f.type === 'int' ? `<small>${f.min} a ${f.max}</small>` : ''}`;
+  lab.innerHTML = `${esc(labelOf(f.name))}${f.type === 'int' ? `<small>${f.min} a ${f.max}</small>` : ''}`;
   row.appendChild(lab);
 
   let input;
@@ -865,33 +1521,117 @@ function renderField(f) {
   row.appendChild(unit);
 
   input.addEventListener('change', () => {
-    const value = f.type === 'bool' ? (input.checked ? '1' : '0') : input.value.trim();
-    setSetting(f, value, row);
+    changeSetting(f.name, f.type === 'bool' ? (input.checked ? '1' : '0') : input.value.trim());
   });
   return row;
 }
 
-async function setSetting(f, value, row) {
+/* The page shows the new value at once, then sends it. If the dash refuses it,
+ * the settings are read back so the page matches the dash again. */
+async function changeSetting(name, value) {
+  const f = fieldOf(name);
+  value = String(value);
+  if (!f || !state.port || f.value === value) return;
+  f.value = value;
+  renderSettings();
   try {
-    await command(`CFG SET ${f.name}=${value}`);
-    f.value = value;
-    state.dirty.add(f.name);
-    row.classList.remove('error');
-    row.classList.add('changed');
-    row.title = '';
-    updateDirty();
-    // Units of other fields depend on enum settings: refresh the list
-    if (f.type === 'enum') await loadSettings();
+    await command(`CFG SET ${name}=${value}`);
   } catch (err) {
-    row.classList.add('error');
-    row.title = err.message;
-    toast(`${f.name}: ${err.message === 'out of range' ? 'valor fuera de rango' : err.message}`);
+    toast(`${labelOf(name)}: ${err.message === 'out of range' ? 'valor fuera de rango' : err.message}`);
+    await loadSettings();
   }
 }
 
+/* RPM thresholds keep aviso ≤ cambio ≤ línea roja, like the dash */
+function setRpm(name, value) {
+  const k = RPM_FIELDS.findIndex(([n]) => n === name);
+  const f = fieldOf(name);
+  const lo = k > 0 ? numOf(RPM_FIELDS[k - 1][0]) : f.min;
+  const hi = k < RPM_FIELDS.length - 1 ? numOf(RPM_FIELDS[k + 1][0]) : f.max;
+  changeSetting(name, Math.min(hi, Math.max(lo, value)));
+}
+
+/* A threshold stays inside the bar and its field limits, and one step away
+ * from its neighbours so the zones keep their order (as on the dash) */
+function setAlert(s, slot, value) {
+  const f = fieldOf(s.fields[slot]);
+  const [barMin, barMax] = alertBar(s);
+  const order = alertSlots(s);
+  const k = order.indexOf(slot);
+  const lo = k > 0 ? numOf(s.fields[order[k - 1]]) + s.step : Math.max(f.min, barMin);
+  const hi = k < order.length - 1 ? numOf(s.fields[order[k + 1]]) - s.step : Math.min(f.max, barMax);
+  if (hi < lo) return; // neighbours too close: nothing valid to move to
+  changeSetting(f.name, Math.min(hi, Math.max(lo, value)));
+}
+
+/* Whole psi in psi mode, like the dash */
+function stepAlert(s, slot, dir) {
+  const v = numOf(s.fields[slot]);
+  setAlert(s, slot, s.kind === 'press' && isPsi(s) ? psiToKpa(kpaToPsi(v) + dir) : v + dir * s.step);
+}
+
+function snapAlert(s, v) {
+  if (s.kind === 'press' && isPsi(s)) return psiToKpa(Math.round(v * 145 / 1000));
+  return Math.round(v / s.step) * s.step;
+}
+
+/* A smaller MAP range moves thresholds that no longer fit to the dash's defaults */
+function setMapMax(label) {
+  const max = Number(label);
+  changeSetting('map_max', label);
+  if ((numOf('map_warning') > max || numOf('map_danger') > max) && MAP_DEFAULTS[label]) {
+    const [warn, danger] = MAP_DEFAULTS[label];
+    changeSetting('map_warning', warn);
+    changeSetting('map_danger', danger);
+  }
+}
+
+/* Brightness: steps of 5 %, aligned to multiples of 5, within the field limits */
+function stepBright(name, dir) {
+  const f = fieldOf(name), v = Number(f.value);
+  const next = dir > 0 ? (Math.trunc(v / 5) + 1) * 5 : (Math.trunc((v + 4) / 5) - 1) * 5;
+  changeSetting(name, Math.min(f.max, Math.max(f.min, next)));
+}
+
+/* Value under the pointer on a bar */
+function trackValue(el, e, lo, hi) {
+  const r = el.getBoundingClientRect();
+  return lo + Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)) * (hi - lo);
+}
+
+function settingsAction(el, e) {
+  const { act, name, v } = el.dataset;
+  const dir = Number(el.dataset.delta);
+  switch (act) {
+    case 'section': state.set.section = v; renderSettings(); syncLive(); break;
+    case 'rpm-sel': state.set.rpm = name; renderSettings(); break;
+    case 'rpm-step': setRpm(state.set.rpm, Math.trunc((numOf(state.set.rpm) + dir * 100) / 100) * 100); break;
+    case 'rpm-track': setRpm(state.set.rpm, Math.round(trackValue(el, e, 0, rpmScale()) / 100) * 100); break;
+    case 'sensor': state.set.sensor = v; state.set.slot = 2; renderSettings(); break;
+    case 'slot': state.set.slot = Number(v); renderSettings(); break;
+    case 'alert-step': stepAlert(curSensor(), state.set.slot, dir); break;
+    case 'alert-track': {
+      const s = curSensor();
+      const [lo, hi] = alertBar(s);
+      setAlert(s, state.set.slot, snapAlert(s, trackValue(el, e, lo, hi)));
+      break;
+    }
+    case 'map-max': setMapMax(v); break;
+    case 'set': for (const n of name.split(' ')) changeSetting(n, v); break;
+    case 'bright': stepBright(name, dir); break;
+    case 'hour': changeSetting(name, (numOf(name) + (dir > 0 ? 1 : 23)) % 24); break;
+  }
+}
+
+/* Changes since the last save: settings whose value differs from the saved one */
 function updateDirty() {
+  const saved = state.savedValues || {};
+  state.dirty = new Set(state.schema.filter((f) => f.name in saved && f.value !== saved[f.name]).map((f) => f.name));
   const n = state.dirty.size;
-  $('dirty-text').textContent = n ? `${n} cambio(s) sin guardar en el dash` : '';
+  const pill = $('dirty-text');
+  pill.hidden = !state.schema.length;
+  pill.className = 'pill ' + (n ? 'dirty' : 'saved');
+  pill.textContent = n ? `${n} ${n === 1 ? 'cambio' : 'cambios'} sin guardar` : 'Guardado en el dash';
   $('btn-save').disabled = !n || !state.port;
   $('btn-revert').disabled = !n || !state.port;
 }
@@ -899,8 +1639,7 @@ function updateDirty() {
 async function saveSettings() {
   try {
     await command('CFG SAVE');
-    state.dirty.clear();
-    await loadSettings();
+    await loadSettings(true);
     toast('Ajustes guardados en el dash');
   } catch (err) {
     toast('No se pudo guardar: ' + err.message);
@@ -910,8 +1649,7 @@ async function saveSettings() {
 async function revertSettings() {
   try {
     await command('CFG REVERT');
-    state.dirty.clear();
-    await loadSettings();
+    await loadSettings(true);
     toast('Cambios descartados');
   } catch (err) {
     toast('Error: ' + err.message);
@@ -921,9 +1659,8 @@ async function revertSettings() {
 async function factoryDefaults() {
   if (!confirm('¿Restaurar todos los ajustes a valores de fábrica? El odómetro no se toca.')) return;
   try {
-    await command('CFG DEFAULTS');
-    state.dirty.clear();
-    await loadSettings();
+    await command('CFG DEFAULTS'); // the dash also saves them
+    await loadSettings(true);
     toast('Valores de fábrica restaurados');
   } catch (err) {
     toast('Error: ' + err.message);
@@ -970,7 +1707,6 @@ async function importSettings(file) {
     if (!byName.has(name)) { failed.push(name); continue; }
     try {
       await command(`CFG SET ${name}=${value}`, { quiet: true });
-      state.dirty.add(name);
       ok++;
     } catch (_) {
       failed.push(name);
@@ -988,38 +1724,352 @@ async function startLive() {
   try {
     await command('LIVE ON ' + $('live-period').value, { quiet: true });
     state.liveOn = true;
-    $('live-state').textContent = 'Recibiendo';
+    state.lv.error = '';
+    lvReset(); // a fresh minute; the stream was off, so the old one has a gap
   } catch (err) {
-    $('live-state').textContent = 'Error: ' + err.message;
+    state.lv.error = err.message;
   }
+  lvToolbar();
 }
 
 async function stopLive() {
   if (!state.port || !state.liveOn) return;
   state.liveOn = false;
-  $('live-state').textContent = 'Detenido';
+  state.live = null;
+  lvToolbar();
   try { await command('LIVE OFF', { quiet: true }); } catch (_) {}
+}
+
+/* The stream runs on the En vivo tab and on Ajustes › Alertas (live reading on the bar) */
+function syncLive() {
+  const wanted = state.page === 'live' || (state.page === 'settings' && state.set.section === 'alerts');
+  if (wanted) startLive(); else stopLive();
 }
 
 function onLive(text) {
   const values = Object.fromEntries(text.split(',').map((kv) => kv.split('=')));
-  const tiles = $('live-tiles');
-  if (!tiles.dataset.ready) {
-    tiles.innerHTML = Object.keys(values).map((k) => {
-      const [label] = LIVE_INFO[k] || [k];
-      return `<div class="tile"><div class="label">${esc(label)}</div><div class="value" id="live-${esc(k)}">—</div></div>`;
-    }).join('');
-    tiles.dataset.ready = '1';
+  if (!state.liveOn) return; // a line still in flight after LIVE OFF
+  state.live = values;
+  updateAlertLive();
+  lvAdd(values);
+}
+
+function lvReset() {
+  const L = state.lv;
+  L.keys = null;
+  L.t = [];
+  L.v = {};
+  L.paused = false;
+  L.cursor = 1;
+  if (state.page === 'live') renderLive();
+}
+
+function lvAdd(values) {
+  const L = state.lv;
+  if (!L.keys) {
+    L.keys = Object.keys(LV).filter((k) => values[k] !== undefined);
+    if (state.page === 'live') renderLive();
   }
-  for (const [k, raw] of Object.entries(values)) {
-    const el = $('live-' + k);
-    if (!el) continue;
-    const [, unit = '', scale = 1] = LIVE_INFO[k] || [];
-    let shown = raw;
-    if (scale === 0) shown = '0x' + raw;
-    else if (scale !== 1) shown = (Number(raw) * scale).toFixed(2);
-    el.innerHTML = `${esc(shown)}${unit ? `<small>${esc(unit)}</small>` : ''}`;
+  if (!L.paused) {
+    const now = performance.now();
+    L.t.push(now);
+    for (const k of L.keys) {
+      const h = (L.v[k] ??= []);
+      const v = Number(values[k]);
+      h.push(Number.isFinite(v) ? v : (h.length ? h[h.length - 1] : 0));
+    }
+    let cut = 0;
+    while (cut < L.t.length && L.t[cut] < now - LV_KEEP_MS) cut++;
+    if (cut) {
+      L.t.splice(0, cut);
+      for (const k of L.keys) L.v[k].splice(0, cut);
+    }
   }
+  if (state.page === 'live') scheduleLive();
+}
+
+let lvFrame = 0;
+const scheduleLive = () => { lvFrame ||= requestAnimationFrame(() => { lvFrame = 0; updateLive(); }); };
+
+const lvName = (k) => k === 'lambda' && valOf('lambda_unit') === 'LAMBDA' ? 'Lambda' : LV[k].name;
+const rpmMarks = () => ({ warn: numOf('rpm_warning') || 6000, shift: numOf('rpm_shift') || 6500, red: numOf('rpm_redline') || 7500 });
+
+/* Chart range, as the dash draws it: RPM up to the redline plus a margin, MAP up to the sensor range */
+function lvRange(k) {
+  if (k === 'rpm') return [0, Math.min(10000, Math.ceil((rpmMarks().red + 500) / 1000) * 1000)];
+  if (k === 'map') return [0, Number(valOf('map_max')) || 250];
+  return [LV[k].min, LV[k].max];
+}
+
+/* [value, unit] in the units picked in Ajustes */
+function lvFmt(k, v) {
+  if (v === undefined || !Number.isFinite(v)) return ['—', ''];
+  switch (LV[k].kind) {
+    case 'rpm': return [String(Math.round(v)), ''];
+    case 'speed': return valOf('speed_unit') === 'MPH' ? [String(Math.round(v * 0.621371)), 'mph'] : [String(Math.round(v)), 'km/h'];
+    case 'gear': return [v > 0 ? String(v) : 'N', ''];
+    case 'temp': return isF() ? [String(Math.trunc(v * 9 / 5) + 32), '°F'] : [String(Math.round(v)), '°C'];
+    case 'press': return valOf(LV[k].unit) === 'PSI' ? [String(kpaToPsi(v)), 'psi'] : [String(Math.round(v)), 'kPa'];
+    case 'lambda': return [valOf('lambda_unit') === 'LAMBDA' ? (v * 0.0001).toFixed(2) : (v * 0.00147).toFixed(1), ''];
+    case 'volt': return [(v / 1000).toFixed(1), 'V'];
+    default: return [String(Math.round(v)), '%'];
+  }
+}
+const lvText = (k, v) => lvFmt(k, v).filter(Boolean).join(' ');
+
+/* Alert zone from the thresholds in Ajustes; pressures don't alert with the engine off */
+const LV_RANK = { '': 0, cold: 1, warn: 2, danger: 3 };
+const LV_ZONE_TEXT = { cold: 'Frío', warn: 'Aviso', danger: 'Peligro' };
+function lvZone(k, v, rpm) {
+  let worst = '';
+  for (const s of alertSensors()) {
+    if (!(LV[k].alert || []).includes(s.id) || (s.engine && !(rpm > 0))) continue;
+    const c = zoneColor(s, v);
+    const z = c === ZONE.danger ? 'danger' : c === ZONE.warn ? 'warn' : c === ZONE.cold ? 'cold' : '';
+    if (LV_RANK[z] > LV_RANK[worst]) worst = z;
+  }
+  return worst;
+}
+
+/* Dashed line: the redline, 14.7 AFR, or the warning threshold */
+function lvRefLine(k) {
+  let ref = null;
+  if (k === 'rpm') ref = [rpmMarks().red, ZONE.danger];
+  else if (k === 'lambda') ref = [10000, '#8a8a8a'];
+  else {
+    const s = alertSensors().find((x) => (LV[k].alert || [])[0] === x.id);
+    if (s) ref = [numOf(s.fields[1]), ZONE.warn];
+  }
+  return ref ? `<span class="lv-ref" style="top:${lvY(k, ref[0], lvRange(k)).toFixed(2)}%;border-color:${ref[1]}"></span>` : '';
+}
+const lvY = (k, v, [a, b]) => 100 - Math.max(0, Math.min(1, (v - a) / (b - a))) * 100;
+
+const LV_CHECK = '<span class="lv-check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>';
+
+function lvPlot(cls, keys, { pause = false, fill = false, inner = '' } = {}) {
+  const paths = keys.map((k) => (fill ? `<path class="area" data-a="${k}" style="fill:${LV[k].color}"/>` : '') +
+    `<path data-l="${k}" style="stroke:${LV[k].color}"/>`).join('');
+  return `<span class="${cls} lv-plot"${pause ? ' data-pause' : ''}>${inner}` +
+    `<svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>` +
+    '<span class="lv-cursor" hidden></span></span>';
+}
+
+/* Builds the page; updateLive fills in the readings */
+function renderLive() {
+  const L = state.lv;
+  const body = $('live-body');
+  lvToolbar();
+  if (!state.port || !L.keys) {
+    body.innerHTML = `<div class="empty">${state.port ? 'Esperando datos del dash…' : 'Conecta el dash para ver los datos en vivo.'}</div>`;
+    return;
+  }
+  const has = (k) => L.keys.includes(k);
+  const sel = L.sel.filter(has);
+  const one = sel.length === 1 ? sel[0] : null;
+  const note = L.dropped ? `Se quitó ${lvName(L.dropped)} para dejar ${LV_MAX_SEL} en la gráfica`
+    : sel.length ? `${sel.length} de ${LV_MAX_SEL} · cada una en su propia escala` : 'Ninguna señal en la gráfica';
+  const legend = sel.map((k) => {
+    const [a, b] = lvRange(k);
+    return `<span class="lv-leg" style="border-left-color:${LV[k].color}"><b>${esc(lvName(k))}</b><output data-leg="${k}"></output>` +
+      `<small>${esc(lvFmt(k, a)[0])}–${esc(lvText(k, b))}</small>` +
+      `<button data-toggle="${k}" aria-label="Quitar ${esca(lvName(k))} de la gráfica" title="Quitar de la gráfica">` +
+      '<svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>';
+  }).join('');
+  const chart = lvPlot('lv-chart', sel, {
+    pause: true, fill: !!one,
+    inner: '<span class="lv-grid"></span>' + (one ? lvRefLine(one) : '') +
+      sel.map((k) => `<span class="lv-dot" data-dot="${k}" style="background:${LV[k].color}"></span>`).join('') +
+      (sel.length ? '' : '<span class="lv-empty">Toca una caja de abajo para ponerla en la gráfica</span>'),
+  });
+  const pick = (k) => `<button class="lv-pick" data-toggle="${k}" aria-pressed="${sel.includes(k)}" style="--c:${LV[k].color}">${LV_CHECK}Gráfica</button>`;
+
+  let hero = '';
+  if (has('rpm')) {
+    const m = rpmMarks(), top = lvRange('rpm')[1];
+    const pct = (v) => Math.min(100, v / top * 100);
+    const zones = [[m.warn, m.shift, ZONE.warn], [m.shift, m.red, ZONE.shift], [m.red, top, ZONE.danger]]
+      .map(([a, b, c]) => `<i style="left:${pct(a)}%;width:${Math.max(0, pct(b) - pct(a))}%;background:${c}"></i>`).join('');
+    const n = top / 1000, step = n % 2 === 0 ? 2 : n % 3 === 0 ? 3 : 1;
+    const ticks = Array.from({ length: n / step + 1 }, (_, i) => `<span>${i * step}</span>`).join('');
+    hero += `<section><div class="lv-top"><span>RPM</span><span class="lv-flag" data-flag hidden></span>${pick('rpm')}</div>` +
+      '<div class="lv-row"><span class="lv-big" data-val="rpm"></span><span class="lv-mm" data-mm="rpm"></span></div>' +
+      `<div class="lv-rpmbar">${zones}<b data-rpmfill></b></div><div class="lv-ticks">${ticks}</div>` +
+      lvPlot('lv-spark', ['rpm'], { pause: true, fill: true, inner: lvRefLine('rpm') }) + '</section>';
+  }
+  if (has('spd')) {
+    hero += `<section><div class="lv-top"><span>Velocidad</span>${pick('spd')}</div>` +
+      '<div class="lv-spd"><div><span class="lv-big" data-val="spd"></span><div class="lv-mm" data-mm="spd"></div></div>' +
+      (has('gear') ? '<div class="lv-gear">MARCHA<output data-gear></output></div>' : '') + '</div>' +
+      lvPlot('lv-spark', ['spd'], { pause: true, fill: true }) + '</section>';
+  }
+  const tiles = LV_TILES.filter(has).map((k) =>
+    `<button class="lv-tile" data-toggle="${k}" aria-pressed="${sel.includes(k)}" style="--c:${LV[k].color}">` +
+    `<span class="lv-name">${LV_CHECK}<b>${esc(lvName(k))}</b><span class="lv-zone" data-zone="${k}"></span></span>` +
+    `<span class="lv-val" data-val="${k}"></span>` +
+    lvPlot('lv-spark', [k], { fill: true, inner: lvRefLine(k) }) +
+    `<span class="lv-mm" data-mm="${k}"></span></button>`).join('');
+
+  body.innerHTML = '<div class="lv">' +
+    `<section><div class="lv-head"><h2>Gráfica</h2><span class="lv-note">${esc(note)}</span></div>` +
+    `<div class="lv-legend">${legend}</div>${chart}` +
+    '<div class="lv-axis"><span data-axis="0"></span><span data-axis="1"></span><span>ahora</span></div></section>' +
+    (hero ? `<div class="lv-hero">${hero}</div>` : '') +
+    `<div class="lv-tiles">${tiles}</div>` +
+    '<p class="lv-foot dev-only" data-extra></p></div>';
+}
+
+/* Readings, charts and cursor; runs on every sample while the tab is open */
+function updateLive() {
+  const L = state.lv;
+  const body = $('live-body');
+  const n = L.t.length;
+  if (!L.keys || !n || !body.querySelector('.lv')) { lvToolbar(); return; }
+  const end = L.paused ? L.end : L.t[n - 1];
+  const win = L.win * 1000, start = end - win;
+  let i0 = 0;
+  while (i0 < n - 1 && L.t[i0] < start) i0++;
+  let i1 = n - 1;
+  while (i1 > 0 && L.t[i1] > end) i1--;
+  let ic = i1; // the sample under the cursor
+  if (L.paused) {
+    const tc = start + L.cursor * win;
+    for (let i = i0; i <= i1; i++) if (Math.abs(L.t[i] - tc) < Math.abs(L.t[ic] - tc)) ic = i;
+  }
+  L.ago = (L.t[i1] - L.t[ic]) / 1000;
+  const xOf = (i) => (L.t[i] - start) / win * 1000;
+  const R = {}, paths = {};
+  const range = (k) => (R[k] ??= lvRange(k));
+  const path = (k) => {
+    if (paths[k] === undefined) {
+      let d = '';
+      for (let i = Math.max(0, i0 - 1); i <= i1; i++) d += (d ? 'L' : 'M') + xOf(i).toFixed(1) + ',' + lvY(k, L.v[k][i], range(k)).toFixed(1);
+      paths[k] = d;
+    }
+    return paths[k];
+  };
+  const at = (k) => L.v[k] ? L.v[k][ic] : undefined;
+  const xc = xOf(ic) / 10;
+
+  for (const plot of body.querySelectorAll('.lv-plot')) {
+    for (const p of plot.querySelectorAll('[data-l]')) p.setAttribute('d', path(p.dataset.l));
+    for (const p of plot.querySelectorAll('[data-a]')) {
+      const d = path(p.dataset.a);
+      p.setAttribute('d', d ? `${d}L1000,100L${xOf(Math.max(0, i0 - 1)).toFixed(1)},100Z` : '');
+    }
+    const cur = plot.querySelector('.lv-cursor');
+    cur.hidden = !L.paused;
+    cur.style.left = xc.toFixed(2) + '%';
+  }
+  for (const d of body.querySelectorAll('[data-dot]')) {
+    const k = d.dataset.dot;
+    d.style.left = `clamp(6px, ${xc.toFixed(2)}%, calc(100% - 6px))`;
+    d.style.top = `clamp(6px, ${lvY(k, at(k), range(k)).toFixed(2)}%, calc(100% - 6px))`;
+  }
+  const rpm = at('rpm');
+  for (const el of body.querySelectorAll('[data-val]')) {
+    const [v, u] = lvFmt(el.dataset.val, at(el.dataset.val));
+    el.innerHTML = esc(v) + (u ? `<small>${esc(u)}</small>` : '');
+  }
+  for (const el of body.querySelectorAll('[data-leg]')) el.textContent = lvText(el.dataset.leg, at(el.dataset.leg));
+  for (const el of body.querySelectorAll('[data-mm]')) {
+    const h = L.v[el.dataset.mm].slice(i0, i1 + 1);
+    const [lo] = lvFmt(el.dataset.mm, Math.min(...h));
+    el.textContent = `mín ${lo} · máx ${lvText(el.dataset.mm, Math.max(...h))}`; // unit once, at the end
+  }
+  for (const el of body.querySelectorAll('[data-zone]')) {
+    const z = lvZone(el.dataset.zone, at(el.dataset.zone), rpm);
+    el.textContent = LV_ZONE_TEXT[z] || '';
+    el.className = 'lv-zone ' + z;
+    const tile = el.closest('.lv-tile');
+    tile.classList.toggle('warn', z === 'warn');
+    tile.classList.toggle('danger', z === 'danger');
+  }
+  const gear = body.querySelector('[data-gear]');
+  if (gear) gear.textContent = lvFmt('gear', at('gear'))[0];
+  const fill = body.querySelector('[data-rpmfill]');
+  if (fill) {
+    const m = rpmMarks();
+    fill.style.width = Math.min(100, rpm / range('rpm')[1] * 100) + '%';
+    fill.style.background = rpm >= m.red ? ZONE.danger : rpm >= m.shift ? ZONE.shift : rpm >= m.warn ? ZONE.warn : '#e6e6e6';
+    const flag = body.querySelector('[data-flag]');
+    const f = rpm >= m.red ? ['LÍNEA ROJA', '#d4213a'] : rpm >= m.shift ? ['CAMBIO', ZONE.shift] : null;
+    flag.hidden = !f;
+    if (f) { flag.textContent = f[0]; flag.style.background = f[1]; }
+  }
+  body.querySelector('[data-axis="0"]').textContent = `−${L.win} s`;
+  body.querySelector('[data-axis="1"]').textContent = `−${L.win / 2} s`;
+  const extra = body.querySelector('[data-extra]');
+  if (isDev() && state.live) {
+    extra.textContent = Object.entries(state.live).filter(([k]) => !LV[k])
+      .map(([k, v]) => k === 'can_id' ? `Último CAN ID 0x${v}` : `${k}=${v}`).join(' · ');
+  }
+  lvToolbar();
+}
+
+/* Status pill, pause button and the hint under the toolbar */
+function lvToolbar() {
+  const L = state.lv;
+  const ready = !!(state.port && L.keys && L.t.length);
+  const st = $('live-state');
+  let text = 'Detenido', cls = 'off';
+  if (L.error) [text, cls] = ['Error: ' + L.error, 'dirty'];
+  else if (state.liveOn && L.paused) [text, cls] = [L.ago > 0.05 ? `Pausado · cursor −${L.ago.toFixed(1)} s` : 'Pausado', 'dirty'];
+  else if (state.liveOn) [text, cls] = [`En vivo · ${Math.round(1000 / Number($('live-period').value))} lecturas por segundo`, 'saved'];
+  st.textContent = text;
+  st.className = 'pill lv-state ' + cls;
+  const btn = $('btn-live-pause');
+  btn.disabled = !ready;
+  btn.classList.toggle('resume', L.paused);
+  btn.innerHTML = L.paused
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true" style="fill:currentColor"><path d="M7 4l13 8-13 8z"/></svg>Reanudar'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:2.5px;stroke-linecap:round"><path d="M8 5v14M16 5v14"/></svg>Pausar';
+  for (const b of $('live-win').children) b.classList.toggle('on', Number(b.dataset.v) === L.win);
+  $('live-hint').textContent = !ready ? ''
+    : L.paused ? 'Toca o pasa el mouse sobre una gráfica para ver otro momento. Reanudar vuelve al tiempo real.'
+    : `Toca una caja para ponerla o quitarla de la gráfica, hasta ${LV_MAX_SEL}. Toca la gráfica para pausar y ver los valores de ese momento.`;
+}
+
+function lvPause(on, cursor = 1) {
+  const L = state.lv;
+  if (!L.t.length) return;
+  if (on && !L.paused) L.end = L.t[L.t.length - 1];
+  L.paused = on;
+  L.cursor = cursor;
+  updateLive();
+}
+
+function lvToggle(k) {
+  const L = state.lv;
+  const sel = L.sel.filter((x) => x !== k && L.keys.includes(x));
+  L.dropped = null;
+  if (sel.length === L.sel.filter((x) => L.keys.includes(x)).length) {
+    sel.push(k);
+    if (sel.length > LV_MAX_SEL) L.dropped = sel.shift();
+  }
+  L.sel = sel;
+  prefs.set('liveSel', sel.join(','));
+  const f = document.activeElement?.closest?.('#live-body [data-toggle]');
+  const again = f && `.${f.classList[0]}[data-toggle="${f.dataset.toggle}"]`;
+  renderLive();
+  updateLive();
+  if (again) $('live-body').querySelector(again)?.focus();
+}
+
+const lvPos = (e, el) => { const r = el.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); };
+
+function lvClick(e) {
+  const t = e.target.closest('[data-toggle]');
+  if (t) { lvToggle(t.dataset.toggle); return; }
+  const p = e.target.closest('[data-pause]');
+  if (p) lvPause(true, lvPos(e, p));
+}
+
+function lvMove(e) {
+  if (!state.lv.paused) return;
+  const p = e.target.closest('.lv-plot');
+  if (!p) return;
+  state.lv.cursor = lvPos(e, p);
+  scheduleLive();
 }
 
 /* ---------------- SD card (File System Access on the mounted drive) ---------------- */
@@ -1858,13 +2908,65 @@ function downloadBoot() {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 
+/* ---------------- Developer mode and palette ---------------- */
+
+/* Browser storage can be blocked (private window, site data off): fall back to defaults */
+const prefs = {
+  get(key) { try { return localStorage.getItem(key); } catch (_) { return null; } },
+  set(key, val) { try { localStorage.setItem(key, val); } catch (_) {} },
+};
+
+const isDev = () => document.documentElement.classList.contains('dev');
+
+function setDevMode(on) {
+  document.documentElement.classList.toggle('dev', on);
+  $('dev-toggle').checked = on;
+  prefs.set('devMode', on ? '1' : '0');
+  if (!on && state.page === 'console') showPage('summary');
+  if (on && state.port) refreshMemory();
+  renderSettings(); // Avanzado's subtitle says whether it is on
+  updateTabsFade(); // the Consola tab came or went
+}
+
+const THEMES = { amarillo: 'icons/logo-amarillo.png', rojo: 'icons/logo-rojo.png' };
+
+function setTheme(name) {
+  const theme = THEMES[name] ? name : 'amarillo';
+  if (theme === 'amarillo') delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = theme;
+  $('brand-logo').src = THEMES[theme];
+  prefs.set('theme', theme);
+  return theme;
+}
+
+/* Console commands the app answers itself; they never reach the dash.
+ * Returns the reply lines, or null when the command is for the dash. */
+function localCommand(cmd) {
+  const [word, arg] = cmd.split(/\s+/);
+  if (word.toUpperCase() !== 'TEMA') return null;
+  if (!arg) return [`Tema actual: ${prefs.get('theme') || 'amarillo'}. Usa TEMA AMARILLO o TEMA ROJO.`];
+  const name = arg.toLowerCase();
+  if (!THEMES[name]) return [`Tema desconocido: ${arg}. Opciones: AMARILLO, ROJO.`];
+  return [`Tema ${setTheme(name)} aplicado`];
+}
+
 /* ---------------- Tabs and wiring ---------------- */
+
+function updateTabsFade() {
+  const n = $('tabs');
+  n.classList.toggle('more-left', n.scrollLeft > 2);
+  n.classList.toggle('more-right', n.scrollLeft + n.clientWidth < n.scrollWidth - 2);
+}
 
 function showPage(page) {
   state.page = page;
-  for (const b of $('tabs').children) b.classList.toggle('active', b.dataset.page === page);
+  for (const b of $('tabs').children) {
+    b.classList.toggle('active', b.dataset.page === page);
+    if (b.dataset.page === page && b.offsetParent) b.scrollIntoView({ block: 'nearest', inline: 'center' }); // clear of the edge fades
+  }
   for (const p of document.querySelectorAll('.page')) p.classList.toggle('active', p.id === 'page-' + page);
-  if (page === 'live') startLive(); else stopLive();
+  if (page === 'live') { renderLive(); updateLive(); } // units may have changed in Ajustes
+  syncLive();
   if (page === 'summary' && state.port && state.proto >= 1) refreshTime();
   if (page === 'firmware' && state.port && !state.fwBusy) refreshFwInfo();
   if (page === 'boot' && state.port && !state.bootBusy && !state.fwBusy) refreshBootInfo();
@@ -1882,6 +2984,12 @@ function init() {
   }
 
   for (const b of $('tabs').children) b.onclick = () => showPage(b.dataset.page);
+  $('tabs').addEventListener('scroll', updateTabsFade, { passive: true });
+  window.addEventListener('resize', updateTabsFade);
+  document.fonts?.ready.then(updateTabsFade); // tab widths change once the fonts load
+  setTheme(prefs.get('theme'));
+  setDevMode(prefs.get('devMode') === '1');
+  $('dev-toggle').onchange = (e) => setDevMode(e.target.checked);
   $('btn-connect').onclick = connect;
   $('btn-disconnect').onclick = disconnect;
   $('btn-mem').onclick = refreshMemory;
@@ -1891,12 +2999,34 @@ function init() {
   $('btn-dfu').onclick = enterDfu;
   $('btn-save').onclick = saveSettings;
   $('btn-revert').onclick = revertSettings;
-  $('btn-reload').onclick = loadSettings;
+  $('btn-reload').onclick = () => loadSettings();
+  $('page-settings').addEventListener('click', (e) => {
+    const el = e.target.closest('[data-act]');
+    if (el && el.dataset.act !== 'bool' && !el.disabled) settingsAction(el, e);
+  });
+  $('page-settings').addEventListener('change', (e) => {
+    const el = e.target.closest('[data-act="bool"]');
+    if (el) changeSetting(el.dataset.name, el.checked ? '1' : '0');
+  });
   $('btn-defaults').onclick = factoryDefaults;
   $('btn-export').onclick = exportSettings;
   $('btn-import').onclick = () => $('import-file').click();
   $('import-file').onchange = (e) => { if (e.target.files[0]) importSettings(e.target.files[0]); e.target.value = ''; };
   $('live-period').onchange = async () => { if (state.liveOn) { await stopLive(); await startLive(); } };
+  const savedSel = prefs.get('liveSel');
+  if (savedSel !== null) state.lv.sel = savedSel.split(',').filter((k) => LV[k]).slice(0, LV_MAX_SEL);
+  state.lv.win = [10, 30, 60].find((w) => String(w) === prefs.get('liveWin')) || 30;
+  $('live-win').onclick = (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    state.lv.win = Number(b.dataset.v);
+    prefs.set('liveWin', b.dataset.v);
+    updateLive();
+  };
+  $('btn-live-pause').onclick = () => lvPause(!state.lv.paused);
+  $('live-body').addEventListener('click', lvClick);
+  $('live-body').addEventListener('pointermove', lvMove);
+  lvToolbar();
   $('btn-sd-pick').onclick = pickSd;
   $('btn-fw-pick').onclick = () => $('fw-file').click();
   $('fw-file').onchange = (e) => { if (e.target.files[0]) openPackage(e.target.files[0]); e.target.value = ''; };
@@ -1916,6 +3046,12 @@ function init() {
     const cmd = $('console-input').value.trim();
     if (!cmd) return;
     $('console-input').value = '';
+    const local = localCommand(cmd);
+    if (local) {
+      log(cmd, 'tx');
+      for (const line of local) log(line, 'sys');
+      return;
+    }
     const isId = cmd.toUpperCase() === 'ID?';
     try {
       await command(cmd, { isDone: isId ? oneLine : untilEnd });
@@ -1924,8 +3060,8 @@ function init() {
     }
   };
 
-  setInterval(() => { $('time-pc').textContent = fmtDate(new Date()); }, 1000);
-  $('time-pc').textContent = fmtDate(new Date());
+  setInterval(() => { $('time-pc').textContent = fmtClock(new Date()); }, 1000);
+  $('time-pc').textContent = fmtClock(new Date());
 
   if (hasSerial) {
     navigator.serial.addEventListener('disconnect', (e) => {
