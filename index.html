@@ -76,7 +76,12 @@
   button.primary:disabled { background: var(--panel-2); border-color: #333; color: var(--muted); font-weight: 400; opacity: 1; }
   button.danger { background: transparent; color: #ff8a8a; border-color: #4a2626; }
   button.danger:hover:not(:disabled) { border-color: var(--bad); color: var(--bad); }
-  nav { display: flex; gap: 6px; padding: 10px 24px 0; background: #000; overflow-x: auto; }
+  nav { display: flex; gap: 6px; padding: 10px 24px 0; background: #000; overflow-x: auto; scrollbar-width: none; }
+  nav::-webkit-scrollbar { display: none; }
+  /* No scrollbar under the tabs; the edge fades while more tabs are hidden that way */
+  nav.more-right { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+  nav.more-left { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px); mask-image: linear-gradient(to right, transparent, #000 40px); }
+  nav.more-left.more-right { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
   nav button {
     border: 0; border-radius: 4px 4px 0 0; background: #161616; color: #a8a8a8; padding: 13px 20px;
     font: 600 14px/1 var(--display); letter-spacing: 1px; text-transform: uppercase;
@@ -2503,6 +2508,7 @@ function setDevMode(on) {
   if (!on && state.page === 'console') showPage('summary');
   if (on && state.port) refreshMemory();
   renderSettings(); // Avanzado's subtitle says whether it is on
+  updateTabsFade(); // the Consola tab came or went
 }
 
 const THEMES = { amarillo: 'icons/logo-amarillo.png', rojo: 'icons/logo-rojo.png' };
@@ -2529,11 +2535,17 @@ function localCommand(cmd) {
 
 /* ---------------- Tabs and wiring ---------------- */
 
+function updateTabsFade() {
+  const n = $('tabs');
+  n.classList.toggle('more-left', n.scrollLeft > 2);
+  n.classList.toggle('more-right', n.scrollLeft + n.clientWidth < n.scrollWidth - 2);
+}
+
 function showPage(page) {
   state.page = page;
   for (const b of $('tabs').children) {
     b.classList.toggle('active', b.dataset.page === page);
-    if (b.dataset.page === page && b.offsetParent) b.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    if (b.dataset.page === page && b.offsetParent) b.scrollIntoView({ block: 'nearest', inline: 'center' }); // clear of the edge fades
   }
   for (const p of document.querySelectorAll('.page')) p.classList.toggle('active', p.id === 'page-' + page);
   syncLive();
@@ -2554,6 +2566,9 @@ function init() {
   }
 
   for (const b of $('tabs').children) b.onclick = () => showPage(b.dataset.page);
+  $('tabs').addEventListener('scroll', updateTabsFade, { passive: true });
+  window.addEventListener('resize', updateTabsFade);
+  document.fonts?.ready.then(updateTabsFade); // tab widths change once the fonts load
   setTheme(prefs.get('theme'));
   setDevMode(prefs.get('devMode') === '1');
   $('dev-toggle').onchange = (e) => setDevMode(e.target.checked);
