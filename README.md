@@ -24,7 +24,7 @@ The Ajustes tab follows the dash's own settings screens: RPM y cambio, Alertas, 
 
 ## En vivo
 
-The En vivo tab follows the dash's Live Data screen: one big chart with up to four signals, each on its own scale (RPM, TPS, MAP and AFR by default), and below it a box per reading with its value, its trend, its min and max in the window, and the alert zone from Ajustes. Tap a box to put it on the chart or take it off; the choice and the window (10 s, 30 s, 1 min) are remembered per browser. Tap a chart to pause and read the values at any moment of the window. Readings use the units picked in Ajustes.
+The En vivo tab follows the dash's Live Data screen: one big chart with up to four signals, each on its own scale (RPMs, TPS, MAP and AFR by default), and below it a box per reading with its value, its trend, its min and max in the window, and the alert zone from Ajustes. Tap a box to put it on the chart or take it off; the choice and the window (10 s, 30 s, 1 min) are remembered per browser. Tap a chart to pause and read the values at any moment of the window. Readings use the units picked in Ajustes.
 
 ## Developer mode and palette
 

@@ -706,14 +706,14 @@ const SETTING_INFO = {
  * Ranges are in the line's own units: °C, kPa, mV, lambda × 10000.
  * alert: the Ajustes › Alertas sensors that color the box */
 const LV = {
-  rpm: { name: 'RPM', color: '#ff5a4f', kind: 'rpm' },
+  rpm: { name: 'RPMs', color: '#ff5a4f', kind: 'rpm' },
   spd: { name: 'Velocidad', color: '#b48cff', min: 0, max: 260, kind: 'speed' },
   gear: { name: 'Marcha', color: '#c8c8d2', min: 0, max: 7, kind: 'gear' },
-  tps: { name: 'Acelerador', color: '#f5c542', min: 0, max: 100, kind: 'pct' },
+  tps: { name: 'TPS', color: '#f5c542', min: 0, max: 100, kind: 'pct' },
   map: { name: 'MAP', color: '#3b9bff', min: 0, kind: 'press', unit: 'map_unit', alert: ['map'] },
   lambda: { name: 'AFR', color: '#3ddc6a', min: 6803, max: 13605, kind: 'lambda' },
-  clt: { name: 'Refrigerante', color: '#ff8c3c', min: 0, max: 130, kind: 'temp', alert: ['clt'] },
-  iat: { name: 'Admisión', color: '#5ad2e6', min: -20, max: 80, kind: 'temp' },
+  clt: { name: 'CLT', color: '#ff8c3c', min: 0, max: 130, kind: 'temp', alert: ['clt'] },
+  iat: { name: 'IAT', color: '#5ad2e6', min: -20, max: 80, kind: 'temp' },
   oilt: { name: 'Temp. aceite', color: '#ff78b4', min: 0, max: 150, kind: 'temp', alert: ['oilt'] },
   oilp: { name: 'Presión aceite', color: '#e6dc6e', min: 0, max: 700, kind: 'press', unit: 'oilp_unit', alert: ['oilp'] },
   fuelp: { name: 'Presión comb.', color: '#96d25a', min: 0, max: 700, kind: 'press', unit: 'fuelp_unit', alert: ['fuelp'] },
@@ -1116,7 +1116,7 @@ const RPM_FIELDS = [
  * low: alerts when the value drops; bar: drawn range (max 0 = MAP sensor range);
  * unit: the setting with its kPa/psi choice; engine: reads 0 with the engine off */
 const ALERT_SENSORS = [
-  { id: 'clt', name: 'Refrigerante', fields: ['clt_cold', 'clt_warning', 'clt_danger'], kind: 'temp', step: 1, bar: [0, 150], live: 'clt' },
+  { id: 'clt', name: 'CLT', fields: ['clt_cold', 'clt_warning', 'clt_danger'], kind: 'temp', step: 1, bar: [0, 150], live: 'clt' },
   { id: 'oilt', name: 'Temp. aceite', fields: ['oilt_cold', 'oilt_warning', 'oilt_danger'], kind: 'temp', step: 1, bar: [0, 150], live: 'oilt' },
   { id: 'oilp', name: 'Presión aceite', fields: [null, 'oilp_warning', 'oilp_danger'], low: true, kind: 'press', unit: 'oilp_unit', step: 5, bar: [0, 700], live: 'oilp', engine: true },
   { id: 'fuelp', name: 'Presión comb.', fields: [null, 'fuelp_warning', 'fuelp_danger'], low: true, kind: 'press', unit: 'fuelp_unit', step: 5, bar: [0, 700], live: 'fuelp', engine: true },
@@ -1134,7 +1134,7 @@ const BRIGHT_SOURCES = { BEAM_OR_TIME: 'Luces bajas u horario', LOW_BEAM: 'Solo 
 
 /* Oil and fuel pressure share one choice, as on the dash's units screen */
 const UNIT_ROWS = [
-  { label: 'Temperatura', sub: 'Motor, aceite y admisión', fields: ['temp_unit'], opts: { C: '°C', F: '°F' } },
+  { label: 'Temperatura', sub: 'CLT, IAT y aceite', fields: ['temp_unit'], opts: { C: '°C', F: '°F' } },
   { label: 'Velocidad', sub: 'Velocímetro y trips', fields: ['speed_unit'], opts: { KPH: 'km/h', MPH: 'mph' } },
   { label: 'Mezcla', sub: 'Sonda lambda', fields: ['lambda_unit'], opts: { AFR: 'AFR', LAMBDA: 'λ' } },
   { label: 'Presión MAP', sub: 'Presión de admisión', fields: ['map_unit'], opts: { KPA: 'kPa', PSI: 'psi' } },
@@ -1891,7 +1891,7 @@ function renderLive() {
       .map(([a, b, c]) => `<i style="left:${pct(a)}%;width:${Math.max(0, pct(b) - pct(a))}%;background:${c}"></i>`).join('');
     const n = top / 1000, step = n % 2 === 0 ? 2 : n % 3 === 0 ? 3 : 1;
     const ticks = Array.from({ length: n / step + 1 }, (_, i) => `<span>${i * step}</span>`).join('');
-    hero += `<section><div class="lv-top"><span>RPM</span><span class="lv-flag" data-flag hidden></span>${pick('rpm')}</div>` +
+    hero += `<section><div class="lv-top"><span>RPMs</span><span class="lv-flag" data-flag hidden></span>${pick('rpm')}</div>` +
       '<div class="lv-row"><span class="lv-big" data-val="rpm"></span><span class="lv-mm" data-mm="rpm"></span></div>' +
       `<div class="lv-rpmbar">${zones}<b data-rpmfill></b></div><div class="lv-ticks">${ticks}</div>` +
       lvPlot('lv-spark', ['rpm'], { pause: true, fill: true, inner: lvRefLine('rpm') }) + '</section>';
