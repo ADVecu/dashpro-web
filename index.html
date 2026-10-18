@@ -201,11 +201,84 @@
     border: 1px solid #333; border-radius: 6px; padding: 7px 9px; font: 13px var(--mono);
   }
   input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); }
-  .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
-  .tile { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
-  .tile .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .6px; }
-  .tile .value { font: 600 28px/1.2 var(--mono); margin-top: 6px; }
-  .tile .value small { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 4px; }
+  /* En vivo: a big chart with the signals picked in the boxes below; each box keeps its own trend */
+  .lv-state { display: inline-flex; align-items: center; gap: 8px; }
+  .lv-state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  .lv-state.off { background: var(--panel-2); color: var(--muted); }
+  #live-win button { min-width: 56px; min-height: 36px; padding: 0 12px; }
+  #btn-live-pause { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
+  #btn-live-pause svg { width: 14px; height: 14px; }
+  #btn-live-pause.resume { background: var(--accent); border-color: var(--accent); color: var(--on-accent); font-weight: 600; }
+  .lv-hint { margin: -6px 0 14px; font-size: 13px; color: var(--muted); }
+  .lv-hint:empty { display: none; }
+  .lv { display: flex; flex-direction: column; gap: 14px; }
+  .lv-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 6px 12px; margin-bottom: 10px; }
+  .lv-head h2 { margin: 0; }
+  .lv-note { font-size: 12.5px; color: var(--muted); }
+  .lv-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .lv-legend:empty { display: none; }
+  .lv-leg { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 2px 0 10px; background: #0f0f0f; border: 1px solid #2a2a2a; border-left: 4px solid; border-radius: 6px; }
+  .lv-leg b { font: 600 12.5px/1 var(--display); letter-spacing: 1px; text-transform: uppercase; color: #cfcfcf; white-space: nowrap; }
+  .lv-leg output { font: 14px/1 var(--mono); color: #fff; white-space: nowrap; }
+  .lv-leg small { font: 11px/1 var(--mono); color: #7a7a7a; white-space: nowrap; }
+  .lv-leg button { display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; background: transparent; border: 0; color: var(--muted); }
+  .lv-leg button:hover { color: #fff; }
+  .lv-leg path { fill: none; stroke: currentColor; stroke-width: 3px; stroke-linecap: round; }
+  .lv-plot { position: relative; display: block; overflow: hidden; background: #0f0f0f; }
+  .lv-plot[data-pause] { cursor: crosshair; touch-action: pan-y; }
+  .lv-chart { height: 300px; background: #0c0c0c; border: 1px solid #1f1f1f; border-radius: 6px; }
+  .lv-spark { height: 56px; margin-top: 10px; border-radius: 6px; }
+  .lv-plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .lv-plot path { fill: none; stroke-width: 2px; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+  .lv-plot path.area { stroke: none; fill-opacity: .15; }
+  .lv-grid { position: absolute; inset: 0; pointer-events: none;
+    background-image: linear-gradient(to right, #1e2127 1px, transparent 1px), linear-gradient(to bottom, #1e2127 1px, transparent 1px);
+    background-size: calc(100% / 6) 100%, 100% 25%; }
+  .lv-ref { position: absolute; left: 0; right: 0; border-top: 1px dashed; pointer-events: none; }
+  .lv-cursor { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: #fff; pointer-events: none; }
+  .lv-cursor[hidden] { display: none; }
+  .lv-dot { position: absolute; width: 12px; height: 12px; margin: -6px 0 0 -6px; border-radius: 50%; border: 2px solid #0c0c0c; pointer-events: none; }
+  .lv-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; padding: 0 24px; text-align: center; font-size: 14px; color: var(--muted); }
+  .lv-axis { display: flex; justify-content: space-between; margin-top: 6px; font: 11.5px var(--mono); color: #8a8a8a; }
+  .lv-hero { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: 14px; }
+  .lv-top { display: flex; align-items: center; gap: 10px; min-height: 34px; }
+  .lv-top > span:first-child { font: 600 12.5px/1 var(--display); letter-spacing: 1.5px; text-transform: uppercase; color: #b5b5b5; }
+  .lv-flag { padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #fff; }
+  .lv-pick { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; min-height: 34px; padding: 0 12px 0 10px; background: transparent; color: #b5b5b5; font-size: 13px; font-weight: 600; }
+  .lv-pick[aria-pressed=true] { background: var(--panel-2); border-color: var(--c); color: #fff; }
+  .lv-check { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; flex: none; border: 2px solid var(--c); border-radius: 4px; }
+  .lv-check svg { width: 12px; height: 12px; visibility: hidden; }
+  .lv-check path { fill: none; stroke: #000; stroke-width: 3.5px; stroke-linecap: round; stroke-linejoin: round; }
+  [aria-pressed=true] .lv-check { background: var(--c); }
+  [aria-pressed=true] .lv-check svg { visibility: visible; }
+  .lv-row { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
+  .lv-big { font: 600 52px/1.1 var(--display); color: #fff; }
+  .lv-big small, .lv-val small { margin-left: 6px; font: 400 15px "Barlow", sans-serif; color: var(--muted); }
+  .lv-mm { font: 12px var(--mono); color: var(--muted); }
+  .lv-rpmbar { position: relative; height: 16px; margin-top: 8px; background: #1d222c; border-radius: 4px; overflow: hidden; }
+  .lv-rpmbar i { position: absolute; top: 0; bottom: 0; opacity: .35; }
+  .lv-rpmbar b { position: absolute; left: 0; top: 0; bottom: 0; }
+  .lv-ticks { display: flex; justify-content: space-between; margin-top: 4px; font: 11px var(--mono); color: #8a8a8a; }
+  .lv-spd { display: flex; align-items: flex-end; gap: 16px; }
+  .lv-spd > div:first-child { flex: 1; min-width: 0; }
+  .lv-gear { display: flex; flex-direction: column; align-items: center; gap: 4px; font: 600 12px/1 var(--display); letter-spacing: 1.5px; color: #b5b5b5; }
+  .lv-gear output { display: flex; align-items: center; justify-content: center; width: 64px; height: 64px; border: 2px solid var(--accent-text); border-radius: 10px; font: 700 40px/1 var(--display); color: var(--accent-text); }
+  .lv-tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .lv-tile { display: flex; flex-direction: column; gap: 6px; min-width: 0; padding: 14px 16px; text-align: left; background: var(--panel); border: 2px solid var(--line); border-radius: 10px; }
+  .lv-tile[aria-pressed=true] { border-color: var(--c); }
+  .lv-tile.warn { border-color: #f5a623; }
+  .lv-tile.danger { border-color: #ff3b4f; }
+  .lv-name { display: flex; align-items: center; gap: 8px; width: 100%; min-width: 0; }
+  .lv-name b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 12.5px/1.2 var(--display); letter-spacing: 1px; text-transform: uppercase; color: #cfcfcf; }
+  .lv-val { font: 600 30px/1.15 var(--display); color: #fff; }
+  .lv-val small { font-size: 14px; }
+  .lv-tile .lv-spark { width: 100%; height: 48px; margin-top: 2px; border-radius: 4px; }
+  .lv-zone { flex: none; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; letter-spacing: .5px; }
+  .lv-zone:empty { display: none; }
+  .lv-zone.cold { background: #3b9eff; color: #000; }
+  .lv-zone.warn { background: #f5a623; color: #000; }
+  .lv-zone.danger { background: #d4213a; color: #fff; }
+  .lv-foot { margin: 4px 0 0; font: 12px var(--mono); color: #6f6f6f; overflow-wrap: anywhere; }
   #console-log {
     height: 360px; overflow: auto; background: #000; border: 1px solid #222;
     border-radius: 6px; padding: 8px 10px; font: 12.5px/1.5 var(--mono); white-space: pre-wrap;
@@ -269,6 +342,24 @@
     .seg button { flex: 1 1 auto; min-width: 0; padding: 0 10px; }
     .stepctl { flex: 1 1 100%; }
     .stepctl output { flex: 1; min-width: 0; }
+    /* En vivo: shorter chart, two boxes per row */
+    .lv-chart { height: 220px; }
+    .lv-winlabel { display: none; }
+    #page-live > .toolbar .lv-state { flex: 1 1 100%; justify-content: flex-start; }
+    #page-live > .toolbar .spacer { display: none; }
+    #live-win { flex: 1 1 auto; }
+    /* Legend two per row; long names are cut */
+    .lv-legend { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .lv-leg { min-width: 0; gap: 6px; padding-left: 8px; }
+    .lv-leg b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; font-size: 11.5px; }
+    .lv-leg output { font-size: 13px; }
+    .lv-leg small { display: none; }
+    .lv-leg button { width: 28px; }
+    .lv-tile .lv-mm { font-size: 11px; }
+    .lv-big { font-size: 46px; }
+    .lv-tiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+    .lv-tile { padding: 12px; }
+    .lv-val { font-size: 26px; }
   }
   @media (max-width: 350px) {
     header { padding: 10px 12px; }
@@ -391,16 +482,22 @@
 <!-- Live -->
 <div class="page" id="page-live">
   <div class="toolbar">
-    <span class="muted">Período</span>
-    <select id="live-period" style="width:auto">
-      <option value="100">100 ms</option>
-      <option value="200" selected>200 ms</option>
-      <option value="500">500 ms</option>
-      <option value="1000">1 s</option>
-    </select>
-    <span class="muted" id="live-state">Detenido</span>
+    <span class="pill lv-state off" id="live-state">Detenido</span>
+    <span class="spacer"></span>
+    <span class="muted lv-winlabel">Ventana</span>
+    <div class="seg" id="live-win"><button data-v="10">10 s</button><button data-v="30" class="on">30 s</button><button data-v="60">1 min</button></div>
+    <button id="btn-live-pause" disabled></button>
+    <label class="dev-only"><span class="muted">Lecturas cada</span>
+      <select id="live-period" style="width:auto">
+        <option value="100">100 ms</option>
+        <option value="200" selected>200 ms</option>
+        <option value="500">500 ms</option>
+        <option value="1000">1 s</option>
+      </select>
+    </label>
   </div>
-  <div class="tiles" id="live-tiles"><div class="empty">Conecta el dash para ver los datos en vivo.</div></div>
+  <p class="lv-hint" id="live-hint"></p>
+  <div id="live-body"><div class="empty">Conecta el dash para ver los datos en vivo.</div></div>
 </div>
 
 <!-- Firmware -->
@@ -605,14 +702,28 @@ const SETTING_INFO = {
   turn_blink_internal: ['ECU', 'Parpadeo interno de direccionales'],
 };
 
-/* Live values: key in the "L" line -> [label, unit, scale]; scale 0 = hex */
-const LIVE_INFO = {
-  rpm: ['RPM', '', 1], spd: ['Velocidad', 'km/h', 1], gear: ['Marcha', '', 1],
-  clt: ['Temp. motor', '°C', 1], iat: ['Temp. admisión', '°C', 1], oilt: ['Temp. aceite', '°C', 1],
-  oilp: ['Presión aceite', 'kPa', 1], fuelp: ['Presión comb.', 'kPa', 1], map: ['MAP', 'kPa', 1],
-  tps: ['TPS', '%', 1], lambda: ['Lambda', 'mV', 1], batt: ['Batería', 'V', 0.001],
-  fuel: ['Combustible', '%', 1], can_id: ['Último CAN ID', '', 0],
+/* Channels of the "L" line with the colors and ranges of the dash's Live Data screen.
+ * Ranges are in the line's own units: °C, kPa, mV, lambda × 10000.
+ * alert: the Ajustes › Alertas sensors that color the box */
+const LV = {
+  rpm: { name: 'RPM', color: '#ff5a4f', kind: 'rpm' },
+  spd: { name: 'Velocidad', color: '#b48cff', min: 0, max: 260, kind: 'speed' },
+  gear: { name: 'Marcha', color: '#c8c8d2', min: 0, max: 7, kind: 'gear' },
+  tps: { name: 'Acelerador', color: '#f5c542', min: 0, max: 100, kind: 'pct' },
+  map: { name: 'MAP', color: '#3b9bff', min: 0, kind: 'press', unit: 'map_unit', alert: ['map'] },
+  lambda: { name: 'AFR', color: '#3ddc6a', min: 6803, max: 13605, kind: 'lambda' },
+  clt: { name: 'Refrigerante', color: '#ff8c3c', min: 0, max: 130, kind: 'temp', alert: ['clt'] },
+  iat: { name: 'Admisión', color: '#5ad2e6', min: -20, max: 80, kind: 'temp' },
+  oilt: { name: 'Temp. aceite', color: '#ff78b4', min: 0, max: 150, kind: 'temp', alert: ['oilt'] },
+  oilp: { name: 'Presión aceite', color: '#e6dc6e', min: 0, max: 700, kind: 'press', unit: 'oilp_unit', alert: ['oilp'] },
+  fuelp: { name: 'Presión comb.', color: '#96d25a', min: 0, max: 700, kind: 'press', unit: 'fuelp_unit', alert: ['fuelp'] },
+  batt: { name: 'Batería', color: '#78aaff', min: 8000, max: 16000, kind: 'volt', alert: ['batt', 'batt_high'] },
+  fuel: { name: 'Combustible', color: '#ffaa64', min: 0, max: 100, kind: 'pct', alert: ['fuel'] },
 };
+const LV_TILES = ['tps', 'map', 'lambda', 'clt', 'iat', 'oilt', 'oilp', 'fuelp', 'batt', 'fuel'];
+const LV_DEFAULT_SEL = ['rpm', 'tps', 'map', 'lambda']; // the dash's Live Data screen
+const LV_MAX_SEL = 4;
+const LV_KEEP_MS = 65000;
 
 const $ = (id) => document.getElementById(id);
 
@@ -632,6 +743,8 @@ const state = {
   set: { section: 'rpm', rpm: 'rpm_shift', sensor: 'clt', slot: 2 }, // Ajustes tab selection
   liveOn: false,
   live: null,         // last live values, for the alerts section
+  // En vivo: samples of the last minute, the signals on the big chart, window in s, pause and cursor (0..1 of the window)
+  lv: { keys: null, t: [], v: {}, sel: LV_DEFAULT_SEL, win: 30, paused: false, end: 0, cursor: 1, dropped: null, error: '' },
   sdDir: null,
   pkg: null,          // verified .dashfw chosen in the Firmware tab
   boot: null,         // image chosen in the Boot tab: {name, frames: [{bmp, ms}], w, h}
@@ -689,16 +802,15 @@ function setConnected(on) {
     for (const id of ['dev-product', 'dev-fw', 'dev-proto', 'dev-serial', 'dev-usb', 'time-dash']) $(id).textContent = '—';
     $('mem-body').innerHTML = '<span class="muted">Conecta el dash para ver la memoria.</span>';
     $('trip-body').textContent = '—';
-    $('live-tiles').innerHTML = '<div class="empty">Conecta el dash para ver los datos en vivo.</div>';
-    delete $('live-tiles').dataset.ready;
-    $('live-state').textContent = 'Detenido';
     state.schema = [];
     state.savedValues = null;
     state.settingsMsg = '';
     state.liveOn = false;
     state.live = null;
+    lvReset();
   }
   renderSettings();
+  renderLive();
 }
 
 async function connect() {
@@ -1085,6 +1197,7 @@ async function loadSettings(fresh = false) {
     state.settingsMsg = 'No se pudieron leer los ajustes: ' + err.message;
   }
   renderSettings();
+  if (state.page === 'live') { renderLive(); updateLive(); } // ranges, units and thresholds come from the settings
 }
 
 /* Sensors this firmware has thresholds for */
@@ -1611,17 +1724,19 @@ async function startLive() {
   try {
     await command('LIVE ON ' + $('live-period').value, { quiet: true });
     state.liveOn = true;
-    $('live-state').textContent = 'Recibiendo';
+    state.lv.error = '';
+    lvReset(); // a fresh minute; the stream was off, so the old one has a gap
   } catch (err) {
-    $('live-state').textContent = 'Error: ' + err.message;
+    state.lv.error = err.message;
   }
+  lvToolbar();
 }
 
 async function stopLive() {
   if (!state.port || !state.liveOn) return;
   state.liveOn = false;
   state.live = null;
-  $('live-state').textContent = 'Detenido';
+  lvToolbar();
   try { await command('LIVE OFF', { quiet: true }); } catch (_) {}
 }
 
@@ -1636,23 +1751,325 @@ function onLive(text) {
   if (!state.liveOn) return; // a line still in flight after LIVE OFF
   state.live = values;
   updateAlertLive();
-  const tiles = $('live-tiles');
-  if (!tiles.dataset.ready) {
-    tiles.innerHTML = Object.keys(values).map((k) => {
-      const [label] = LIVE_INFO[k] || [k];
-      return `<div class="tile"><div class="label">${esc(label)}</div><div class="value" id="live-${esc(k)}">—</div></div>`;
-    }).join('');
-    tiles.dataset.ready = '1';
+  lvAdd(values);
+}
+
+function lvReset() {
+  const L = state.lv;
+  L.keys = null;
+  L.t = [];
+  L.v = {};
+  L.paused = false;
+  L.cursor = 1;
+  if (state.page === 'live') renderLive();
+}
+
+function lvAdd(values) {
+  const L = state.lv;
+  if (!L.keys) {
+    L.keys = Object.keys(LV).filter((k) => values[k] !== undefined);
+    if (state.page === 'live') renderLive();
   }
-  for (const [k, raw] of Object.entries(values)) {
-    const el = $('live-' + k);
-    if (!el) continue;
-    const [, unit = '', scale = 1] = LIVE_INFO[k] || [];
-    let shown = raw;
-    if (scale === 0) shown = '0x' + raw;
-    else if (scale !== 1) shown = (Number(raw) * scale).toFixed(2);
-    el.innerHTML = `${esc(shown)}${unit ? `<small>${esc(unit)}</small>` : ''}`;
+  if (!L.paused) {
+    const now = performance.now();
+    L.t.push(now);
+    for (const k of L.keys) {
+      const h = (L.v[k] ??= []);
+      const v = Number(values[k]);
+      h.push(Number.isFinite(v) ? v : (h.length ? h[h.length - 1] : 0));
+    }
+    let cut = 0;
+    while (cut < L.t.length && L.t[cut] < now - LV_KEEP_MS) cut++;
+    if (cut) {
+      L.t.splice(0, cut);
+      for (const k of L.keys) L.v[k].splice(0, cut);
+    }
   }
+  if (state.page === 'live') scheduleLive();
+}
+
+let lvFrame = 0;
+const scheduleLive = () => { lvFrame ||= requestAnimationFrame(() => { lvFrame = 0; updateLive(); }); };
+
+const lvName = (k) => k === 'lambda' && valOf('lambda_unit') === 'LAMBDA' ? 'Lambda' : LV[k].name;
+const rpmMarks = () => ({ warn: numOf('rpm_warning') || 6000, shift: numOf('rpm_shift') || 6500, red: numOf('rpm_redline') || 7500 });
+
+/* Chart range, as the dash draws it: RPM up to the redline plus a margin, MAP up to the sensor range */
+function lvRange(k) {
+  if (k === 'rpm') return [0, Math.min(10000, Math.ceil((rpmMarks().red + 500) / 1000) * 1000)];
+  if (k === 'map') return [0, Number(valOf('map_max')) || 250];
+  return [LV[k].min, LV[k].max];
+}
+
+/* [value, unit] in the units picked in Ajustes */
+function lvFmt(k, v) {
+  if (v === undefined || !Number.isFinite(v)) return ['—', ''];
+  switch (LV[k].kind) {
+    case 'rpm': return [String(Math.round(v)), ''];
+    case 'speed': return valOf('speed_unit') === 'MPH' ? [String(Math.round(v * 0.621371)), 'mph'] : [String(Math.round(v)), 'km/h'];
+    case 'gear': return [v > 0 ? String(v) : 'N', ''];
+    case 'temp': return isF() ? [String(Math.trunc(v * 9 / 5) + 32), '°F'] : [String(Math.round(v)), '°C'];
+    case 'press': return valOf(LV[k].unit) === 'PSI' ? [String(kpaToPsi(v)), 'psi'] : [String(Math.round(v)), 'kPa'];
+    case 'lambda': return [valOf('lambda_unit') === 'LAMBDA' ? (v * 0.0001).toFixed(2) : (v * 0.00147).toFixed(1), ''];
+    case 'volt': return [(v / 1000).toFixed(1), 'V'];
+    default: return [String(Math.round(v)), '%'];
+  }
+}
+const lvText = (k, v) => lvFmt(k, v).filter(Boolean).join(' ');
+
+/* Alert zone from the thresholds in Ajustes; pressures don't alert with the engine off */
+const LV_RANK = { '': 0, cold: 1, warn: 2, danger: 3 };
+const LV_ZONE_TEXT = { cold: 'Frío', warn: 'Aviso', danger: 'Peligro' };
+function lvZone(k, v, rpm) {
+  let worst = '';
+  for (const s of alertSensors()) {
+    if (!(LV[k].alert || []).includes(s.id) || (s.engine && !(rpm > 0))) continue;
+    const c = zoneColor(s, v);
+    const z = c === ZONE.danger ? 'danger' : c === ZONE.warn ? 'warn' : c === ZONE.cold ? 'cold' : '';
+    if (LV_RANK[z] > LV_RANK[worst]) worst = z;
+  }
+  return worst;
+}
+
+/* Dashed line: the redline, 14.7 AFR, or the warning threshold */
+function lvRefLine(k) {
+  let ref = null;
+  if (k === 'rpm') ref = [rpmMarks().red, ZONE.danger];
+  else if (k === 'lambda') ref = [10000, '#8a8a8a'];
+  else {
+    const s = alertSensors().find((x) => (LV[k].alert || [])[0] === x.id);
+    if (s) ref = [numOf(s.fields[1]), ZONE.warn];
+  }
+  return ref ? `<span class="lv-ref" style="top:${lvY(k, ref[0], lvRange(k)).toFixed(2)}%;border-color:${ref[1]}"></span>` : '';
+}
+const lvY = (k, v, [a, b]) => 100 - Math.max(0, Math.min(1, (v - a) / (b - a))) * 100;
+
+const LV_CHECK = '<span class="lv-check"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"/></svg></span>';
+
+function lvPlot(cls, keys, { pause = false, fill = false, inner = '' } = {}) {
+  const paths = keys.map((k) => (fill ? `<path class="area" data-a="${k}" style="fill:${LV[k].color}"/>` : '') +
+    `<path data-l="${k}" style="stroke:${LV[k].color}"/>`).join('');
+  return `<span class="${cls} lv-plot"${pause ? ' data-pause' : ''}>${inner}` +
+    `<svg viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>` +
+    '<span class="lv-cursor" hidden></span></span>';
+}
+
+/* Builds the page; updateLive fills in the readings */
+function renderLive() {
+  const L = state.lv;
+  const body = $('live-body');
+  lvToolbar();
+  if (!state.port || !L.keys) {
+    body.innerHTML = `<div class="empty">${state.port ? 'Esperando datos del dash…' : 'Conecta el dash para ver los datos en vivo.'}</div>`;
+    return;
+  }
+  const has = (k) => L.keys.includes(k);
+  const sel = L.sel.filter(has);
+  const one = sel.length === 1 ? sel[0] : null;
+  const note = L.dropped ? `Se quitó ${lvName(L.dropped)} para dejar ${LV_MAX_SEL} en la gráfica`
+    : sel.length ? `${sel.length} de ${LV_MAX_SEL} · cada una en su propia escala` : 'Ninguna señal en la gráfica';
+  const legend = sel.map((k) => {
+    const [a, b] = lvRange(k);
+    return `<span class="lv-leg" style="border-left-color:${LV[k].color}"><b>${esc(lvName(k))}</b><output data-leg="${k}"></output>` +
+      `<small>${esc(lvFmt(k, a)[0])}–${esc(lvText(k, b))}</small>` +
+      `<button data-toggle="${k}" aria-label="Quitar ${esca(lvName(k))} de la gráfica" title="Quitar de la gráfica">` +
+      '<svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></span>';
+  }).join('');
+  const chart = lvPlot('lv-chart', sel, {
+    pause: true, fill: !!one,
+    inner: '<span class="lv-grid"></span>' + (one ? lvRefLine(one) : '') +
+      sel.map((k) => `<span class="lv-dot" data-dot="${k}" style="background:${LV[k].color}"></span>`).join('') +
+      (sel.length ? '' : '<span class="lv-empty">Toca una caja de abajo para ponerla en la gráfica</span>'),
+  });
+  const pick = (k) => `<button class="lv-pick" data-toggle="${k}" aria-pressed="${sel.includes(k)}" style="--c:${LV[k].color}">${LV_CHECK}Gráfica</button>`;
+
+  let hero = '';
+  if (has('rpm')) {
+    const m = rpmMarks(), top = lvRange('rpm')[1];
+    const pct = (v) => Math.min(100, v / top * 100);
+    const zones = [[m.warn, m.shift, ZONE.warn], [m.shift, m.red, ZONE.shift], [m.red, top, ZONE.danger]]
+      .map(([a, b, c]) => `<i style="left:${pct(a)}%;width:${Math.max(0, pct(b) - pct(a))}%;background:${c}"></i>`).join('');
+    const n = top / 1000, step = n % 2 === 0 ? 2 : n % 3 === 0 ? 3 : 1;
+    const ticks = Array.from({ length: n / step + 1 }, (_, i) => `<span>${i * step}</span>`).join('');
+    hero += `<section><div class="lv-top"><span>RPM</span><span class="lv-flag" data-flag hidden></span>${pick('rpm')}</div>` +
+      '<div class="lv-row"><span class="lv-big" data-val="rpm"></span><span class="lv-mm" data-mm="rpm"></span></div>' +
+      `<div class="lv-rpmbar">${zones}<b data-rpmfill></b></div><div class="lv-ticks">${ticks}</div>` +
+      lvPlot('lv-spark', ['rpm'], { pause: true, fill: true, inner: lvRefLine('rpm') }) + '</section>';
+  }
+  if (has('spd')) {
+    hero += `<section><div class="lv-top"><span>Velocidad</span>${pick('spd')}</div>` +
+      '<div class="lv-spd"><div><span class="lv-big" data-val="spd"></span><div class="lv-mm" data-mm="spd"></div></div>' +
+      (has('gear') ? '<div class="lv-gear">MARCHA<output data-gear></output></div>' : '') + '</div>' +
+      lvPlot('lv-spark', ['spd'], { pause: true, fill: true }) + '</section>';
+  }
+  const tiles = LV_TILES.filter(has).map((k) =>
+    `<button class="lv-tile" data-toggle="${k}" aria-pressed="${sel.includes(k)}" style="--c:${LV[k].color}">` +
+    `<span class="lv-name">${LV_CHECK}<b>${esc(lvName(k))}</b><span class="lv-zone" data-zone="${k}"></span></span>` +
+    `<span class="lv-val" data-val="${k}"></span>` +
+    lvPlot('lv-spark', [k], { fill: true, inner: lvRefLine(k) }) +
+    `<span class="lv-mm" data-mm="${k}"></span></button>`).join('');
+
+  body.innerHTML = '<div class="lv">' +
+    `<section><div class="lv-head"><h2>Gráfica</h2><span class="lv-note">${esc(note)}</span></div>` +
+    `<div class="lv-legend">${legend}</div>${chart}` +
+    '<div class="lv-axis"><span data-axis="0"></span><span data-axis="1"></span><span>ahora</span></div></section>' +
+    (hero ? `<div class="lv-hero">${hero}</div>` : '') +
+    `<div class="lv-tiles">${tiles}</div>` +
+    '<p class="lv-foot dev-only" data-extra></p></div>';
+}
+
+/* Readings, charts and cursor; runs on every sample while the tab is open */
+function updateLive() {
+  const L = state.lv;
+  const body = $('live-body');
+  const n = L.t.length;
+  if (!L.keys || !n || !body.querySelector('.lv')) { lvToolbar(); return; }
+  const end = L.paused ? L.end : L.t[n - 1];
+  const win = L.win * 1000, start = end - win;
+  let i0 = 0;
+  while (i0 < n - 1 && L.t[i0] < start) i0++;
+  let i1 = n - 1;
+  while (i1 > 0 && L.t[i1] > end) i1--;
+  let ic = i1; // the sample under the cursor
+  if (L.paused) {
+    const tc = start + L.cursor * win;
+    for (let i = i0; i <= i1; i++) if (Math.abs(L.t[i] - tc) < Math.abs(L.t[ic] - tc)) ic = i;
+  }
+  L.ago = (L.t[i1] - L.t[ic]) / 1000;
+  const xOf = (i) => (L.t[i] - start) / win * 1000;
+  const R = {}, paths = {};
+  const range = (k) => (R[k] ??= lvRange(k));
+  const path = (k) => {
+    if (paths[k] === undefined) {
+      let d = '';
+      for (let i = Math.max(0, i0 - 1); i <= i1; i++) d += (d ? 'L' : 'M') + xOf(i).toFixed(1) + ',' + lvY(k, L.v[k][i], range(k)).toFixed(1);
+      paths[k] = d;
+    }
+    return paths[k];
+  };
+  const at = (k) => L.v[k] ? L.v[k][ic] : undefined;
+  const xc = xOf(ic) / 10;
+
+  for (const plot of body.querySelectorAll('.lv-plot')) {
+    for (const p of plot.querySelectorAll('[data-l]')) p.setAttribute('d', path(p.dataset.l));
+    for (const p of plot.querySelectorAll('[data-a]')) {
+      const d = path(p.dataset.a);
+      p.setAttribute('d', d ? `${d}L1000,100L${xOf(Math.max(0, i0 - 1)).toFixed(1)},100Z` : '');
+    }
+    const cur = plot.querySelector('.lv-cursor');
+    cur.hidden = !L.paused;
+    cur.style.left = xc.toFixed(2) + '%';
+  }
+  for (const d of body.querySelectorAll('[data-dot]')) {
+    const k = d.dataset.dot;
+    d.style.left = `clamp(6px, ${xc.toFixed(2)}%, calc(100% - 6px))`;
+    d.style.top = `clamp(6px, ${lvY(k, at(k), range(k)).toFixed(2)}%, calc(100% - 6px))`;
+  }
+  const rpm = at('rpm');
+  for (const el of body.querySelectorAll('[data-val]')) {
+    const [v, u] = lvFmt(el.dataset.val, at(el.dataset.val));
+    el.innerHTML = esc(v) + (u ? `<small>${esc(u)}</small>` : '');
+  }
+  for (const el of body.querySelectorAll('[data-leg]')) el.textContent = lvText(el.dataset.leg, at(el.dataset.leg));
+  for (const el of body.querySelectorAll('[data-mm]')) {
+    const h = L.v[el.dataset.mm].slice(i0, i1 + 1);
+    const [lo] = lvFmt(el.dataset.mm, Math.min(...h));
+    el.textContent = `mín ${lo} · máx ${lvText(el.dataset.mm, Math.max(...h))}`; // unit once, at the end
+  }
+  for (const el of body.querySelectorAll('[data-zone]')) {
+    const z = lvZone(el.dataset.zone, at(el.dataset.zone), rpm);
+    el.textContent = LV_ZONE_TEXT[z] || '';
+    el.className = 'lv-zone ' + z;
+    const tile = el.closest('.lv-tile');
+    tile.classList.toggle('warn', z === 'warn');
+    tile.classList.toggle('danger', z === 'danger');
+  }
+  const gear = body.querySelector('[data-gear]');
+  if (gear) gear.textContent = lvFmt('gear', at('gear'))[0];
+  const fill = body.querySelector('[data-rpmfill]');
+  if (fill) {
+    const m = rpmMarks();
+    fill.style.width = Math.min(100, rpm / range('rpm')[1] * 100) + '%';
+    fill.style.background = rpm >= m.red ? ZONE.danger : rpm >= m.shift ? ZONE.shift : rpm >= m.warn ? ZONE.warn : '#e6e6e6';
+    const flag = body.querySelector('[data-flag]');
+    const f = rpm >= m.red ? ['LÍNEA ROJA', '#d4213a'] : rpm >= m.shift ? ['CAMBIO', ZONE.shift] : null;
+    flag.hidden = !f;
+    if (f) { flag.textContent = f[0]; flag.style.background = f[1]; }
+  }
+  body.querySelector('[data-axis="0"]').textContent = `−${L.win} s`;
+  body.querySelector('[data-axis="1"]').textContent = `−${L.win / 2} s`;
+  const extra = body.querySelector('[data-extra]');
+  if (isDev() && state.live) {
+    extra.textContent = Object.entries(state.live).filter(([k]) => !LV[k])
+      .map(([k, v]) => k === 'can_id' ? `Último CAN ID 0x${v}` : `${k}=${v}`).join(' · ');
+  }
+  lvToolbar();
+}
+
+/* Status pill, pause button and the hint under the toolbar */
+function lvToolbar() {
+  const L = state.lv;
+  const ready = !!(state.port && L.keys && L.t.length);
+  const st = $('live-state');
+  let text = 'Detenido', cls = 'off';
+  if (L.error) [text, cls] = ['Error: ' + L.error, 'dirty'];
+  else if (state.liveOn && L.paused) [text, cls] = [L.ago > 0.05 ? `Pausado · cursor −${L.ago.toFixed(1)} s` : 'Pausado', 'dirty'];
+  else if (state.liveOn) [text, cls] = [`En vivo · ${Math.round(1000 / Number($('live-period').value))} lecturas por segundo`, 'saved'];
+  st.textContent = text;
+  st.className = 'pill lv-state ' + cls;
+  const btn = $('btn-live-pause');
+  btn.disabled = !ready;
+  btn.classList.toggle('resume', L.paused);
+  btn.innerHTML = L.paused
+    ? '<svg viewBox="0 0 24 24" aria-hidden="true" style="fill:currentColor"><path d="M7 4l13 8-13 8z"/></svg>Reanudar'
+    : '<svg viewBox="0 0 24 24" aria-hidden="true" style="fill:none;stroke:currentColor;stroke-width:2.5px;stroke-linecap:round"><path d="M8 5v14M16 5v14"/></svg>Pausar';
+  for (const b of $('live-win').children) b.classList.toggle('on', Number(b.dataset.v) === L.win);
+  $('live-hint').textContent = !ready ? ''
+    : L.paused ? 'Toca o pasa el mouse sobre una gráfica para ver otro momento. Reanudar vuelve al tiempo real.'
+    : `Toca una caja para ponerla o quitarla de la gráfica, hasta ${LV_MAX_SEL}. Toca la gráfica para pausar y ver los valores de ese momento.`;
+}
+
+function lvPause(on, cursor = 1) {
+  const L = state.lv;
+  if (!L.t.length) return;
+  if (on && !L.paused) L.end = L.t[L.t.length - 1];
+  L.paused = on;
+  L.cursor = cursor;
+  updateLive();
+}
+
+function lvToggle(k) {
+  const L = state.lv;
+  const sel = L.sel.filter((x) => x !== k && L.keys.includes(x));
+  L.dropped = null;
+  if (sel.length === L.sel.filter((x) => L.keys.includes(x)).length) {
+    sel.push(k);
+    if (sel.length > LV_MAX_SEL) L.dropped = sel.shift();
+  }
+  L.sel = sel;
+  prefs.set('liveSel', sel.join(','));
+  const f = document.activeElement?.closest?.('#live-body [data-toggle]');
+  const again = f && `.${f.classList[0]}[data-toggle="${f.dataset.toggle}"]`;
+  renderLive();
+  updateLive();
+  if (again) $('live-body').querySelector(again)?.focus();
+}
+
+const lvPos = (e, el) => { const r = el.getBoundingClientRect(); return Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); };
+
+function lvClick(e) {
+  const t = e.target.closest('[data-toggle]');
+  if (t) { lvToggle(t.dataset.toggle); return; }
+  const p = e.target.closest('[data-pause]');
+  if (p) lvPause(true, lvPos(e, p));
+}
+
+function lvMove(e) {
+  if (!state.lv.paused) return;
+  const p = e.target.closest('.lv-plot');
+  if (!p) return;
+  state.lv.cursor = lvPos(e, p);
+  scheduleLive();
 }
 
 /* ---------------- SD card (File System Access on the mounted drive) ---------------- */
@@ -2548,6 +2965,7 @@ function showPage(page) {
     if (b.dataset.page === page && b.offsetParent) b.scrollIntoView({ block: 'nearest', inline: 'center' }); // clear of the edge fades
   }
   for (const p of document.querySelectorAll('.page')) p.classList.toggle('active', p.id === 'page-' + page);
+  if (page === 'live') { renderLive(); updateLive(); } // units may have changed in Ajustes
   syncLive();
   if (page === 'summary' && state.port && state.proto >= 1) refreshTime();
   if (page === 'firmware' && state.port && !state.fwBusy) refreshFwInfo();
@@ -2595,6 +3013,20 @@ function init() {
   $('btn-import').onclick = () => $('import-file').click();
   $('import-file').onchange = (e) => { if (e.target.files[0]) importSettings(e.target.files[0]); e.target.value = ''; };
   $('live-period').onchange = async () => { if (state.liveOn) { await stopLive(); await startLive(); } };
+  const savedSel = prefs.get('liveSel');
+  if (savedSel !== null) state.lv.sel = savedSel.split(',').filter((k) => LV[k]).slice(0, LV_MAX_SEL);
+  state.lv.win = [10, 30, 60].find((w) => String(w) === prefs.get('liveWin')) || 30;
+  $('live-win').onclick = (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    state.lv.win = Number(b.dataset.v);
+    prefs.set('liveWin', b.dataset.v);
+    updateLive();
+  };
+  $('btn-live-pause').onclick = () => lvPause(!state.lv.paused);
+  $('live-body').addEventListener('click', lvClick);
+  $('live-body').addEventListener('pointermove', lvMove);
+  lvToolbar();
   $('btn-sd-pick').onclick = pickSd;
   $('btn-fw-pick').onclick = () => $('fw-file').click();
   $('fw-file').onchange = (e) => { if (e.target.files[0]) openPackage(e.target.files[0]); e.target.value = ''; };
