@@ -1,0 +1,38 @@
+{
+  "versions": [
+    {
+      "version": "1.1.0",
+      "date": "2026-10-27",
+      "file": "dashpro_1.1.0.dashfw",
+      "size": 43577028,
+      "sha256": "bae6a872fa1ba9e09d525309fb020751a7fd918f07491844b60c91e5e315b6d4",
+      "summary": "Primera versión publicada. Trae la configuración desde esta página, la actualización de firmware sin programador, ECU Tune para rusEFI y el menú rediseñado.",
+      "changes": {
+        "Nuevo": [
+          "Conexión por USB con esta página o la app instalable: ajustes, datos en vivo, trips, reloj y la microSD como unidad del PC.",
+          "Actualización de firmware desde la SD o desde esta página, con doble banco: si la versión nueva no arranca, el dash vuelve sola a la anterior.",
+          "Imagen o animación de arranque propia. La pantalla de arranque muestra la versión del firmware.",
+          "Ajustes en pantalla rediseñados: menú con seis secciones y fecha y hora con campos tocables.",
+          "Pantalla Telemetría con cuatro gráficas en vivo.",
+          "Cambio de mapa del motor y armado del launch control desde el dash, con confirmación de la ECU.",
+          "Brillo de noche por luces bajas, por hora del día o por cualquiera de los dos, con las horas de día y de noche ajustables.",
+          "Direccionales que parpadean desde el dash en carros sin destellador.",
+          "Unidad de presión del MAP separada de la de aceite y combustible.",
+          "ECU Tune para rusEFI por CAN: lee y edita los ajustes de la ECU (límites, protecciones, ventiladores, combustible, encendido, ralentí, trigger, launch y más), sus curvas y tablas (VE, avance, lambda objetivo, turbo, ralentí…), con Deshacer y Grabar en ECU. Marca en verde dónde está el motor.",
+          "ECU Tune, Respaldo: guarda el tune de la ECU en la SD como `.msq` que abre TunerStudio (`BK_AAAA-MM-DD_HH.MM.msq`).",
+          "ECU Tune, Cargar tune: carga un `.msq` de la SD en la ECU. Antes muestra qué cambia y guarda un respaldo de lo que tenía la ECU."
+        ],
+        "Cambiado": [
+          "Menú rediseñado como lista: Ajustes, ECU Tune, Telemetría y Viaje (próximamente), un panel de Mantenimiento (próximamente) y abajo la hora, la temperatura ambiente y la altitud."
+        ],
+        "Corregido": [
+          "Lectura del sensor barométrico (filtro y corrección de +1,87 kPa).",
+          "Brillo de día y de noche invertido.",
+          "Las direccionales siguen la señal real del CAN y parpadean al ritmo del destellador del carro.",
+          "Textos de la pantalla de actualización ajustados al ancho.",
+          "Entrada a modo DFU por software."
+        ]
+      }
+    }
+  ]
+}

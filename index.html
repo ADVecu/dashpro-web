@@ -303,6 +303,28 @@
   .opts label { color: var(--muted); }
   input[type=color] { width: 60px; height: 32px; padding: 2px; background: var(--field); border: 1px solid var(--line); border-radius: 8px; }
   #boot-canvas { width: 100%; max-width: 800px; aspect-ratio: 5 / 3; display: block; border: 1px solid var(--line); border-radius: 8px; background: #000; }
+  /* Firmware: published versions on the left, the chosen one's changes on the right */
+  .fw-versions { margin-bottom: 18px; }
+  .fwv-layout { display: flex; gap: 18px; align-items: flex-start; }
+  .fwv-list { flex: 0 0 230px; display: flex; flex-direction: column; gap: 6px; }
+  .fwv-list button { text-align: left; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+  .fwv-list button b { font: 700 17px/1.1 var(--display); }
+  .fwv-list button small { color: var(--muted); font-size: 12px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .fwv-list button.active { border-color: var(--accent); background: #1f1d0a; }
+  :root[data-theme="rojo"] .fwv-list button.active { background: #200a09; }
+  .fwv-detail { flex: 1; min-width: 0; }
+  .fwv-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .fwv-head h3 { margin: 0; font: 700 22px/1.2 var(--display); }
+  .fwv-summary { margin: 8px 0 0; color: #cfcfcf; }
+  .fwv-detail h4 { margin: 16px 0 6px; font: 700 12.5px/1.2 var(--display); text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); }
+  .fwv-detail ul { margin: 0; padding-left: 20px; }
+  .fwv-detail li { margin: 4px 0; }
+  .fwv-detail code { font-family: var(--mono); font-size: 13px; background: var(--panel-2); padding: 1px 5px; border-radius: 4px; }
+  .fwv-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+  .tag { font: 600 10.5px/1 var(--display); letter-spacing: 1px; text-transform: uppercase; padding: 3px 6px; border-radius: 3px; border: 1px solid #3a3a3a; color: #cfcfcf; }
+  .tag.ok { border-color: #1f5a37; color: var(--ok); }
+  .tag.new { border-color: var(--accent-text); color: var(--accent-text); }
+  .tag.test { border-color: #5a3d12; color: var(--warn); }
   @media (max-width: 600px) {
     /* Header in one row: smaller brand, the status as a dot, one compact button */
     header { position: static; gap: 8px; padding: 10px 16px; }
@@ -360,6 +382,11 @@
     .lv-tiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
     .lv-tile { padding: 12px; }
     .lv-val { font-size: 26px; }
+    /* Firmware: the versions wrap above their changes */
+    .fwv-layout { flex-direction: column; gap: 14px; }
+    .fwv-list { flex: none; width: 100%; flex-direction: row; flex-wrap: wrap; }
+    .fwv-list button { flex: 1 1 140px; }
+    .fwv-actions button { flex: 1 1 100%; }
   }
   @media (max-width: 350px) {
     header { padding: 10px 12px; }
@@ -502,6 +529,10 @@
 
 <!-- Firmware -->
 <div class="page" id="page-firmware">
+  <section class="fw-versions">
+    <h2>Versiones <span class="spacer"></span><button id="btn-fwv-reload" hidden>Reintentar</button></h2>
+    <div id="fwv-body"><div class="empty">Cargando versiones…</div></div>
+  </section>
   <div class="grid">
     <section>
       <h2>Instalado en el dash</h2>
@@ -515,7 +546,7 @@
     <section>
       <h2>Paquete</h2>
       <div class="actions">
-        <button id="btn-fw-pick">Abrir paquete .dashfw…</button>
+        <button id="btn-fw-pick">Abrir un .dashfw del PC…</button>
         <input type="file" id="fw-file" accept=".dashfw" hidden>
       </div>
       <dl class="kv" style="margin-top:12px">
@@ -2212,9 +2243,180 @@ async function openPackage(file) {
   updateFwButton();
 }
 
+/* ---------------- Published versions (firmware/versions.json) ---------------- */
+
+/* The firmware repo is private, so each release's .dashfw and its changes are
+ * published here, in firmware/ (see README). Newest first. */
+const FW_INDEX = 'firmware/versions.json';
+const FWV_SECTIONS = ['Nuevo', 'Cambiado', 'Corregido'];
+
+const fwv = { list: null, error: '', sel: null, loading: false, busy: false };
+
+/* Same order as the dash (FwUpdate_CompareVersions): semver with beta/rc */
+function compareVersions(a, b) {
+  const split = (v) => {
+    const [core, pre] = String(v).split('-');
+    return { nums: core.split('.').map(Number), pre: pre ? pre.split('.') : null };
+  };
+  const x = split(a), y = split(b);
+  for (let i = 0; i < 3; i++) {
+    const d = (x.nums[i] || 0) - (y.nums[i] || 0);
+    if (d) return Math.sign(d);
+  }
+  if (!x.pre || !y.pre) return (x.pre ? -1 : 0) + (y.pre ? 1 : 0);
+  for (let i = 0; i < Math.max(x.pre.length, y.pre.length); i++) {
+    const p = x.pre[i], q = y.pre[i];
+    if (p === undefined) return -1;
+    if (q === undefined) return 1;
+    const pn = /^\d+$/.test(p), qn = /^\d+$/.test(q);
+    if (pn && qn && +p !== +q) return Math.sign(p - q);
+    if (pn !== qn) return pn ? -1 : 1;
+    if (!pn && p !== q) return p < q ? -1 : 1;
+  }
+  return 0;
+}
+
+const isTestVersion = (v) => String(v).includes('-');
+const FW_MONTHS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+const fmtDay = (iso) => {
+  const [y, m, d] = String(iso || '').split('-').map(Number);
+  return y && m && d ? `${d} ${FW_MONTHS[m - 1]} ${y}` : '';
+};
+/* Changelog lines are plain text with `code` */
+const fmtChange = (t) => esc(t).replace(/`([^`]+)`/g, '<code>$1</code>');
+
+async function loadVersions() {
+  if (fwv.loading) return;
+  fwv.loading = true;
+  fwv.error = '';
+  $('btn-fwv-reload').hidden = true;
+  $('fwv-body').innerHTML = '<div class="empty">Cargando versiones…</div>';
+  try {
+    const res = await fetch(FW_INDEX, { cache: 'no-cache' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    fwv.list = (data.versions || []).filter((v) => v && v.version)
+      .sort((a, b) => compareVersions(b.version, a.version));
+    if (!fwv.list.some((v) => v.version === fwv.sel)) {
+      const first = fwv.list.find((v) => !isTestVersion(v.version)) || fwv.list[0];
+      fwv.sel = first ? first.version : null;
+    }
+  } catch (err) {
+    fwv.list = null;
+    fwv.error = navigator.onLine ? 'No se pudo leer la lista de versiones (' + err.message + ').' : 'Sin conexión a internet: la lista de versiones necesita conexión.';
+    $('btn-fwv-reload').hidden = false;
+  }
+  fwv.loading = false;
+  renderVersions();
+}
+
+function renderVersions() {
+  const body = $('fwv-body');
+  if (!fwv.list) {
+    body.innerHTML = fwv.error ? `<div class="empty">${esc(fwv.error)}</div>` : '<div class="empty">Cargando versiones…</div>';
+    return;
+  }
+  if (!fwv.list.length) {
+    body.innerHTML = '<div class="empty">Aún no hay versiones publicadas.</div>';
+    return;
+  }
+  const installed = state.port ? state.info.fw : null;
+  const newest = fwv.list.find((v) => !isTestVersion(v.version)) || fwv.list[0];
+  const tags = (v) => {
+    const t = [];
+    if (installed && v.version === installed) t.push('<span class="tag ok">Instalada</span>');
+    else if (installed && v.version === newest.version && compareVersions(v.version, installed) > 0) t.push('<span class="tag new">Nueva</span>');
+    if (isTestVersion(v.version)) t.push('<span class="tag test">Prueba</span>');
+    return t.join('');
+  };
+
+  const list = fwv.list.map((v) => `
+    <button data-v="${esc(v.version)}" class="${v.version === fwv.sel ? 'active' : ''}">
+      <b>${esc(v.version)}</b>
+      <small>${esc(fmtDay(v.date))} ${tags(v)}</small>
+    </button>`).join('');
+
+  const v = fwv.list.find((x) => x.version === fwv.sel) || fwv.list[0];
+  const changes = v.changes || {};
+  const sections = [...FWV_SECTIONS, ...Object.keys(changes).filter((k) => !FWV_SECTIONS.includes(k))]
+    .filter((k) => Array.isArray(changes[k]) && changes[k].length)
+    .map((k) => `<h4>${esc(k)}</h4><ul>${changes[k].map((c) => `<li>${fmtChange(c)}</li>`).join('')}</ul>`).join('');
+
+  let action;
+  if (!v.file) action = '<span class="muted">El paquete de esta versión aún no está publicado.</span>';
+  else if (installed && v.version === installed) action = `<button id="btn-fwv-use">Reinstalar ${esc(v.version)}</button><span class="muted">Es la versión que tiene el dash.</span>`;
+  else action = `<button class="primary" id="btn-fwv-use">Usar ${esc(v.version)}</button>` +
+    `<span class="muted">${v.size ? 'Descarga ' + mb(v.size) + '. ' : ''}Se carga como paquete y se instala con <b>Actualizar firmware</b>.</span>`;
+  if (installed && v.file && compareVersions(v.version, installed) < 0) {
+    action += '<span class="warn">Es más vieja que la instalada: el dash vuelve a esa versión.</span>';
+  }
+
+  body.innerHTML = `
+    <div class="fwv-layout">
+      <div class="fwv-list">${list}</div>
+      <div class="fwv-detail">
+        <div class="fwv-head"><h3>DashPRO ${esc(v.version)}</h3>${tags(v)}<span class="muted">${esc(fmtDay(v.date))}</span></div>
+        ${v.summary ? `<p class="fwv-summary">${fmtChange(v.summary)}</p>` : ''}
+        ${sections || '<p class="muted">Sin notas de cambios.</p>'}
+        <div class="fwv-actions">${action}</div>
+      </div>
+    </div>`;
+  for (const b of body.querySelectorAll('.fwv-list button')) {
+    b.onclick = () => { fwv.sel = b.dataset.v; renderVersions(); };
+  }
+  const use = $('btn-fwv-use');
+  if (use) {
+    use.disabled = fwv.busy || state.fwBusy;
+    use.onclick = () => useVersion(v);
+  }
+}
+
+/* Download a published package and load it as if it was opened from the PC */
+async function useVersion(v) {
+  if (fwv.busy) return;
+  fwv.busy = true;
+  renderVersions();
+  $('pkg-name').textContent = v.file;
+  $('pkg-check').textContent = 'descargando…';
+  try {
+    const res = await fetch('firmware/' + encodeURIComponent(v.file), { cache: 'no-cache' });
+    if (res.status === 404) throw new Error('el paquete de esta versión aún no está publicado');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const total = Number(res.headers.get('content-length')) || v.size || 0;
+    const reader = res.body.getReader();
+    const parts = [];
+    let done = 0;
+    for (;;) {
+      const { value, done: end } = await reader.read();
+      if (end) break;
+      parts.push(value);
+      done += value.length;
+      fwStep(`Descargando ${v.version}… ${mb(done)}${total ? ' de ' + mb(total) : ''}`, total ? Math.round(done * 100 / total) : null);
+    }
+    fwStep('—', null);
+    await openPackage(new File(parts, v.file));
+    if (state.pkg && state.pkg.version !== v.version) {
+      $('pkg-check').innerHTML = `<span class="bad">el paquete dice ${esc(state.pkg.version)}, no ${esc(v.version)}</span>`;
+      state.pkg = null;
+      updateFwButton();
+    } else if (state.pkg) {
+      toast(state.port ? `Paquete ${v.version} listo: toca Actualizar firmware` : `Paquete ${v.version} listo: conecta el dash para instalarlo`);
+      $('btn-fw-update').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  } catch (err) {
+    fwStep('—', null);
+    $('pkg-check').innerHTML = `<span class="bad">${esc(err.message)}</span>`;
+    toast('No se pudo descargar: ' + err.message);
+  } finally {
+    fwv.busy = false;
+    renderVersions();
+  }
+}
+
 function updateFwButton() {
   const caps = (state.info.caps || '').split(',');
   $('btn-fw-update').disabled = !(state.pkg && state.port && caps.includes('fw') && !state.fwBusy && !state.bootBusy);
+  if ($('btn-fwv-use')) $('btn-fwv-use').disabled = fwv.busy || state.fwBusy;
 }
 
 function parseKv(lines) {
@@ -2229,6 +2431,7 @@ const BOOT_TEXT = {
 
 async function refreshFwInfo() {
   $('fw-installed').textContent = state.info.fw || '—';
+  renderVersions();
   const caps = (state.info.caps || '').split(',');
   if (!state.port || !caps.includes('fw')) {
     $('fw-bank').textContent = state.port ? 'firmware sin actualización por SD' : '—';
@@ -2968,7 +3171,10 @@ function showPage(page) {
   if (page === 'live') { renderLive(); updateLive(); } // units may have changed in Ajustes
   syncLive();
   if (page === 'summary' && state.port && state.proto >= 1) refreshTime();
-  if (page === 'firmware' && state.port && !state.fwBusy) refreshFwInfo();
+  if (page === 'firmware') {
+    if (!fwv.list) loadVersions(); else renderVersions();
+    if (state.port && !state.fwBusy) refreshFwInfo();
+  }
   if (page === 'boot' && state.port && !state.bootBusy && !state.fwBusy) refreshBootInfo();
 }
 
@@ -3031,6 +3237,7 @@ function init() {
   $('btn-fw-pick').onclick = () => $('fw-file').click();
   $('fw-file').onchange = (e) => { if (e.target.files[0]) openPackage(e.target.files[0]); e.target.value = ''; };
   $('btn-fw-update').onclick = updateFirmware;
+  $('btn-fwv-reload').onclick = loadVersions;
   $('btn-boot-pick').onclick = () => $('boot-file').click();
   $('boot-file').onchange = (e) => { if (e.target.files[0]) loadBootImage(e.target.files[0]); e.target.value = ''; };
   for (const id of ['boot-fit', 'boot-size', 'boot-bg', 'boot-format', 'boot-fps', 'boot-loops', 'boot-minms'])

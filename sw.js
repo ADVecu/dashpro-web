@@ -2,7 +2,7 @@
  * Service worker: makes the app open offline and update itself.
  * Bump CACHE_VERSION on every release so clients pick up the new files.
  */
-const CACHE_VERSION = 'dashpro-v7';
+const CACHE_VERSION = 'dashpro-v8';
 const APP_SHELL = [
   './',
   './index.html',
@@ -41,7 +41,10 @@ self.addEventListener('message', (event) => {
 /* Stale-while-revalidate for same-origin GETs: answer from cache, refresh in background */
 self.addEventListener('fetch', (event) => {
   const req = event.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  // Firmware list and packages always from the network: new versions show up and 40 MB files stay out of the cache
+  if (url.pathname.includes('/firmware/')) return;
 
   event.respondWith(
     caches.open(CACHE_VERSION).then(async (cache) => {
