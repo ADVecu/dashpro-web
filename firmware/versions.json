@@ -4,6 +4,8 @@
       "version": "1.1.0",
       "date": "2026-10-27",
       "file": "dashpro_1.1.0.dashfw",
+      "size": 43577028,
+      "sha256": "bae6a872fa1ba9e09d525309fb020751a7fd918f07491844b60c91e5e315b6d4",
       "summary": "Primera versión publicada. Trae la configuración desde esta página, la actualización de firmware sin programador, ECU Tune para rusEFI y el menú rediseñado.",
       "changes": {
         "Nuevo": [
