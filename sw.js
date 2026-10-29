@@ -2,7 +2,7 @@
  * Service worker: makes the app open offline and update itself.
  * Bump CACHE_VERSION on every release so clients pick up the new files.
  */
-const CACHE_VERSION = 'dashpro-v8';
+const CACHE_VERSION = 'dashpro-v9';
 const APP_SHELL = [
   './',
   './index.html',
