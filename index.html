@@ -9,6 +9,10 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <script>
+  // The app moved to its own domain: the old GitHub Pages address sends people there
+  if (location.hostname === 'advecu.github.io') location.replace('https://dash.gnvperformance.com/' + location.search + location.hash);
+</script>
+<script>
   // Apply the saved palette and developer mode before the first paint
   try {
     if (localStorage.getItem('theme') === 'rojo') document.documentElement.dataset.theme = 'rojo';
