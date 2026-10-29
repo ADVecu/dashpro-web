@@ -1,0 +1,14 @@
+{
+  // Cloudflare Workers: the app is this folder as static assets (minus what .assetsignore lists).
+  // Firmware packages (.dashfw) are served from the R2 bucket by worker.js.
+  "name": "dashpro-web",
+  "main": "worker.js",
+  "compatibility_date": "2026-09-01",
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "."
+  },
+  "r2_buckets": [
+    { "binding": "FIRMWARE", "bucket_name": "dashpro-firmware" }
+  ]
+}
