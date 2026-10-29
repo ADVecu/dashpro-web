@@ -1,0 +1,11 @@
+# Files that are not part of the app, so Cloudflare does not publish them
+.git
+.github
+.assetsignore
+wrangler.jsonc
+worker.js
+README.md
+.wrangler
+.gitignore
+# Firmware packages are served from R2 (see worker.js); versions.json stays a static file
+firmware/*.dashfw

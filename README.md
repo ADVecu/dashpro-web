@@ -18,6 +18,19 @@ Open https://advecu.github.io/dashpro-web/ in Chrome or Edge and click **Instala
 
 When releasing, bump `CACHE_VERSION` in `sw.js` so installed copies pick up the new files.
 
+## Hosting (Cloudflare)
+
+The app is also published as a Cloudflare Worker (`wrangler.jsonc`). Cloudflare deploys it from `main` on every push and serves this folder as static files; `.assetsignore` lists what is left out.
+
+Firmware packages are bigger than the 25 MiB Cloudflare allows for a static file, so they are stored in the R2 bucket `dashpro-firmware` and `worker.js` serves them at the same path, `firmware/<file>`. `firmware/versions.json` stays in the repo.
+
+To try it locally with the Worker and a local copy of the bucket:
+
+```
+npx wrangler r2 object put dashpro-firmware/dashpro_1.1.0.dashfw --file firmware/dashpro_1.1.0.dashfw --local
+npx wrangler dev
+```
+
 ## Ajustes
 
 The Ajustes tab follows the dash's own settings screens: RPM y cambio, Alertas, Pantalla, Unidades and ECU y luces, with the same steps, limits and zone colors. It is built from `CFG LIST?`, so a setting the firmware does not have is not shown, and a setting the page does not know yet appears under "Otros". Changes go to the dash right away; **Guardar en el dash** stores them. The Alertas section turns the live stream on to show the current reading on each bar.
@@ -32,7 +45,7 @@ The Firmware tab lists the published firmware versions with what changed in each
 
 The firmware repo is private, so the page cannot read its GitHub Releases: each release is published here too, in `firmware/`:
 
-1. Copy the release's `.dashfw` to `firmware/` (e.g. `firmware/dashpro_1.2.0.dashfw`).
+1. Upload the release's `.dashfw` to the R2 bucket `dashpro-firmware` (Cloudflare dashboard › R2 › `dashpro-firmware` › Upload), with the same name it has in `versions.json`. While GitHub Pages is still in use, also copy it to `firmware/` (e.g. `firmware/dashpro_1.2.0.dashfw`).
 2. Add an entry to `firmware/versions.json`: `version`, `date` (`AAAA-MM-DD`), `file`, `size` in bytes (for the download text), a one-line `summary` and `changes` with `Nuevo`, `Cambiado` and `Corregido` lists in plain words for the user (`code` in backticks is allowed). The order in the file does not matter; the page sorts by version.
 
 An entry without `file` shows its changes and says the package is not published yet. Versions with `-beta` or `-rc` are marked *Prueba*. The service worker never caches `firmware/`, so a new version shows up without bumping `CACHE_VERSION`.
