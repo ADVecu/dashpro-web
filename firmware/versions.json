@@ -4,8 +4,8 @@
       "version": "1.1.0",
       "date": "2026-10-27",
       "file": "dashpro_1.1.0.dashfw",
-      "size": 43577028,
-      "sha256": "bae6a872fa1ba9e09d525309fb020751a7fd918f07491844b60c91e5e315b6d4",
+      "size": 43577060,
+      "sha256": "504b8b69a81a6a235313bf27ca1b6194a443093e7175467bb737393196a968a6",
       "summary": "Primera versión publicada. Trae la configuración desde esta página, la actualización de firmware sin programador, ECU Tune para rusEFI y el menú rediseñado.",
       "changes": {
         "Nuevo": [
@@ -26,6 +26,7 @@
           "Menú rediseñado como lista: Ajustes, ECU Tune, Telemetría y Viaje (próximamente), un panel de Mantenimiento (próximamente) y abajo la hora, la temperatura ambiente y la altitud."
         ],
         "Corregido": [
+          "Con los 12 V permanentes y el encendido quitado, conectar y desconectar el USB dejaba el dash prendido para siempre. Ahora se apaga normal al quitar el cable.",
           "Lectura del sensor barométrico (filtro y corrección de +1,87 kPa).",
           "Brillo de día y de noche invertido.",
           "Las direccionales siguen la señal real del CAN y parpadean al ritmo del destellador del carro.",
